@@ -39,7 +39,7 @@ import org.eclipse.gemini.mgmt.framework.codec.OSGiBundleEvent;
 /** 
  * 
  */
-public class BundleState extends Monitor implements BundleStateMBean {
+public class BundleState extends Monitor implements CustomBundleStateMBean {
 	public BundleState(BundleContext bc, StartLevel sl, PackageAdmin admin) {
 		this.bc = bc;
 		this.sl = sl;
@@ -52,12 +52,22 @@ public class BundleState extends Monitor implements BundleStateMBean {
 	 * @see org.osgi.jmx.core.BundleStateMBean#getBundles()
 	 */
 	public TabularData listBundles() throws IOException {
+		return listBundles(CustomBundleStateMBean.DEFAULT);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.gemini.mgmt.framework.CustomBundleStateMBean#listBundles(int)
+	 */
+	public TabularData listBundles(int mask) throws IOException {
+		if (mask < 1 || mask > 1048575) {
+			throw new IllegalArgumentException("Mask out of range!");
+		}
 		try {
 			ArrayList<OSGiBundle> bundles = new ArrayList<OSGiBundle>();
 			for (Bundle bundle : bc.getBundles()) {
 				bundles.add(new OSGiBundle(bc, admin, sl, bundle));
 			}
-			TabularData table = OSGiBundle.tableFrom(bundles);
+			TabularData table = OSGiBundle.tableFrom(bundles, mask);
 			return table;
 		} catch (Throwable e) {
 			e.printStackTrace();

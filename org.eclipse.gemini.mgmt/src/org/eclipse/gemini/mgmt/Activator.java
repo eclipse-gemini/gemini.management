@@ -29,18 +29,18 @@ import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 import javax.management.StandardMBean;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 import org.eclipse.gemini.mgmt.cm.ConfigAdminManager;
 import org.eclipse.gemini.mgmt.framework.BundleState;
+import org.eclipse.gemini.mgmt.framework.CustomBundleStateMBean;
 import org.eclipse.gemini.mgmt.framework.Framework;
 import org.eclipse.gemini.mgmt.framework.PackageState;
 import org.eclipse.gemini.mgmt.framework.ServiceState;
 import org.eclipse.gemini.mgmt.permissionadmin.PermissionManager;
 import org.eclipse.gemini.mgmt.provisioning.Provisioning;
 import org.eclipse.gemini.mgmt.useradmin.UserManager;
-import org.osgi.jmx.framework.BundleStateMBean;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.jmx.framework.FrameworkMBean;
 import org.osgi.jmx.framework.PackageStateMBean;
 import org.osgi.jmx.framework.ServiceStateMBean;
@@ -99,7 +99,7 @@ public class Activator implements BundleActivator {
 	public void start(BundleContext bundleContext) throws Exception {
 		this.bundleContext = bundleContext;
 		frameworkName = new ObjectName(FrameworkMBean.OBJECTNAME);
-		bundlesStateName = new ObjectName(BundleStateMBean.OBJECTNAME);
+		bundlesStateName = new ObjectName(CustomBundleStateMBean.OBJECTNAME);
 		serviceStateName = new ObjectName(ServiceStateMBean.OBJECTNAME);
 		packageStateName = new ObjectName(PackageStateMBean.OBJECTNAME);
 		configAdminName = new ObjectName(ConfigurationAdminMBean.OBJECTNAME);
@@ -256,7 +256,7 @@ public class Activator implements BundleActivator {
 		}
 		try {
 			bundleState = new StandardMBean(new BundleState(bundleContext, sl,
-					admin), BundleStateMBean.class);
+					admin), CustomBundleStateMBean.class);
 		} catch (NotCompliantMBeanException e) {
 			log.log(Level.SEVERE,
 					"Unable to create StandardMBean for BundleState", e);
