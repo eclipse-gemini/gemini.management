@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/org.eclipse.gemini.mgmt.feature_1.0.0.qualifier.jar" id="org.eclipse.gemini.mgmt.feature" version="1.0.0.qualifier">
+      <category name="gemini.mgmt"/>
+   </feature>
+   <category-def name="gemini.mgmt" label="Gemini Management"/>
+</site>
