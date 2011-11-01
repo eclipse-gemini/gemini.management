@@ -673,7 +673,7 @@ public class OSGiBundle {
 	 */
 	public boolean isRemovalPending() {
 		if (removalPending == null) {
-			isRequiredBundleRemovalPending(b, bc, admin);
+			removalPending = isRequiredBundleRemovalPending(b, bc, admin);
 		}
 		return removalPending;
 	}
