@@ -13,11 +13,12 @@
 		<eclipse-site>http://download.eclipse.org/eclipse/updates/3.7milestones/</eclipse-site>
 		<emf-site>http://download.eclipse.org/modeling/emf/emf/updates/2.7milestones/</emf-site>
 		<wtp-site>http://download.eclipse.org/webtools/repository/indigo/</wtp-site>
+		<orbit-site>http://download.eclipse.org/tools/orbit/downloads/drops/I20110812052410/repository/</orbit-site>
 	</properties>
 	
 	<modules>
-		<module>../osgi.enterprise</module>
 		<module>../org.eclipse.gemini.mgmt</module>
+		<module>../org.eclipse.gemini.mgmt.tests</module>
 		<module>../org.eclipse.gemini.mgmt.feature</module>
 		<module>../gemini.mgmt.repository</module>
 	</modules>
@@ -123,6 +124,11 @@
 			<id>emf-sdk</id>
 			<url>${emf-site}</url>
 			<layout>p2</layout>
+		</repository>
+		<repository>
+		  <id>orbit-site</id>
+		  <url>${orbit-site}</url>
+		  <layout>p2</layout>
 		</repository>
 		<repository>
 			<id>central</id>

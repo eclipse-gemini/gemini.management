@@ -13,14 +13,6 @@
 	<packaging>eclipse-plugin</packaging>
 	<name>Gemini Management Bundle</name>
 
-	<dependencies>
-		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.enterprise</artifactId>
-			<version>4.2.0</version>
-		</dependency>
-	</dependencies>
-
 	<build>
 		<plugins>
 			<plugin>
