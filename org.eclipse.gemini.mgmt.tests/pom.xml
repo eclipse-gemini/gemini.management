@@ -13,19 +13,12 @@
 	<packaging>eclipse-test-plugin</packaging>
 	<name>Gemini Management Bundle Tests</name>
 
-<!--	<dependencies>
-		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.enterprise</artifactId>
-			<version>4.2.0</version>
-		</dependency>
-	</dependencies>
--->
 	<build>
 		<plugins>
 		  <plugin>
 				<groupId>org.sonatype.tycho</groupId>
 				<artifactId>maven-osgi-test-plugin</artifactId>
+				<version>${tycho-version}</version>
 				<configuration>
 					<argLine>-Xmx512m -Xms128m -XX:PermSize=128m -XX:MaxPermSize=384m -Dcom.sun.management.jmxremote.port=21045 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false</argLine>
 					<bundleStartLevel>
