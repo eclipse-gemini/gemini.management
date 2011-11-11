@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?pde version="3.6"?>
+
+<target name="gemini-management" sequenceNumber="4">
+<locations>
+
+<location includeAllPlatforms="false" includeMode="planner" type="InstallableUnit">
+<unit id="org.eclipse.osgi" version="0.0.0"/>
+<unit id="org.eclipse.osgi.services" version="0.0.0"/>
+<unit id="org.junit4" version="0.0.0"/>
+<repository location="http://download.eclipse.org/eclipse/updates/3.7milestones/"/>
+</location>
+
+<location includeAllPlatforms="false" includeMode="planner" type="InstallableUnit">
+<unit id="osgi.enterprise" version="0.0.0"/>
+<repository location="http://download.eclipse.org/tools/orbit/downloads/drops/S20111018035124/repository/"/>
+</location>
+
+</locations>
+</target>
