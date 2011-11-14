@@ -23,27 +23,16 @@ import javax.management.ObjectName;
 /** 
  * 
  */
-
 abstract public class Monitor extends NotificationBroadcasterSupport implements
 		MBeanRegistration {
 
 	public void postDeregister() {
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.management.MBeanRegistration#postRegister(java.lang.Boolean)
-	 */
 	public void postRegister(Boolean registrationDone) {
 		addListener();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.management.MBeanRegistration#preDeregister()
-	 */
 	public void preDeregister() throws Exception {
 		removeListener();
 	}

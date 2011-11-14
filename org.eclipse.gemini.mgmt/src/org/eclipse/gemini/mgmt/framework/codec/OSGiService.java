@@ -20,8 +20,8 @@ import static org.osgi.framework.Constants.SERVICE_ID;
 import static org.eclipse.gemini.mgmt.codec.Util.LongArrayFrom;
 import static org.eclipse.gemini.mgmt.codec.Util.longArrayFrom;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.management.openmbean.CompositeData;
@@ -70,13 +70,11 @@ public class OSGiService {
 	 * @param data
 	 *            - the <link>CompositeData</link> encoding the OSGiService
 	 */
-	@SuppressWarnings("boxing")
 	public OSGiService(CompositeData data) {
-		this((Long) data.get(ServiceStateMBean.IDENTIFIER), (String[]) data
-				.get(ServiceStateMBean.OBJECT_CLASS), (Long) data
-				.get(ServiceStateMBean.BUNDLE_IDENTIFIER),
-				longArrayFrom((Long[]) data
-						.get(ServiceStateMBean.USING_BUNDLES)));
+		this((Long) data.get(ServiceStateMBean.IDENTIFIER), 
+				(String[]) data.get(ServiceStateMBean.OBJECT_CLASS), 
+				(Long) data.get(ServiceStateMBean.BUNDLE_IDENTIFIER),
+				longArrayFrom((Long[]) data.get(ServiceStateMBean.USING_BUNDLES)));
 	}
 
 	/**
@@ -88,8 +86,7 @@ public class OSGiService {
 	 * @param bundle
 	 * @param usingBundles
 	 */
-	public OSGiService(long identifier, String[] interfaces, long bundle,
-			long[] usingBundles) {
+	public OSGiService(long identifier, String[] interfaces, long bundle, long[] usingBundles) {
 		this.identifier = identifier;
 		this.interfaces = interfaces;
 		this.bundle = bundle;
@@ -104,9 +101,10 @@ public class OSGiService {
 	 *            - the reference of the service
 	 */
 	@SuppressWarnings("boxing")
-	public OSGiService(ServiceReference reference) {
-		this((Long) reference.getProperty(SERVICE_ID), (String[]) reference
-				.getProperty(OBJECTCLASS), reference.getBundle().getBundleId(),
+	public OSGiService(ServiceReference<?> reference) {
+		this((Long) reference.getProperty(SERVICE_ID), 
+				(String[]) reference.getProperty(OBJECTCLASS), 
+				reference.getBundle().getBundleId(),
 				Util.bundleIds(reference.getUsingBundles()));
 	}
 
@@ -118,9 +116,8 @@ public class OSGiService {
 	 * 
 	 * @return the TabularData representing the list of OSGiServices
 	 */
-	public static TabularData tableFrom(ArrayList<OSGiService> services) {
-		TabularDataSupport table = new TabularDataSupport(
-				ServiceStateMBean.SERVICES_TYPE);
+	public static TabularData tableFrom(List<OSGiService> services) {
+		TabularDataSupport table = new TabularDataSupport(ServiceStateMBean.SERVICES_TYPE);
 		for (OSGiService service : services) {
 			table.put(service.asCompositeData());
 		}
@@ -132,7 +129,6 @@ public class OSGiService {
 	 * 
 	 * @return the CompositeData encoding of the receiver.
 	 */
-	@SuppressWarnings("boxing")
 	public CompositeData asCompositeData() {
 		Map<String, Object> items = new HashMap<String, Object>();
 		items.put(ServiceStateMBean.IDENTIFIER, identifier);
@@ -141,8 +137,7 @@ public class OSGiService {
 		items.put(ServiceStateMBean.USING_BUNDLES, LongArrayFrom(usingBundles));
 
 		try {
-			return new CompositeDataSupport(ServiceStateMBean.SERVICE_TYPE,
-					items);
+			return new CompositeDataSupport(ServiceStateMBean.SERVICE_TYPE, items);
 		} catch (OpenDataException e) {
 			throw new IllegalStateException("Cannot form service open data", e);
 		}
