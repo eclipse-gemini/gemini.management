@@ -72,8 +72,7 @@ public class OSGiServiceEvent {
 		serviceId = (Long) data.get(ServiceStateMBean.IDENTIFIER);
 		bundleId = (Long) data.get(ServiceStateMBean.BUNDLE_IDENTIFIER);
 		location = (String) data.get(ServiceStateMBean.BUNDLE_LOCATION);
-		symbolicName = (String) data
-				.get(ServiceStateMBean.BUNDLE_SYMBOLIC_NAME);
+		symbolicName = (String) data.get(ServiceStateMBean.BUNDLE_SYMBOLIC_NAME);
 		interfaces = (String[]) data.get(ServiceStateMBean.OBJECT_CLASS);
 		eventType = (Integer) data.get(ServiceStateMBean.EVENT);
 	}
@@ -88,8 +87,7 @@ public class OSGiServiceEvent {
 	 * @param interfaces
 	 * @param eventType
 	 */
-	public OSGiServiceEvent(long serviceId, long bundleId, String location,
-			String symbolicName, String[] interfaces, int eventType) {
+	public OSGiServiceEvent(long serviceId, long bundleId, String location, String symbolicName, String[] interfaces, int eventType) {
 		this.serviceId = serviceId;
 		this.bundleId = bundleId;
 		this.location = location;
@@ -107,12 +105,11 @@ public class OSGiServiceEvent {
 	 */
 	@SuppressWarnings("boxing")
 	public OSGiServiceEvent(ServiceEvent event) {
-		this((Long) event.getServiceReference().getProperty(
-				Constants.SERVICE_ID), event.getServiceReference().getBundle()
-				.getBundleId(), event.getServiceReference().getBundle()
-				.getLocation(), event.getServiceReference().getBundle()
-				.getSymbolicName(), (String[]) event.getServiceReference()
-				.getProperty(Constants.OBJECTCLASS), event.getType());
+		this((Long) event.getServiceReference().getProperty(Constants.SERVICE_ID), 
+			 event.getServiceReference().getBundle().getBundleId(), 
+			 event.getServiceReference().getBundle().getLocation(), 
+			 event.getServiceReference().getBundle().getSymbolicName(), 
+			 (String[]) event.getServiceReference().getProperty(Constants.OBJECTCLASS), event.getType());
 	}
 
 	/**
@@ -132,11 +129,9 @@ public class OSGiServiceEvent {
 		items.put(ServiceStateMBean.EVENT, eventType);
 
 		try {
-			return new CompositeDataSupport(
-					ServiceStateMBean.SERVICE_EVENT_TYPE, items);
+			return new CompositeDataSupport(ServiceStateMBean.SERVICE_EVENT_TYPE, items);
 		} catch (OpenDataException e) {
-			throw new IllegalStateException(
-					"Cannot form service event open data", e);
+			throw new IllegalStateException("Cannot form service event open data", e);
 		}
 	}
 

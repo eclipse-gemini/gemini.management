@@ -76,7 +76,7 @@ public class Activator implements BundleActivator {
 	protected ObjectName bundlesStateName;
 	protected StandardMBean framework;
 	protected ObjectName frameworkName;
-	protected ServiceTracker mbeanServiceTracker;
+	protected ServiceTracker<MBeanServer, ?> mbeanServiceTracker;
 	protected ObjectName packageStateName;
 	protected ObjectName serviceStateName;
 	protected ObjectName configAdminName;
@@ -84,18 +84,11 @@ public class Activator implements BundleActivator {
 	protected ObjectName provisioningServiceName;
 	protected ObjectName userAdminName;
 	protected AtomicBoolean servicesRegistered = new AtomicBoolean(false);
-	protected ServiceTracker configAdminTracker;
-	protected ServiceTracker permissionAdminTracker;
-	protected ServiceTracker provisioningServiceTracker;
-	protected ServiceTracker userAdminTracker;
+	protected ServiceTracker<ConfigurationAdmin, ?> configAdminTracker;
+	protected ServiceTracker<PermissionAdmin, ?> permissionAdminTracker;
+	protected ServiceTracker<ProvisioningService, ?> provisioningServiceTracker;
+	protected ServiceTracker<UserAdmin, ?> userAdminTracker;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext
-	 * )
-	 */
 	public void start(BundleContext bundleContext) throws Exception {
 		this.bundleContext = bundleContext;
 		frameworkName = new ObjectName(FrameworkMBean.OBJECTNAME);
@@ -104,22 +97,14 @@ public class Activator implements BundleActivator {
 		packageStateName = new ObjectName(PackageStateMBean.OBJECTNAME);
 		configAdminName = new ObjectName(ConfigurationAdminMBean.OBJECTNAME);
 		permissionAdminName = new ObjectName(PermissionAdminMBean.OBJECTNAME);
-		provisioningServiceName = new ObjectName(
-				ProvisioningServiceMBean.OBJECTNAME);
+		provisioningServiceName = new ObjectName(ProvisioningServiceMBean.OBJECTNAME);
 		userAdminName = new ObjectName(UserAdminMBean.OBJECTNAME);
 
-		mbeanServiceTracker = new ServiceTracker(bundleContext,
-				MBeanServer.class.getCanonicalName(), new MBeanServiceTracker());
+		mbeanServiceTracker = new ServiceTracker<MBeanServer, Object>(bundleContext, MBeanServer.class.getCanonicalName(), new MBeanServiceTracker());
 		log.fine("Awaiting MBeanServer service registration");
 		mbeanServiceTracker.open();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
-	 */
 	public void stop(BundleContext arg0) throws Exception {
 		mbeanServiceTracker.close();
 		for (MBeanServer mbeanServer : mbeanServers) {
@@ -129,6 +114,9 @@ public class Activator implements BundleActivator {
 	}
 
 	/**
+	 * Unregister all MBeans from a MBean server
+	 * 
+	 * @param mbeanServer MBean Server to unregister the MBeans from
      */
 	protected synchronized void deregisterServices(MBeanServer mbeanServer) {
 		if (!servicesRegistered.get()) {
@@ -147,37 +135,29 @@ public class Activator implements BundleActivator {
 		try {
 			mbeanServer.unregisterMBean(bundlesStateName);
 		} catch (InstanceNotFoundException e) {
-			log.log(Level.FINEST,
-					"OSGi BundleStateMBean not found on deregistration", e);
+			log.log(Level.FINEST, "OSGi BundleStateMBean not found on deregistration", e);
 		} catch (MBeanRegistrationException e) {
-			log.log(Level.FINE, 
-					"OSGi BundleStateMBean deregistration problem", e);
+			log.log(Level.FINE, "OSGi BundleStateMBean deregistration problem", e);
 		}
 		bundleState = null;
 
-		log.fine("Deregistering services monitor with MBeanServer: "
-				+ mbeanServer);
+		log.fine("Deregistering services monitor with MBeanServer: " + mbeanServer);
 		try {
 			mbeanServer.unregisterMBean(serviceStateName);
 		} catch (InstanceNotFoundException e) {
-			log.log(Level.FINEST,
-					"OSGi ServiceStateMBean not found on deregistration", e);
+			log.log(Level.FINEST, "OSGi ServiceStateMBean not found on deregistration", e);
 		} catch (MBeanRegistrationException e) {
-			log.log(Level.FINE,
-					"OSGi ServiceStateMBean deregistration problem", e);
+			log.log(Level.FINE, "OSGi ServiceStateMBean deregistration problem", e);
 		}
 		serviceState = null;
 
-		log.fine("Deregistering packages monitor with MBeanServer: "
-				+ mbeanServer);
+		log.fine("Deregistering packages monitor with MBeanServer: " + mbeanServer);
 		try {
 			mbeanServer.unregisterMBean(packageStateName);
 		} catch (InstanceNotFoundException e) {
-			log.log(Level.FINEST,
-					"OSGi PackageStateMBean not found on deregistration", e);
+			log.log(Level.FINEST, "OSGi PackageStateMBean not found on deregistration", e);
 		} catch (MBeanRegistrationException e) {
-			log.log(Level.FINE,
-					"OSGi PackageStateMBean deregistration problem", e);
+			log.log(Level.FINE, "OSGi PackageStateMBean deregistration problem", e);
 		}
 		packageState = null;
 
@@ -186,39 +166,31 @@ public class Activator implements BundleActivator {
 		try {
 			mbeanServer.unregisterMBean(configAdminName);
 		} catch (InstanceNotFoundException e) {
-			log.log(Level.FINEST,
-					"OSGi ConfigAdminMBean not found on deregistration", e);
+			log.log(Level.FINEST, "OSGi ConfigAdminMBean not found on deregistration", e);
 		} catch (MBeanRegistrationException e) {
-			log.log(Level.FINE, 
-					"OSGi ConfigAdminMBean deregistration problem", e);
+			log.log(Level.FINE, "OSGi ConfigAdminMBean deregistration problem", e);
 		}
 		configAdminTracker = null;
 
-		log.fine("Deregistering permission admin with MBeanServer: "
-				+ mbeanServer);
+		log.fine("Deregistering permission admin with MBeanServer: " + mbeanServer);
 		permissionAdminTracker.close();
 		try {
 			mbeanServer.unregisterMBean(permissionAdminName);
 		} catch (InstanceNotFoundException e) {
-			log.log(Level.FINEST,
-					"OSGi PermissionAdminMBean not found on deregistration", e);
+			log.log(Level.FINEST, "OSGi PermissionAdminMBean not found on deregistration", e);
 		} catch (MBeanRegistrationException e) {
-			log.log(Level.FINE,
-					"OSGi PermissionAdminMBean deregistration problem", e);
+			log.log(Level.FINE, "OSGi PermissionAdminMBean deregistration problem", e);
 		}
 		permissionAdminTracker = null;
 
-		log.fine("Deregistering provisioning service admin with MBeanServer: "
-				+ mbeanServer);
+		log.fine("Deregistering provisioning service admin with MBeanServer: " + mbeanServer);
 		provisioningServiceTracker.close();
 		try {
 			mbeanServer.unregisterMBean(provisioningServiceName);
 		} catch (InstanceNotFoundException e) {
-			log.log(Level.FINEST,
-					"OSGi ProvisioningServiceMBean not found on deregistration", e);
+			log.log(Level.FINEST, "OSGi ProvisioningServiceMBean not found on deregistration", e);
 		} catch (MBeanRegistrationException e) {
-			log.log(Level.FINE,
-					"OSGi ProvisioningServiceMBean deregistration problem", e);
+			log.log(Level.FINE, "OSGi ProvisioningServiceMBean deregistration problem", e);
 		}
 		provisioningServiceTracker = null;
 
@@ -227,8 +199,7 @@ public class Activator implements BundleActivator {
 		try {
 			mbeanServer.unregisterMBean(userAdminName);
 		} catch (InstanceNotFoundException e) {
-			log.log(Level.FINEST,
-					"OSGi UserAdminMBean not found on deregistration", e);
+			log.log(Level.FINEST, "OSGi UserAdminMBean not found on deregistration", e);
 		} catch (MBeanRegistrationException e) {
 			log.log(Level.FINE, "OSGi UserAdminMBean deregistration problem", e);
 		}
@@ -238,49 +209,39 @@ public class Activator implements BundleActivator {
 	}
 
 	/**
+	 * Register all MBeans in a MBean server
+	 * 
+	 * @param mbeanServer MBean Server to register the MBeans in
      */
 	protected synchronized void registerServices(MBeanServer mbeanServer) {
-		PackageAdmin admin = (PackageAdmin) bundleContext
-				.getService(bundleContext
-						.getServiceReference(PackageAdmin.class
-								.getCanonicalName()));
-		StartLevel sl = (StartLevel) bundleContext.getService(bundleContext
-				.getServiceReference(StartLevel.class.getCanonicalName()));
+		PackageAdmin admin = (PackageAdmin) bundleContext.getService(bundleContext.getServiceReference(PackageAdmin.class.getCanonicalName()));
+		StartLevel sl = (StartLevel) bundleContext.getService(bundleContext.getServiceReference(StartLevel.class.getCanonicalName()));
 		try {
-			framework = new StandardMBean(new Framework(bundleContext, admin,
-					sl), FrameworkMBean.class);
+			framework = new StandardMBean(new Framework(bundleContext, admin, sl), FrameworkMBean.class);
 		} catch (NotCompliantMBeanException e) {
-			log.log(Level.SEVERE,
-					"Unable to create StandardMBean for Framework", e);
+			log.log(Level.SEVERE, "Unable to create StandardMBean for Framework", e);
 			return;
 		}
 		try {
-			bundleState = new StandardMBean(new BundleState(bundleContext, sl,
-					admin), CustomBundleStateMBean.class);
+			bundleState = new StandardMBean(new BundleState(bundleContext, sl, admin), CustomBundleStateMBean.class);
 		} catch (NotCompliantMBeanException e) {
-			log.log(Level.SEVERE,
-					"Unable to create StandardMBean for BundleState", e);
+			log.log(Level.SEVERE, "Unable to create StandardMBean for BundleState", e);
 			return;
 		}
 		try {
-			serviceState = new StandardMBean(new ServiceState(bundleContext),
-					ServiceStateMBean.class);
+			serviceState = new StandardMBean(new ServiceState(bundleContext), ServiceStateMBean.class);
 		} catch (NotCompliantMBeanException e) {
-			log.log(Level.SEVERE,
-					"Unable to create StandardMBean for ServiceState", e);
+			log.log(Level.SEVERE, "Unable to create StandardMBean for ServiceState", e);
 			return;
 		}
 		try {
-			packageState = new StandardMBean(new PackageState(bundleContext,
-					admin), PackageStateMBean.class);
+			packageState = new StandardMBean(new PackageState(bundleContext, admin), PackageStateMBean.class);
 		} catch (NotCompliantMBeanException e) {
-			log.log(Level.SEVERE,
-					"Unable to create StandardMBean for PackageState", e);
+			log.log(Level.SEVERE, "Unable to create StandardMBean for PackageState", e);
 			return;
 		}
 
-		log.fine("Registering Framework with MBeanServer: " + mbeanServer
-				+ " with name: " + frameworkName);
+		log.fine("Registering Framework with MBeanServer: " + mbeanServer + " with name: " + frameworkName);
 		try {
 			mbeanServer.registerMBean(framework, frameworkName);
 		} catch (InstanceAlreadyExistsException e) {
@@ -303,8 +264,7 @@ public class Activator implements BundleActivator {
 			log.log(Level.SEVERE, "Cannot register OSGi BundleStateMBean", e);
 		}
 
-		log.fine("Registering services monitor with MBeanServer: "
-				+ mbeanServer + " with name: " + serviceStateName);
+		log.fine("Registering services monitor with MBeanServer: " + mbeanServer + " with name: " + serviceStateName);
 		try {
 			mbeanServer.registerMBean(serviceState, serviceStateName);
 		} catch (InstanceAlreadyExistsException e) {
@@ -315,8 +275,7 @@ public class Activator implements BundleActivator {
 			log.log(Level.SEVERE, "Cannot register OSGi ServiceStateMBean", e);
 		}
 
-		log.fine("Registering packages monitor with MBeanServer: "
-				+ mbeanServer + " with name: " + packageStateName);
+		log.fine("Registering packages monitor with MBeanServer: " + mbeanServer + " with name: " + packageStateName);
 		try {
 			mbeanServer.registerMBean(packageState, packageStateName);
 		} catch (InstanceAlreadyExistsException e) {
@@ -327,17 +286,10 @@ public class Activator implements BundleActivator {
 			log.log(Level.SEVERE, "Cannot register OSGi PackageStateMBean", e);
 		}
 
-		configAdminTracker = new ServiceTracker(bundleContext,
-				"org.osgi.service.cm.ConfigurationAdmin",
-				new ConfigAdminTracker());
-		permissionAdminTracker = new ServiceTracker(bundleContext,
-				"org.osgi.service.permissionadmin.PermissionAdmin",
-				new PermissionAdminTracker());
-		provisioningServiceTracker = new ServiceTracker(bundleContext,
-				"org.osgi.service.provisioning.ProvisioningService",
-				new ProvisioningServiceTracker());
-		userAdminTracker = new ServiceTracker(bundleContext,
-				"org.osgi.service.useradmin.UserAdmin", new UserAdminTracker());
+		configAdminTracker = new ServiceTracker<ConfigurationAdmin, Object>(bundleContext, "org.osgi.service.cm.ConfigurationAdmin", new ConfigAdminTracker());
+		permissionAdminTracker = new ServiceTracker<PermissionAdmin, Object>(bundleContext, "org.osgi.service.permissionadmin.PermissionAdmin", new PermissionAdminTracker());
+		provisioningServiceTracker = new ServiceTracker<ProvisioningService, Object>(bundleContext, "org.osgi.service.provisioning.ProvisioningService", new ProvisioningServiceTracker());
+		userAdminTracker = new ServiceTracker<UserAdmin, Object>(bundleContext, "org.osgi.service.useradmin.UserAdmin", new UserAdminTracker());
 		configAdminTracker.open();
 		permissionAdminTracker.open();
 		provisioningServiceTracker.open();
@@ -345,21 +297,27 @@ public class Activator implements BundleActivator {
 		servicesRegistered.set(true);
 	}
 
-	class MBeanServiceTracker implements ServiceTrackerCustomizer {
+	class MBeanServiceTracker implements ServiceTrackerCustomizer<MBeanServer, Object> {
 
-		public Object addingService(ServiceReference servicereference) {
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * Register all MBeans in a newly registered MBean server
+		 * 
+		 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
+		 */
+		public Object addingService(ServiceReference<MBeanServer> servicereference) {
 			try {
 				log.fine("Adding MBeanServer: " + servicereference);
-				final MBeanServer mbeanServer = (MBeanServer) bundleContext
-						.getService(servicereference);
+				final MBeanServer mbeanServer = bundleContext.getService(servicereference);
 				mbeanServers.add(mbeanServer);
 				Runnable registration = new Runnable() {
 					public void run() {
 						registerServices(mbeanServer);
 					}
 				};
-				Thread registrationThread = new Thread(registration,
-						"JMX Core MBean Registration");
+				
+				Thread registrationThread = new Thread(registration, "JMX Core MBean Registration");
 				registrationThread.setDaemon(true);
 				registrationThread.start();
 
@@ -370,16 +328,21 @@ public class Activator implements BundleActivator {
 			}
 		}
 
-		public void modifiedService(ServiceReference servicereference,
-				Object obj) {
+		public void modifiedService(ServiceReference<MBeanServer> servicereference, Object obj) {
 			// no op
 		}
 
-		public void removedService(ServiceReference servicereference, Object obj) {
+		/*
+		 * (non-Javadoc)
+		 * 
+		 *  Unregister all MBeans from a MBean server when it gets unregistered
+		 *  
+		 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
+		 */
+		public void removedService(ServiceReference<MBeanServer> servicereference, Object obj) {
 			try {
 				log.fine("Removing MBeanServer: " + servicereference);
-				final MBeanServer mbeanServer = (MBeanServer) bundleContext
-						.getService(servicereference);
+				final MBeanServer mbeanServer = bundleContext.getService(servicereference);
 				mbeanServers.remove(mbeanServer);
 				Runnable deregister = new Runnable() {
 					public void run() {
@@ -387,8 +350,7 @@ public class Activator implements BundleActivator {
 					}
 				};
 
-				Thread deregisterThread = new Thread(deregister,
-						"JMX Core MBean Deregistration");
+				Thread deregisterThread = new Thread(deregister, "JMX Core MBean Deregistration");
 				deregisterThread.setDaemon(true);
 				deregisterThread.start();
 
@@ -398,278 +360,230 @@ public class Activator implements BundleActivator {
 		}
 	}
 
-	class ConfigAdminTracker implements ServiceTrackerCustomizer {
+	class ConfigAdminTracker implements ServiceTrackerCustomizer<ConfigurationAdmin, Object> {
 		StandardMBean manager;
 
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see
-		 * org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.
-		 * osgi.framework.ServiceReference)
+		 * Register a MBean for the ConfigurationAdmin service in all MBean servers
+		 * 
+		 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
 		 */
-		public Object addingService(ServiceReference reference) {
+		public Object addingService(ServiceReference<ConfigurationAdmin> reference) {
 			ConfigurationAdmin admin;
 			try {
-				admin = (ConfigurationAdmin) bundleContext
-						.getService(reference);
+				admin = bundleContext .getService(reference);
 			} catch (ClassCastException e) {
-				log.log(Level.SEVERE,
-						"Incompatible class version for the Configuration Admin Manager", e);
+				log.log(Level.SEVERE, "Incompatible class version for the Configuration Admin Manager", e);
 				return bundleContext.getService(reference);
 			}
 
 			try {
-				manager = new StandardMBean(new ConfigAdminManager(admin),
-						ConfigurationAdminMBean.class);
+				manager = new StandardMBean(new ConfigAdminManager(admin), ConfigurationAdminMBean.class);
 			} catch (NotCompliantMBeanException e) {
-				log.log(Level.SEVERE,
-						"Unable to create Configuration Admin Manager", e);
+				log.log(Level.SEVERE, "Unable to create Configuration Admin Manager", e);
 				return admin;
 			}
+			
 			for (MBeanServer mbeanServer : mbeanServers) {
-				log.fine("Registering configuration admin with MBeanServer: "
-						+ mbeanServer + " with name: " + configAdminName);
+				log.fine("Registering configuration admin with MBeanServer: " + mbeanServer + " with name: " + configAdminName);
 				try {
 					mbeanServer.registerMBean(manager, configAdminName);
 				} catch (InstanceAlreadyExistsException e) {
-					log.log(Level.FINE,
-							"Cannot register Configuration Manager MBean", e);
+					log.log(Level.FINE, "Cannot register Configuration Manager MBean", e);
 				} catch (MBeanRegistrationException e) {
-					log.log(Level.SEVERE,
-							"Cannot register Configuration Manager MBean", e);
+					log.log(Level.SEVERE, "Cannot register Configuration Manager MBean", e);
 				} catch (NotCompliantMBeanException e) {
-					log.log(Level.SEVERE,
-							"Cannot register Configuration Manager MBean", e);
+					log.log(Level.SEVERE, "Cannot register Configuration Manager MBean", e);
 				}
 			}
+			
 			return admin;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(org
-		 * .osgi.framework.ServiceReference, java.lang.Object)
-		 */
-		public void modifiedService(ServiceReference reference, Object service) {
+		public void modifiedService(ServiceReference<ConfigurationAdmin> reference, Object service) {
 		}
 
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see
-		 * org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org
-		 * .osgi.framework.ServiceReference, java.lang.Object)
+		 * Unregister the MBean for the ConfigurationAdmin service from all MBean servers
+		 * 
+		 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
 		 */
-		public void removedService(ServiceReference reference, Object service) {
+		public void removedService(ServiceReference<ConfigurationAdmin> reference, Object service) {
 
 			for (MBeanServer mbeanServer : mbeanServers) {
-				log.fine("deregistering configuration admin from: "
-						+ mbeanServer + " with name: " + configAdminName);
+				log.fine("deregistering configuration admin from: " + mbeanServer + " with name: " + configAdminName);
 				try {
 					mbeanServer.unregisterMBean(configAdminName);
 				} catch (InstanceNotFoundException e) {
 					log.fine("Configuration Manager MBean was never registered");
 				} catch (MBeanRegistrationException e) {
-					log.log(Level.SEVERE,
-							"Cannot deregister Configuration Manager MBean", e);
+					log.log(Level.SEVERE, "Cannot deregister Configuration Manager MBean", e);
 				}
 			}
 		}
 	}
 
-	class PermissionAdminTracker implements ServiceTrackerCustomizer {
+	class PermissionAdminTracker implements ServiceTrackerCustomizer<PermissionAdmin, Object> {
 		StandardMBean manager;
 
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see
-		 * org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.
-		 * osgi.framework.ServiceReference)
+		 * Register a MBean for the PermissionAdmin service in all MBean servers
+		 * 
+		 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
 		 */
-		public Object addingService(ServiceReference reference) {
+		public Object addingService(ServiceReference<PermissionAdmin> reference) {
 			PermissionAdmin admin;
 			try {
-				admin = (PermissionAdmin) bundleContext.getService(reference);
+				admin = bundleContext.getService(reference);
 			} catch (ClassCastException e) {
-				log.log(Level.SEVERE,
-						"Incompatible class version for the Permission Admin Manager", e);
+				log.log(Level.SEVERE, "Incompatible class version for the Permission Admin Manager", e);
 				return bundleContext.getService(reference);
 			}
 			try {
-				manager = new StandardMBean(new PermissionManager(admin),
-						PermissionAdminMBean.class);
+				manager = new StandardMBean(new PermissionManager(admin), PermissionAdminMBean.class);
 			} catch (NotCompliantMBeanException e) {
-				log.log(Level.SEVERE, 
-						"Unable to create Permission Admin Manager", e);
+				log.log(Level.SEVERE, "Unable to create Permission Admin Manager", e);
 				return admin;
 			}
 			for (MBeanServer mbeanServer : mbeanServers) {
-				log.fine("Registering permission admin with MBeanServer: "
-						+ mbeanServer + " with name: " + permissionAdminName);
+				log.fine("Registering permission admin with MBeanServer: " + mbeanServer + " with name: " + permissionAdminName);
 				try {
 					mbeanServer.registerMBean(manager, permissionAdminName);
 				} catch (InstanceAlreadyExistsException e) {
-					log.log(Level.FINE,
-							"Cannot register Permission Manager MBean", e);
+					log.log(Level.FINE, "Cannot register Permission Manager MBean", e);
 				} catch (MBeanRegistrationException e) {
-					log.log(Level.SEVERE,
-							"Cannot register Permission Manager MBean", e);
+					log.log(Level.SEVERE, "Cannot register Permission Manager MBean", e);
 				} catch (NotCompliantMBeanException e) {
-					log.log(Level.SEVERE,
-							"Cannot register Permission Manager MBean", e);
+					log.log(Level.SEVERE, "Cannot register Permission Manager MBean", e);
 				}
 			}
 			return admin;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(org
-		 * .osgi.framework.ServiceReference, java.lang.Object)
-		 */
-		public void modifiedService(ServiceReference reference, Object service) {
+		public void modifiedService(ServiceReference<PermissionAdmin> reference, Object service) {
 		}
 
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see
-		 * org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org
-		 * .osgi.framework.ServiceReference, java.lang.Object)
+		 * Unregister the MBean for the PermissionAdmin service from all MBean servers
+		 * 
+		 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
 		 */
-		public void removedService(ServiceReference reference, Object service) {
+		public void removedService(ServiceReference<PermissionAdmin> reference, Object service) {
 			for (MBeanServer mbeanServer : mbeanServers) {
-				log.fine("deregistering permission admin with MBeanServer: "
-						+ mbeanServer + " with name: " + permissionAdminName);
+				log.fine("deregistering permission admin with MBeanServer: " + mbeanServer + " with name: " + permissionAdminName);
 				try {
 					mbeanServer.unregisterMBean(permissionAdminName);
 				} catch (InstanceNotFoundException e) {
 					log.fine("Permission Manager MBean was never registered");
 				} catch (MBeanRegistrationException e) {
-					log.log(Level.SEVERE,
-							"Cannot deregister Permission Manager MBean", e);
+					log.log(Level.SEVERE, "Cannot deregister Permission Manager MBean", e);
 				}
 			}
 		}
 	}
 
-	class ProvisioningServiceTracker implements ServiceTrackerCustomizer {
+	class ProvisioningServiceTracker implements ServiceTrackerCustomizer<ProvisioningService, Object> {
 		StandardMBean provisioning;
 
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see
-		 * org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.
-		 * osgi.framework.ServiceReference)
+		 * Register a MBean for the Provisioning service in all MBean servers
+		 * 
+		 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
 		 */
-		public Object addingService(ServiceReference reference) {
+		public Object addingService(ServiceReference<ProvisioningService> reference) {
 			ProvisioningService service;
+			
 			try {
-				service = (ProvisioningService) bundleContext
-						.getService(reference);
+				service = bundleContext .getService(reference);
 			} catch (ClassCastException e) {
-				log.log(Level.SEVERE,
-						"Incompatible class version for the Provisioning service", e);
+				log.log(Level.SEVERE, "Incompatible class version for the Provisioning service", e);
 				return bundleContext.getService(reference);
 			}
+			
 			try {
-				provisioning = new StandardMBean(new Provisioning(service),
-						ProvisioningServiceMBean.class);
+				provisioning = new StandardMBean(new Provisioning(service), ProvisioningServiceMBean.class);
 			} catch (NotCompliantMBeanException e) {
-				log.log(Level.SEVERE,
-						"Unable to create Provisioning Service Manager", e);
+				log.log(Level.SEVERE, "Unable to create Provisioning Service Manager", e);
 				return service;
 			}
+			
 			for (MBeanServer mbeanServer : mbeanServers) {
-				log.fine("Registering provisioning service with MBeanServer: "
-						+ mbeanServer + " with name: "
-						+ provisioningServiceName);
+				log.fine("Registering provisioning service with MBeanServer: " + mbeanServer + " with name: " + provisioningServiceName);
 				try {
-					mbeanServer.registerMBean(provisioning,
-							provisioningServiceName);
+					mbeanServer.registerMBean(provisioning, provisioningServiceName);
 				} catch (InstanceAlreadyExistsException e) {
-					log.log(Level.FINE,
-							"Cannot register Provisioning Service MBean", e);
+					log.log(Level.FINE, "Cannot register Provisioning Service MBean", e);
 				} catch (MBeanRegistrationException e) {
-					log.log(Level.SEVERE,
-							"Cannot register Provisioning Service MBean", e);
+					log.log(Level.SEVERE, "Cannot register Provisioning Service MBean", e);
 				} catch (NotCompliantMBeanException e) {
-					log.log(Level.SEVERE,
-							"Cannot register Provisioning Service MBean", e);
+					log.log(Level.SEVERE, "Cannot register Provisioning Service MBean", e);
 				}
 			}
 			return service;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(org
-		 * .osgi.framework.ServiceReference, java.lang.Object)
-		 */
-		public void modifiedService(ServiceReference reference, Object service) {
+		public void modifiedService(ServiceReference<ProvisioningService> reference, Object service) {
 		}
 
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see
-		 * org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org
-		 * .osgi.framework.ServiceReference, java.lang.Object)
+		 * Unregister the MBean for the Provisioning service from all MBean servers
+		 * 
+		 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
 		 */
-		public void removedService(ServiceReference reference, Object service) {
+		public void removedService(ServiceReference<ProvisioningService> reference, Object service) {
 			for (MBeanServer mbeanServer : mbeanServers) {
-				log.fine("deregistering provisioning service with MBeanServer: "
-						+ mbeanServer + " with name: " + provisioningServiceName);
+				log.fine("deregistering provisioning service with MBeanServer: " + mbeanServer + " with name: " + provisioningServiceName);
 				try {
 					mbeanServer.unregisterMBean(provisioningServiceName);
 				} catch (InstanceNotFoundException e) {
 					log.fine("Provisioning Service MBean was never registered");
 				} catch (MBeanRegistrationException e) {
-					log.log(Level.SEVERE,
-							"Cannot deregister Provisioning Service MBean", e);
+					log.log(Level.SEVERE, "Cannot deregister Provisioning Service MBean", e);
 				}
 			}
 		}
 	}
 
-	class UserAdminTracker implements ServiceTrackerCustomizer {
+	class UserAdminTracker implements ServiceTrackerCustomizer<UserAdmin, Object> {
 		StandardMBean manager;
 
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see
-		 * org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.
-		 * osgi.framework.ServiceReference)
+		 * Register a MBean for the UserAdmin service in all MBean servers
+		 * 
+		 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
 		 */
-		public Object addingService(ServiceReference reference) {
+		public Object addingService(ServiceReference<UserAdmin> reference) {
 			UserAdmin admin;
 			try {
-				admin = (UserAdmin) bundleContext.getService(reference);
+				admin = bundleContext.getService(reference);
 			} catch (ClassCastException e) {
-				log.log(Level.SEVERE,
-						"Incompatible class version for the User Admin manager", e);
+				log.log(Level.SEVERE, "Incompatible class version for the User Admin manager", e);
 				return bundleContext.getService(reference);
 			}
+			
 			try {
-				manager = new StandardMBean(new UserManager(admin),
-						UserAdminMBean.class);
+				manager = new StandardMBean(new UserManager(admin), UserAdminMBean.class);
 			} catch (NotCompliantMBeanException e1) {
 				log.log(Level.SEVERE, "Unable to create User Admin Manager");
 				return admin;
 			}
+			
 			for (MBeanServer mbeanServer : mbeanServers) {
-				log.fine("Registering user admin with MBeanServer: "
-						+ mbeanServer + " with name: " + userAdminName);
+				log.fine("Registering user admin with MBeanServer: " + mbeanServer + " with name: " + userAdminName);
 				try {
 					mbeanServer.registerMBean(manager, userAdminName);
 				} catch (InstanceAlreadyExistsException e) {
@@ -683,34 +597,25 @@ public class Activator implements BundleActivator {
 			return admin;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(org
-		 * .osgi.framework.ServiceReference, java.lang.Object)
-		 */
-		public void modifiedService(ServiceReference reference, Object service) {
+		public void modifiedService(ServiceReference<UserAdmin> reference, Object service) {
 		}
 
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see
-		 * org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org
-		 * .osgi.framework.ServiceReference, java.lang.Object)
+		 * Unregister the MBean for the UserAdmin service from all MBean servers
+		 * 
+		 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
 		 */
-		public void removedService(ServiceReference reference, Object service) {
+		public void removedService(ServiceReference<UserAdmin> reference, Object service) {
 			for (MBeanServer mbeanServer : mbeanServers) {
-				log.fine("Deregistering user admin with MBeanServer: "
-						+ mbeanServer + " with name: " + userAdminName);
+				log.fine("Deregistering user admin with MBeanServer: " + mbeanServer + " with name: " + userAdminName);
 				try {
 					mbeanServer.unregisterMBean(userAdminName);
 				} catch (InstanceNotFoundException e) {
 					log.fine("User Manager MBean was never registered");
 				} catch (MBeanRegistrationException e) {
-					log.log(Level.SEVERE,
-							"Cannot deregister User Manager MBean", e);
+					log.log(Level.SEVERE, "Cannot deregister User Manager MBean", e);
 				}
 			}
 		}

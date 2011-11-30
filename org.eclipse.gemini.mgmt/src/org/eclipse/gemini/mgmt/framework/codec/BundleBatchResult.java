@@ -16,6 +16,8 @@
 package org.eclipse.gemini.mgmt.framework.codec;
 
 /**
+ * Abstract supertype to represent the result of an operation on multiple bundles. 
+ * The bundles are identified by their id.
  */
 abstract public class BundleBatchResult {
 

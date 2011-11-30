@@ -46,16 +46,11 @@ public class UserManager extends Monitor implements UserAdminMBean {
 		this.admin = admin;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.osgi.jmx.compendium.UserManagerMBean#addCredential(java.lang.String,
-	 * byte[], java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
 	@SuppressWarnings("unchecked")
-	public void addCredential(String key, byte[] value, String username)
-			throws IOException {
+	public void addCredential(String key, byte[] value, String username) throws IOException {
 		if (username == null) {
 			throw new IOException("User name must not be null");
 		}
@@ -74,16 +69,11 @@ public class UserManager extends Monitor implements UserAdminMBean {
 		user.getCredentials().put(key, value);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.osgi.jmx.compendium.UserManagerMBean#addCredential(java.lang.String,
-	 * java.lang.String, java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
 	@SuppressWarnings("unchecked")
-	public void addCredentialString(String key, String value, String username)
-			throws IOException {
+	public void addCredentialString(String key, String value, String username) throws IOException {
 		if (username == null) {
 			throw new IOException("User name must not be null");
 		}
@@ -102,14 +92,10 @@ public class UserManager extends Monitor implements UserAdminMBean {
 		user.getCredentials().put(key, value);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.compendium.UserManagerMBean#addMember(java.lang.String,
-	 * java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
-	public boolean addMember(String groupname, String rolename)
-			throws IOException {
+	public boolean addMember(String groupname, String rolename) throws IOException {
 		if (groupname == null) {
 			throw new IOException("Group name must not be null");
 		}
@@ -127,16 +113,11 @@ public class UserManager extends Monitor implements UserAdminMBean {
 		return group.getType() == Role.GROUP && ((Group) group).addMember(role);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.osgi.jmx.compendium.UserManagerMBean#addProperty(java.lang.String,
-	 * byte[], java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
 	@SuppressWarnings("unchecked")
-	public void addProperty(String key, byte[] value, String rolename)
-			throws IOException {
+	public void addProperty(String key, byte[] value, String rolename) throws IOException {
 		if (rolename == null) {
 			throw new IOException("Role name must not be null");
 		}
@@ -150,16 +131,11 @@ public class UserManager extends Monitor implements UserAdminMBean {
 		role.getProperties().put(key, value);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.osgi.jmx.compendium.UserManagerMBean#addProperty(java.lang.String,
-	 * java.lang.String, java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
 	@SuppressWarnings("unchecked")
-	public void addPropertyString(String key, String value, String rolename)
-			throws IOException {
+	public void addPropertyString(String key, String value, String rolename) throws IOException {
 		if (rolename == null) {
 			throw new IOException("Role name must not be null");
 		}
@@ -173,15 +149,10 @@ public class UserManager extends Monitor implements UserAdminMBean {
 		role.getProperties().put(key, value);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.osgi.jmx.compendium.UserManagerMBean#addRequiredMember(java.lang.
-	 * String, java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
-	public boolean addRequiredMember(String groupname, String rolename)
-			throws IOException {
+	public boolean addRequiredMember(String groupname, String rolename) throws IOException {
 		if (groupname == null) {
 			throw new IOException("Group name must not be null");
 		}
@@ -193,15 +164,11 @@ public class UserManager extends Monitor implements UserAdminMBean {
 		if (role == null) {
 			throw new IOException("Role does not exist: " + rolename);
 		}
-		return group.getType() == Role.GROUP
-				&& ((Group) group).addRequiredMember(role);
+		return group.getType() == Role.GROUP && ((Group) group).addRequiredMember(role);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.osgi.jmx.compendium.UserManagerMBean#createGroup(java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
 	public void createGroup(String name) throws IOException {
 		if (name == null) {
@@ -210,11 +177,8 @@ public class UserManager extends Monitor implements UserAdminMBean {
 		admin.createRole(name, Role.GROUP);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.osgi.jmx.compendium.UserManagerMBean#createUser(java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
 	public void createUser(String name) throws IOException {
 		if (name == null) {
@@ -223,23 +187,15 @@ public class UserManager extends Monitor implements UserAdminMBean {
 		admin.createRole(name, Role.USER);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.osgi.jmx.compendium.UserManagerMBean#createRole(java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
 	public void createRole(String name) throws IOException {
-		throw new UnsupportedOperationException(
-				"This method is deprecated and does not work");
+		throw new UnsupportedOperationException("This method is deprecated and does not work");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.osgi.jmx.compendium.UserManagerMBean#getAuthorization(java.lang.String
-	 * )
+	/**
+	 * {@inheritDoc}
 	 */
 	public CompositeData getAuthorization(String u) throws IOException {
 		if (u == null) {
@@ -252,18 +208,14 @@ public class UserManager extends Monitor implements UserAdminMBean {
 			throw new IOException("Not a user: " + u);
 		}
 		try {
-			return new OSGiAuthorization(admin.getAuthorization(user))
-					.asCompositeData();
+			return new OSGiAuthorization(admin.getAuthorization(user)).asCompositeData();
 		} catch (OpenDataException e) {
 			throw new IOException("Unable to create open data type: " + e);
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.osgi.jmx.compendium.UserManagerMBean#getCredentials(java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
 	public TabularData getCredentials(String username) throws IOException {
 		if (username == null) {
@@ -281,10 +233,8 @@ public class UserManager extends Monitor implements UserAdminMBean {
 		return OSGiProperties.tableFrom(user.getCredentials());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.compendium.UserManagerMBean#getGroup(java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
 	public CompositeData getGroup(String groupname) throws IOException {
 		if (groupname == null) {
@@ -303,18 +253,15 @@ public class UserManager extends Monitor implements UserAdminMBean {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.compendium.UserManagerMBean#listGroups()
+	/**
+	 * {@inheritDoc}
 	 */
 	public String[] listGroups() throws IOException {
 		Role[] roles;
 		try {
 			roles = admin.getRoles(null);
 		} catch (InvalidSyntaxException e) {
-			throw new IllegalStateException(
-					"Cannot use null filter, apparently: " + e);
+			throw new IllegalStateException("Cannot use null filter, apparently: " + e);
 		}
 		ArrayList<String> groups = new ArrayList<String>();
 		for (Role role : roles) {
@@ -325,10 +272,8 @@ public class UserManager extends Monitor implements UserAdminMBean {
 		return groups.toArray(new String[groups.size()]);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.compendium.UserManagerMBean#getGroups(java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
 	public String[] getGroups(String filter) throws IOException {
 		Role[] roles;
@@ -346,12 +291,8 @@ public class UserManager extends Monitor implements UserAdminMBean {
 		return groups.toArray(new String[groups.size()]);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.osgi.jmx.compendium.UserManagerMBean#getImpliedRoles(java.lang.String
-	 * )
+	/**
+	 * {@inheritDoc}
 	 */
 	public String[] getImpliedRoles(String username) throws IOException {
 		if (username == null) {
@@ -365,11 +306,8 @@ public class UserManager extends Monitor implements UserAdminMBean {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.osgi.jmx.compendium.UserManagerMBean#getMembers(java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
 	public String[] getMembers(String groupname) throws IOException {
 		if (groupname == null) {
@@ -392,11 +330,8 @@ public class UserManager extends Monitor implements UserAdminMBean {
 		return names;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.osgi.jmx.compendium.UserManagerMBean#getProperties(java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
 	public TabularData getProperties(String rolename) throws IOException {
 		if (rolename == null) {
@@ -409,12 +344,8 @@ public class UserManager extends Monitor implements UserAdminMBean {
 		return OSGiProperties.tableFrom(role.getProperties());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.osgi.jmx.compendium.UserManagerMBean#getRequiredMembers(java.lang
-	 * .String)
+	/**
+	 * {@inheritDoc}
 	 */
 	public String[] getRequiredMembers(String groupname) throws IOException {
 		if (groupname == null) {
@@ -437,10 +368,8 @@ public class UserManager extends Monitor implements UserAdminMBean {
 		return names;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.compendium.UserManagerMBean#getRole(java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
 	public CompositeData getRole(String name) throws IOException {
 		if (name == null) {
@@ -454,18 +383,15 @@ public class UserManager extends Monitor implements UserAdminMBean {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.compendium.UserManagerMBean#listRoles()
+	/**
+	 * {@inheritDoc}
 	 */
 	public String[] listRoles() throws IOException {
 		Role[] roles;
 		try {
 			roles = admin.getRoles(null);
 		} catch (InvalidSyntaxException e) {
-			throw new IllegalStateException(
-					"Cannot use null filter, apparently: " + e);
+			throw new IllegalStateException("Cannot use null filter, apparently: " + e);
 		}
 		String[] result = new String[roles.length];
 		for (int i = 0; i < roles.length; i++) {
@@ -474,10 +400,8 @@ public class UserManager extends Monitor implements UserAdminMBean {
 		return result;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.compendium.UserManagerMBean#getRoles(java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
 	public String[] getRoles(String filter) throws IOException {
 		Role[] roles;
@@ -493,10 +417,8 @@ public class UserManager extends Monitor implements UserAdminMBean {
 		return result;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.compendium.UserManagerMBean#getUser(java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
 	public CompositeData getUser(String username) throws IOException {
 		if (username == null) {
@@ -515,14 +437,10 @@ public class UserManager extends Monitor implements UserAdminMBean {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.compendium.UserManagerMBean#getUser(java.lang.String,
-	 * java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
-	public String getUserWithProperty(String key, String value)
-			throws IOException {
+	public String getUserWithProperty(String key, String value) throws IOException {
 		if (key == null) {
 			throw new IOException("Name must not be null");
 		}
@@ -530,18 +448,15 @@ public class UserManager extends Monitor implements UserAdminMBean {
 		return user == null ? null : user.getName();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.compendium.UserManagerMBean#listUsers()
+	/**
+	 * {@inheritDoc}
 	 */
 	public String[] listUsers() throws IOException {
 		Role[] roles;
 		try {
 			roles = admin.getRoles(null);
 		} catch (InvalidSyntaxException e) {
-			throw new IllegalStateException(
-					"Cannot use null filter, apparently: " + e);
+			throw new IllegalStateException("Cannot use null filter, apparently: " + e);
 		}
 		ArrayList<String> groups = new ArrayList<String>();
 		for (Role role : roles) {
@@ -552,10 +467,8 @@ public class UserManager extends Monitor implements UserAdminMBean {
 		return groups.toArray(new String[groups.size()]);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.compendium.UserManagerMBean#getUsers(java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
 	public String[] getUsers(String filter) throws IOException {
 		Role[] roles;
@@ -573,15 +486,10 @@ public class UserManager extends Monitor implements UserAdminMBean {
 		return groups.toArray(new String[groups.size()]);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.osgi.jmx.compendium.UserManagerMBean#removeCredential(java.lang.String
-	 * , java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
-	public void removeCredential(String key, String username)
-			throws IOException {
+	public void removeCredential(String key, String username) throws IOException {
 		if (username == null || username.length() == 0) {
 			throw new IOException("Name must not be null or empty");
 		}
@@ -600,15 +508,10 @@ public class UserManager extends Monitor implements UserAdminMBean {
 		user.getCredentials().remove(key);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.osgi.jmx.compendium.UserManagerMBean#removeMember(java.lang.String,
-	 * java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
-	public boolean removeMember(String groupname, String rolename)
-			throws IOException {
+	public boolean removeMember(String groupname, String rolename) throws IOException {
 		if (groupname == null) {
 			throw new IOException("Group name must not be null");
 		}
@@ -631,12 +534,8 @@ public class UserManager extends Monitor implements UserAdminMBean {
 		return group.removeMember(role);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.osgi.jmx.compendium.UserManagerMBean#removeProperty(java.lang.String,
-	 * java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
 	public void removeProperty(String key, String rolename) throws IOException {
 		if (rolename == null) {
@@ -649,11 +548,8 @@ public class UserManager extends Monitor implements UserAdminMBean {
 		role.getProperties().remove(key);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.osgi.jmx.compendium.UserManagerMBean#removeRole(java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
 	public boolean removeRole(String name) throws IOException {
 		if (name == null) {
@@ -662,11 +558,8 @@ public class UserManager extends Monitor implements UserAdminMBean {
 		return admin.removeRole(name);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.osgi.jmx.compendium.UserManagerMBean#removeUser(java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
 	public boolean removeUser(String name) throws IOException {
 		if (name == null) {
@@ -675,11 +568,8 @@ public class UserManager extends Monitor implements UserAdminMBean {
 		return admin.removeRole(name);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.osgi.jmx.compendium.UserManagerMBean#removeGroup(java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
 	public boolean removeGroup(String name) throws IOException {
 		if (name == null) {
@@ -688,26 +578,20 @@ public class UserManager extends Monitor implements UserAdminMBean {
 		return admin.removeRole(name);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.core.Monitor#addListener()
+	/**
+	 * {@inheritDoc}
 	 */
 	@Override
 	protected void addListener() {
-		// TODO Auto-generated method stub
-
+		
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.core.Monitor#removeListener()
+	/**
+	 * {@inheritDoc}
 	 */
 	@Override
 	protected void removeListener() {
-		// TODO Auto-generated method stub
-
+		
 	}
 
 }

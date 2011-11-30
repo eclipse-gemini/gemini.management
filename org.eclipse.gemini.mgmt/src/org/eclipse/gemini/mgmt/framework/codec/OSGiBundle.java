@@ -148,11 +148,9 @@ import org.eclipse.gemini.mgmt.framework.CustomBundleStateMBean;
 public class OSGiBundle {
 	
 	private static final String VALUE = "Value";
-
 	private static final String KEY = "Key";
-
-	private static final String[] HEADER_PROPERTY_ITEM_NAMES = new String[] {
-			KEY, VALUE };
+	private static final String[] HEADER_PROPERTY_ITEM_NAMES = new String[] {KEY, VALUE };
+	
 	private BundleContext bc;
 	private PackageAdmin admin;
 	private StartLevel sl;
@@ -166,30 +164,26 @@ public class OSGiBundle {
 	 */
 	@SuppressWarnings("boxing")
 	public OSGiBundle(CompositeData data) {
-		this((String) data.get(BundleStateMBean.LOCATION), ((Long) data
-				.get(BundleStateMBean.IDENTIFIER)).longValue(), (String) data
-				.get(BundleStateMBean.SYMBOLIC_NAME), (String) data
-				.get(BundleStateMBean.VERSION), ((Integer) data
-				.get(BundleStateMBean.START_LEVEL)).intValue(), (String) data
-				.get(BundleStateMBean.STATE), ((Long) data
-				.get(BundleStateMBean.LAST_MODIFIED)).longValue(),
-				(Boolean) data.get(BundleStateMBean.PERSISTENTLY_STARTED),
-				(Boolean) data.get(BundleStateMBean.REMOVAL_PENDING),
-				(Boolean) data.get(BundleStateMBean.REQUIRED), (Boolean) data
-						.get(BundleStateMBean.FRAGMENT),
-				longArrayFrom((Long[]) data
-						.get(BundleStateMBean.REGISTERED_SERVICES)),
-				longArrayFrom((Long[]) data
-						.get(BundleStateMBean.SERVICES_IN_USE)),
-				mapFrom((TabularData) data.get(BundleStateMBean.HEADERS)),
-				(String[]) data.get(BundleStateMBean.EXPORTED_PACKAGES),
-				(String[]) data.get(BundleStateMBean.IMPORTED_PACKAGES),
-				longArrayFrom((Long[]) data.get(BundleStateMBean.FRAGMENTS)),
-				longArrayFrom((Long[]) data.get(BundleStateMBean.HOSTS)),
-				longArrayFrom((Long[]) data
-						.get(BundleStateMBean.REQUIRED_BUNDLES)),
-				longArrayFrom((Long[]) data
-						.get(BundleStateMBean.REQUIRING_BUNDLES)));
+		this((String) data.get(BundleStateMBean.LOCATION), 
+			 ((Long) data.get(BundleStateMBean.IDENTIFIER)).longValue(), 
+			 (String) data.get(BundleStateMBean.SYMBOLIC_NAME), 
+			 (String) data.get(BundleStateMBean.VERSION), 
+			 ((Integer) data.get(BundleStateMBean.START_LEVEL)).intValue(), 
+			 (String) data.get(BundleStateMBean.STATE), 
+			 ((Long) data.get(BundleStateMBean.LAST_MODIFIED)).longValue(),
+			 (Boolean) data.get(BundleStateMBean.PERSISTENTLY_STARTED), 
+			 (Boolean) data.get(BundleStateMBean.REMOVAL_PENDING),
+			 (Boolean) data.get(BundleStateMBean.REQUIRED), 
+			 (Boolean) data.get(BundleStateMBean.FRAGMENT),
+			 longArrayFrom((Long[]) data.get(BundleStateMBean.REGISTERED_SERVICES)),
+			 longArrayFrom((Long[]) data.get(BundleStateMBean.SERVICES_IN_USE)),
+			 mapFrom((TabularData) data.get(BundleStateMBean.HEADERS)), 
+			 (String[]) data.get(BundleStateMBean.EXPORTED_PACKAGES),
+			 (String[]) data.get(BundleStateMBean.IMPORTED_PACKAGES), 
+			 longArrayFrom((Long[]) data.get(BundleStateMBean.FRAGMENTS)),
+			 longArrayFrom((Long[]) data.get(BundleStateMBean.HOSTS)), 
+			 longArrayFrom((Long[]) data.get(BundleStateMBean.REQUIRED_BUNDLES)),
+			 longArrayFrom((Long[]) data.get(BundleStateMBean.REQUIRING_BUNDLES)));
 
 	}
 
@@ -205,8 +199,7 @@ public class OSGiBundle {
 	 * @param b
 	 *            - the Bundle to represent
 	 */
-	public OSGiBundle(BundleContext bc, PackageAdmin admin, StartLevel sl,
-			Bundle b) {
+	public OSGiBundle(BundleContext bc, PackageAdmin admin, StartLevel sl, Bundle b) {
 		this.bc = bc;
 		this.admin = admin;
 		this.sl = sl;
@@ -278,9 +271,8 @@ public class OSGiBundle {
 	 * @return the Tabular data which represents the list of bundles
 	 */
 	public static TabularData tableFrom(ArrayList<OSGiBundle> bundles, int mask) {
-		TabularDataSupport table = new TabularDataSupport(
-				Item.tabularType("BUNDLES", "A list of bundles",
-						OSGiBundle.computeBundleType(mask), new String[] { BundleStateMBean.IDENTIFIER }));
+		TabularDataSupport table = new TabularDataSupport(Item.tabularType("BUNDLES", "A list of bundles", 
+				OSGiBundle.computeBundleType(mask), new String[] { BundleStateMBean.IDENTIFIER }));
 		for (OSGiBundle bundle : bundles) {
 			table.put(bundle.asCompositeData(mask));
 		}
@@ -350,8 +342,7 @@ public class OSGiBundle {
 		bundleTypes.add(BundleStateMBean.REQUIRED_BUNDLES_ITEM);
 		}
 
-		CompositeType currentCompositeType = Item.compositeType("BUNDLE",
-				"This type encapsulates OSGi bundles",bundleTypes.toArray(new Item[]{}));
+		CompositeType currentCompositeType = Item.compositeType("BUNDLE", "This type encapsulates OSGi bundles",bundleTypes.toArray(new Item[]{}));
 		return currentCompositeType;
 	}
 
@@ -364,8 +355,7 @@ public class OSGiBundle {
 	 */
 	@SuppressWarnings("unchecked")
 	public static TabularData headerTable(Bundle b) {
-		TabularDataSupport table = new TabularDataSupport(
-				BundleStateMBean.HEADERS_TYPE);
+		TabularDataSupport table = new TabularDataSupport(BundleStateMBean.HEADERS_TYPE);
 		Dictionary map = b.getHeaders();
 		for (Enumeration headers = map.keys(); headers.hasMoreElements();) {
 			String key = (String) headers.nextElement();
@@ -381,8 +371,7 @@ public class OSGiBundle {
 	 * @return the bundle headers
 	 */
 	public static TabularData headerTable(Map<String, String> headers) {
-		TabularDataSupport table = new TabularDataSupport(
-				BundleStateMBean.HEADERS_TYPE);
+		TabularDataSupport table = new TabularDataSupport(BundleStateMBean.HEADERS_TYPE);
 		for (Map.Entry<String, String> entry : headers.entrySet()) {
 			table.put(headerData(entry.getKey(), entry.getValue()));
 		}
@@ -395,11 +384,9 @@ public class OSGiBundle {
 		itemValues[1] = value;
 
 		try {
-			return new CompositeDataSupport(BundleStateMBean.HEADER_TYPE,
-					HEADER_PROPERTY_ITEM_NAMES, itemValues);
+			return new CompositeDataSupport(BundleStateMBean.HEADER_TYPE, HEADER_PROPERTY_ITEM_NAMES, itemValues);
 		} catch (OpenDataException e) {
-			throw new IllegalStateException(
-					"Cannot form bundle header open data", e);
+			throw new IllegalStateException("Cannot form bundle header open data", e);
 		}
 	}
 
@@ -446,12 +433,10 @@ public class OSGiBundle {
 		items.put(BundleStateMBean.FRAGMENT, isFragment());
 		}
 		if((mask | CustomBundleStateMBean.REGISTERED_SERVICES) == mask) {
-		items.put(BundleStateMBean.REGISTERED_SERVICES,
-				LongArrayFrom(getRegisteredServices()));
+		items.put(BundleStateMBean.REGISTERED_SERVICES, LongArrayFrom(getRegisteredServices()));
 		}
 		if((mask | CustomBundleStateMBean.SERVICES_IN_USE) == mask) {
-		items.put(BundleStateMBean.SERVICES_IN_USE,
-				LongArrayFrom(getServicesInUse()));
+		items.put(BundleStateMBean.SERVICES_IN_USE, LongArrayFrom(getServicesInUse()));
 		}
 		if((mask | CustomBundleStateMBean.HEADERS) == mask) {
 		items.put(BundleStateMBean.HEADERS, headerTable(getHeaders()));
@@ -469,12 +454,10 @@ public class OSGiBundle {
 		items.put(BundleStateMBean.HOSTS, LongArrayFrom(getHosts()));
 		}
 		if((mask | CustomBundleStateMBean.REQUIRING_BUNDLES) == mask) {
-		items.put(BundleStateMBean.REQUIRING_BUNDLES,
-				LongArrayFrom(getRequiringBundles()));
+		items.put(BundleStateMBean.REQUIRING_BUNDLES, LongArrayFrom(getRequiringBundles()));
 		}
 		if((mask | CustomBundleStateMBean.REQUIRED_BUNDLES) == mask) {
-		items.put(BundleStateMBean.REQUIRED_BUNDLES,
-				LongArrayFrom(getRequiredBundles()));
+		items.put(BundleStateMBean.REQUIRED_BUNDLES, LongArrayFrom(getRequiredBundles()));
 		}
 
 		try {
@@ -693,8 +676,7 @@ public class OSGiBundle {
 		Map<String, String> headers = new HashMap<String, String>();
 		Set<List<?>> keySet = (Set<List<?>>) data.keySet();
 		for (List<?> key : keySet) {
-			headers.put((String) key.get(0), (String) data.get(
-					new Object[] { key.get(0) }).get(VALUE));
+			headers.put((String) key.get(0), (String) data.get(new Object[] { key.get(0) }).get(VALUE));
 
 		}
 		return headers;

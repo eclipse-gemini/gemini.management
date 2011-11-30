@@ -41,15 +41,10 @@ public class PackageState implements PackageStateMBean {
 		this.admin = admin;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.osgi.jmx.core.PackageStateMBean#getExportingBundles(java.lang.String,
-	 * java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
-	public long[] getExportingBundles(String packageName, String version)
-			throws IOException {
+	public long[] getExportingBundles(String packageName, String version) throws IOException {
 		if (packageName == null) {
 			throw new IOException("Package name cannot be null");
 		}
@@ -61,8 +56,7 @@ public class PackageState implements PackageStateMBean {
 				throw new IOException("Invalid package version: " + version);
 			}
 		}
-		ExportedPackage[] exportedPackages = admin
-				.getExportedPackages(packageName);
+		ExportedPackage[] exportedPackages = admin.getExportedPackages(packageName);
 		if (exportedPackages == null) {
 			return new long[0];
 		}
@@ -80,15 +74,10 @@ public class PackageState implements PackageStateMBean {
 		return bundles;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.osgi.jmx.core.PackageStateMBean#getImportingBundles(java.lang.String,
-	 * java.lang.String, long)
+	/**
+	 * {@inheritDoc}
 	 */
-	public long[] getImportingBundles(String packageName, String version,
-			long exportingBundle) throws IOException {
+	public long[] getImportingBundles(String packageName, String version, long exportingBundle) throws IOException {
 		if (packageName == null) {
 			throw new IOException("Package name cannot be null");
 		}
@@ -100,14 +89,12 @@ public class PackageState implements PackageStateMBean {
 				throw new IOException("Invalid package version: " + version);
 			}
 		}
-		ExportedPackage[] exportedPackages = admin
-				.getExportedPackages(packageName);
+		ExportedPackage[] exportedPackages = admin.getExportedPackages(packageName);
 		if (exportedPackages == null) {
 			return new long[0];
 		}
 		for (ExportedPackage pkg : exportedPackages) {
-			if (pkg.getVersion().equals(v)
-					&& pkg.getExportingBundle().getBundleId() == exportingBundle) {
+			if (pkg.getVersion().equals(v) && pkg.getExportingBundle().getBundleId() == exportingBundle) {
 				Bundle[] bundles = pkg.getImportingBundles();
 				long[] ids = new long[bundles.length];
 				for (int i = 0; i < bundles.length; i++) {
@@ -119,10 +106,8 @@ public class PackageState implements PackageStateMBean {
 		return new long[0];
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.core.PackageStateMBean#listPackages()
+	/**
+	 * {@inheritDoc}
 	 */
 	public TabularData listPackages() {
 		Set<OSGiPackage> packages = new HashSet<OSGiPackage>();
@@ -137,15 +122,10 @@ public class PackageState implements PackageStateMBean {
 		return OSGiPackage.tableFrom(packages);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.osgi.jmx.core.PackageStateMBean#isRemovalPending(java.lang.String,
-	 * java.lang.String, long)
+	/**
+	 * {@inheritDoc}
 	 */
-	public boolean isRemovalPending(String packageName, String version,
-			long exportingBundle) throws IOException {
+	public boolean isRemovalPending(String packageName, String version, long exportingBundle) throws IOException {
 		if (packageName == null) {
 			throw new IOException("Package name cannot be null");
 		}
@@ -157,14 +137,12 @@ public class PackageState implements PackageStateMBean {
 				throw new IOException("Invalid package version: " + version);
 			}
 		}
-		ExportedPackage[] exportedPackages = admin
-				.getExportedPackages(packageName);
+		ExportedPackage[] exportedPackages = admin.getExportedPackages(packageName);
 		if (exportedPackages == null) {
 			return false;
 		}
 		for (ExportedPackage pkg : exportedPackages) {
-			if (pkg.getVersion().equals(v)
-					&& pkg.getExportingBundle().getBundleId() == exportingBundle) {
+			if (pkg.getVersion().equals(v) && pkg.getExportingBundle().getBundleId() == exportingBundle) {
 				return pkg.isRemovalPending();
 			}
 		}

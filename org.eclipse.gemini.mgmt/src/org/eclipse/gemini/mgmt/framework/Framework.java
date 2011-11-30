@@ -42,28 +42,22 @@ public class Framework implements FrameworkMBean {
 		this.sl = sl;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.core.FrameworkMBean#getFrameworkStartLevel()
+	/**
+	 * {@inheritDoc}
 	 */
 	public int getFrameworkStartLevel() throws IOException {
 		return sl.getStartLevel();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.core.FrameworkMBean#getInitialBundleStartLevel()
+	/**
+	 * {@inheritDoc}
 	 */
 	public int getInitialBundleStartLevel() throws IOException {
 		return sl.getInitialBundleStartLevel();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.core.FrameworkMBean#installBundle(java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
 	public long installBundle(String location) throws IOException {
 		try {
@@ -73,14 +67,10 @@ public class Framework implements FrameworkMBean {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.core.FrameworkMBean#installBundle(java.lang.String,
-	 * java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
-	public long installBundleFromURL(String location, String url)
-			throws IOException {
+	public long installBundleFromURL(String location, String url) throws IOException {
 		InputStream is = null;
 		try {
 			is = new URL(url).openStream();
@@ -97,10 +87,8 @@ public class Framework implements FrameworkMBean {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.core.FrameworkMBean#installBundles(java.lang.String[])
+	/**
+	 * {@inheritDoc}
 	 */
 	public CompositeData installBundles(String[] locations) throws IOException {
 		if (locations == null) {
@@ -114,23 +102,17 @@ public class Framework implements FrameworkMBean {
 				long[] completed = new long[i];
 				System.arraycopy(ids, 0, completed, 0, completed.length);
 				String[] remaining = new String[locations.length - i - 1];
-				System.arraycopy(locations, i + 1, remaining, 0,
-						remaining.length);
-				return new BundleBatchInstallResult(e.toString(), completed,
-						locations[i], remaining).asCompositeData();
+				System.arraycopy(locations, i + 1, remaining, 0, remaining.length);
+				return new BundleBatchInstallResult(e.toString(), completed, locations[i], remaining).asCompositeData();
 			}
 		}
 		return new BundleBatchInstallResult(ids).asCompositeData();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.core.FrameworkMBean#installBundles(java.lang.String[],
-	 * java.lang.String[])
+	/**
+	 * {@inheritDoc}
 	 */
-	public CompositeData installBundlesFromURL(String[] locations, String[] urls)
-			throws IOException {
+	public CompositeData installBundlesFromURL(String[] locations, String[] urls) throws IOException {
 		if (locations == null) {
 			throw new IOException("locations must not be null");
 		}
@@ -147,10 +129,8 @@ public class Framework implements FrameworkMBean {
 				long[] completed = new long[i];
 				System.arraycopy(ids, 0, completed, 0, completed.length);
 				String[] remaining = new String[locations.length - i - 1];
-				System.arraycopy(locations, i + 1, remaining, 0,
-						remaining.length);
-				return new BundleBatchInstallResult(e.toString(), completed,
-						locations[i], remaining).asCompositeData();
+				System.arraycopy(locations, i + 1, remaining, 0, remaining.length);
+				return new BundleBatchInstallResult(e.toString(), completed, locations[i], remaining).asCompositeData();
 			} finally {
 				if (is != null) {
 					try {
@@ -163,19 +143,15 @@ public class Framework implements FrameworkMBean {
 		return new BundleBatchInstallResult(ids).asCompositeData();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.core.FrameworkMBean#refreshPackages(long)
+	/**
+	 * {@inheritDoc}
 	 */
 	public void refreshBundle(long bundleIdentifier) throws IOException {
 		admin.refreshPackages(new Bundle[] { bundle(bundleIdentifier) });
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.core.FrameworkMBean#refreshPackages(long[])
+	/**
+	 * {@inheritDoc}
 	 */
 	public void refreshBundles(long[] bundleIdentifiers) throws IOException {
 		Bundle[] bundles = null;
@@ -186,8 +162,7 @@ public class Framework implements FrameworkMBean {
 				try {
 					bundles[i] = bundle(bundleIdentifiers[i]);
 				} catch (Throwable e) {
-					IOException iox = new IOException(
-							"Unable to refresh packages");
+					IOException iox = new IOException("Unable to refresh packages");
 					iox.initCause(e);
 					throw iox;
 				}
@@ -202,10 +177,8 @@ public class Framework implements FrameworkMBean {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.core.FrameworkMBean#resolveBundle(long)
+	/**
+	 * {@inheritDoc}
 	 */
 	public boolean resolveBundle(long bundleIdentifier) throws IOException {
 		return admin.resolveBundles(new Bundle[] { bundle(bundleIdentifier) });
@@ -227,10 +200,8 @@ public class Framework implements FrameworkMBean {
 		return admin.resolveBundles(bundles);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.core.FrameworkMBean#restartFramework()
+	/**
+	 * {@inheritDoc}
 	 */
 	public void restartFramework() throws IOException {
 		try {
@@ -240,13 +211,10 @@ public class Framework implements FrameworkMBean {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.core.FrameworkMBean#setBundleStartLevel(long, int)
+	/**
+	 * {@inheritDoc}
 	 */
-	public void setBundleStartLevel(long bundleIdentifier, int newlevel)
-			throws IOException {
+	public void setBundleStartLevel(long bundleIdentifier, int newlevel) throws IOException {
 		try {
 			sl.setBundleStartLevel(bundle(bundleIdentifier), newlevel);
 		} catch (Throwable e) {
@@ -256,13 +224,10 @@ public class Framework implements FrameworkMBean {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.core.FrameworkMBean#setBundleStartLevels(long[], int[])
+	/**
+	 * {@inheritDoc}
 	 */
-	public CompositeData setBundleStartLevels(long[] bundleIdentifiers,
-			int[] newlevels) throws IOException {
+	public CompositeData setBundleStartLevels(long[] bundleIdentifiers, int[] newlevels) throws IOException {
 		if (bundleIdentifiers == null) {
 			throw new IOException("Bundle identifiers must not be null");
 		}
@@ -271,26 +236,20 @@ public class Framework implements FrameworkMBean {
 		}
 		for (int i = 0; i < bundleIdentifiers.length; i++) {
 			try {
-				sl.setBundleStartLevel(bundle(bundleIdentifiers[i]),
-						newlevels[i]);
+				sl.setBundleStartLevel(bundle(bundleIdentifiers[i]), newlevels[i]);
 			} catch (Throwable e) {
 				long[] completed = new long[i];
-				System.arraycopy(bundleIdentifiers, 0, completed, 0,
-						completed.length);
+				System.arraycopy(bundleIdentifiers, 0, completed, 0, completed.length);
 				long[] remaining = new long[bundleIdentifiers.length - i - 1];
-				System.arraycopy(bundleIdentifiers, i + 1, remaining, 0,
-						remaining.length);
-				return new BundleBatchActionResult(e.toString(), completed,
-						bundleIdentifiers[i], remaining).asCompositeData();
+				System.arraycopy(bundleIdentifiers, i + 1, remaining, 0, remaining.length);
+				return new BundleBatchActionResult(e.toString(), completed, bundleIdentifiers[i], remaining).asCompositeData();
 			}
 		}
 		return new BundleBatchActionResult().asCompositeData();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.core.FrameworkMBean#setFrameworkStartLevel(int)
+	/**
+	 * {@inheritDoc}
 	 */
 	public void setFrameworkStartLevel(int newlevel) throws IOException {
 		try {
@@ -302,10 +261,8 @@ public class Framework implements FrameworkMBean {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.core.FrameworkMBean#setInitialBundleStartLevel(int)
+	/**
+	 * {@inheritDoc}
 	 */
 	public void setInitialBundleStartLevel(int newlevel) throws IOException {
 		try {
@@ -317,24 +274,19 @@ public class Framework implements FrameworkMBean {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.core.FrameworkMBean#shutdownFramework()
+	/**
+	 * {@inheritDoc}
 	 */
 	public void shutdownFramework() throws IOException {
 		try {
 			bundle(0).stop();
 		} catch (Throwable be) {
-			throw new IOException(
-					"Shutting down not implemented in this framework: " + be);
+			throw new IOException("Shutting down not implemented in this framework: " + be);
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.core.FrameworkMBean#startBundle(long)
+	/**
+	 * {@inheritDoc}
 	 */
 	public void startBundle(long bundleIdentifier) throws IOException {
 		try {
@@ -344,13 +296,10 @@ public class Framework implements FrameworkMBean {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.core.FrameworkMBean#startBundles(long[])
+	/**
+	 * {@inheritDoc}
 	 */
-	public CompositeData startBundles(long[] bundleIdentifiers)
-			throws IOException {
+	public CompositeData startBundles(long[] bundleIdentifiers) throws IOException {
 		if (bundleIdentifiers == null) {
 			throw new IOException("Bundle identifiers must not be null");
 		}
@@ -359,22 +308,17 @@ public class Framework implements FrameworkMBean {
 				bundle(bundleIdentifiers[i]).start();
 			} catch (Throwable e) {
 				long[] completed = new long[i];
-				System.arraycopy(bundleIdentifiers, 0, completed, 0,
-						completed.length);
+				System.arraycopy(bundleIdentifiers, 0, completed, 0, completed.length);
 				long[] remaining = new long[bundleIdentifiers.length - i - 1];
-				System.arraycopy(bundleIdentifiers, i + 1, remaining, 0,
-						remaining.length);
-				return new BundleBatchActionResult(e.toString(), completed,
-						bundleIdentifiers[i], remaining).asCompositeData();
+				System.arraycopy(bundleIdentifiers, i + 1, remaining, 0, remaining.length);
+				return new BundleBatchActionResult(e.toString(), completed, bundleIdentifiers[i], remaining).asCompositeData();
 			}
 		}
 		return new BundleBatchActionResult().asCompositeData();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.core.FrameworkMBean#stopBundle(long)
+	/**
+	 * {@inheritDoc}
 	 */
 	public void stopBundle(long bundleIdentifier) throws IOException {
 		try {
@@ -384,13 +328,10 @@ public class Framework implements FrameworkMBean {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.core.FrameworkMBean#stopBundles(long[])
+	/**
+	 * {@inheritDoc}
 	 */
-	public CompositeData stopBundles(long[] bundleIdentifiers)
-			throws IOException {
+	public CompositeData stopBundles(long[] bundleIdentifiers) throws IOException {
 		if (bundleIdentifiers == null) {
 			throw new IOException("Bundle identifiers must not be null");
 		}
@@ -399,22 +340,17 @@ public class Framework implements FrameworkMBean {
 				bundle(bundleIdentifiers[i]).stop();
 			} catch (Throwable e) {
 				long[] completed = new long[i];
-				System.arraycopy(bundleIdentifiers, 0, completed, 0,
-						completed.length);
+				System.arraycopy(bundleIdentifiers, 0, completed, 0, completed.length);
 				long[] remaining = new long[bundleIdentifiers.length - i - 1];
-				System.arraycopy(bundleIdentifiers, i + 1, remaining, 0,
-						remaining.length);
-				return new BundleBatchActionResult(e.toString(), completed,
-						bundleIdentifiers[i], remaining).asCompositeData();
+				System.arraycopy(bundleIdentifiers, i + 1, remaining, 0, remaining.length);
+				return new BundleBatchActionResult(e.toString(), completed, bundleIdentifiers[i], remaining).asCompositeData();
 			}
 		}
 		return new BundleBatchActionResult().asCompositeData();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.core.FrameworkMBean#uninstallBundle(long)
+	/**
+	 * {@inheritDoc}
 	 */
 	public void uninstallBundle(long bundleIdentifier) throws IOException {
 		try {
@@ -424,13 +360,10 @@ public class Framework implements FrameworkMBean {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.core.FrameworkMBean#uninstallBundles(long[])
+	/**
+	 * {@inheritDoc}
 	 */
-	public CompositeData uninstallBundles(long[] bundleIdentifiers)
-			throws IOException {
+	public CompositeData uninstallBundles(long[] bundleIdentifiers) throws IOException {
 		if (bundleIdentifiers == null) {
 			throw new IOException("Bundle identifiers must not be null");
 		}
@@ -439,22 +372,17 @@ public class Framework implements FrameworkMBean {
 				bundle(bundleIdentifiers[i]).uninstall();
 			} catch (Throwable e) {
 				long[] completed = new long[i];
-				System.arraycopy(bundleIdentifiers, 0, completed, 0,
-						completed.length);
+				System.arraycopy(bundleIdentifiers, 0, completed, 0, completed.length);
 				long[] remaining = new long[bundleIdentifiers.length - i - 1];
-				System.arraycopy(bundleIdentifiers, i + 1, remaining, 0,
-						remaining.length);
-				return new BundleBatchActionResult(e.toString(), completed,
-						bundleIdentifiers[i], remaining).asCompositeData();
+				System.arraycopy(bundleIdentifiers, i + 1, remaining, 0, remaining.length);
+				return new BundleBatchActionResult(e.toString(), completed, bundleIdentifiers[i], remaining).asCompositeData();
 			}
 		}
 		return new BundleBatchActionResult().asCompositeData();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.core.FrameworkMBean#updateBundle(long)
+	/**
+	 * {@inheritDoc}
 	 */
 	public void updateBundle(long bundleIdentifier) throws IOException {
 		try {
@@ -464,14 +392,10 @@ public class Framework implements FrameworkMBean {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.core.FrameworkMBean#updateBundleFromUrl(long,
-	 * java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
-	public void updateBundleFromURL(long bundleIdentifier, String url)
-			throws IOException {
+	public void updateBundleFromURL(long bundleIdentifier, String url) throws IOException {
 		InputStream is = null;
 		try {
 			is = new URL(url).openStream();
@@ -488,13 +412,10 @@ public class Framework implements FrameworkMBean {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.core.FrameworkMBean#updateBundles(long[])
+	/**
+	 * {@inheritDoc}
 	 */
-	public CompositeData updateBundles(long[] bundleIdentifiers)
-			throws IOException {
+	public CompositeData updateBundles(long[] bundleIdentifiers) throws IOException {
 		if (bundleIdentifiers == null) {
 			throw new IOException("Bundle identifiers must not be null");
 		}
@@ -503,26 +424,19 @@ public class Framework implements FrameworkMBean {
 				bundle(bundleIdentifiers[i]).update();
 			} catch (Throwable e) {
 				long[] completed = new long[i];
-				System.arraycopy(bundleIdentifiers, 0, completed, 0,
-						completed.length);
+				System.arraycopy(bundleIdentifiers, 0, completed, 0, completed.length);
 				long[] remaining = new long[bundleIdentifiers.length - i - 1];
-				System.arraycopy(bundleIdentifiers, i + 1, remaining, 0,
-						remaining.length);
-				return new BundleBatchActionResult(e.toString(), completed,
-						bundleIdentifiers[i], remaining).asCompositeData();
+				System.arraycopy(bundleIdentifiers, i + 1, remaining, 0, remaining.length);
+				return new BundleBatchActionResult(e.toString(), completed, bundleIdentifiers[i], remaining).asCompositeData();
 			}
 		}
 		return new BundleBatchActionResult().asCompositeData();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.core.FrameworkMBean#updateBundlesFromUrls(long[],
-	 * java.lang.String[])
+	/**
+	 * {@inheritDoc}
 	 */
-	public CompositeData updateBundlesFromURL(long[] bundleIdentifiers,
-			String[] urls) throws IOException {
+	public CompositeData updateBundlesFromURL(long[] bundleIdentifiers, String[] urls) throws IOException {
 		if (bundleIdentifiers == null) {
 			throw new IOException("Bundle identifiers must not be null");
 		}
@@ -533,13 +447,10 @@ public class Framework implements FrameworkMBean {
 				bundle(bundleIdentifiers[i]).update(is);
 			} catch (Throwable e) {
 				long[] completed = new long[i];
-				System.arraycopy(bundleIdentifiers, 0, completed, 0,
-						completed.length);
+				System.arraycopy(bundleIdentifiers, 0, completed, 0, completed.length);
 				long[] remaining = new long[bundleIdentifiers.length - i - 1];
-				System.arraycopy(bundleIdentifiers, i + 1, remaining, 0,
-						remaining.length);
-				return new BundleBatchActionResult(e.toString(), completed,
-						bundleIdentifiers[i], remaining).asCompositeData();
+				System.arraycopy(bundleIdentifiers, i + 1, remaining, 0, remaining.length);
+				return new BundleBatchActionResult(e.toString(), completed, bundleIdentifiers[i], remaining).asCompositeData();
 			} finally {
 				if (is != null) {
 					try {
@@ -552,10 +463,8 @@ public class Framework implements FrameworkMBean {
 		return new BundleBatchActionResult().asCompositeData();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.core.FrameworkMBean#updateFramework()
+	/**
+	 * {@inheritDoc}
 	 */
 	public void updateFramework() throws IOException {
 		try {

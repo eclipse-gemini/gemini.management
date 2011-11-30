@@ -72,9 +72,9 @@ public class OSGiService {
 	 */
 	public OSGiService(CompositeData data) {
 		this((Long) data.get(ServiceStateMBean.IDENTIFIER), 
-				(String[]) data.get(ServiceStateMBean.OBJECT_CLASS), 
-				(Long) data.get(ServiceStateMBean.BUNDLE_IDENTIFIER),
-				longArrayFrom((Long[]) data.get(ServiceStateMBean.USING_BUNDLES)));
+			 (String[]) data.get(ServiceStateMBean.OBJECT_CLASS), 
+			 (Long) data.get(ServiceStateMBean.BUNDLE_IDENTIFIER), 
+			 longArrayFrom((Long[]) data.get(ServiceStateMBean.USING_BUNDLES)));
 	}
 
 	/**
@@ -102,10 +102,8 @@ public class OSGiService {
 	 */
 	@SuppressWarnings("boxing")
 	public OSGiService(ServiceReference<?> reference) {
-		this((Long) reference.getProperty(SERVICE_ID), 
-				(String[]) reference.getProperty(OBJECTCLASS), 
-				reference.getBundle().getBundleId(),
-				Util.bundleIds(reference.getUsingBundles()));
+		this((Long) reference.getProperty(SERVICE_ID), (String[]) reference.getProperty(OBJECTCLASS), 
+			 reference.getBundle().getBundleId(), Util.bundleIds(reference.getUsingBundles()));
 	}
 
 	/**

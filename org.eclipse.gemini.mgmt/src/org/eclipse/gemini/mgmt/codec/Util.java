@@ -88,16 +88,14 @@ public class Util {
 				if (importing != null) {
 					for (Bundle bundle : importing) {
 						if (bundle == b) {
-							dependencies.add(pkg.getExportingBundle()
-									.getBundleId());
+							dependencies.add(pkg.getExportingBundle().getBundleId());
 							break;
 						}
 					}
 				}
 			}
 		}
-		return longArrayFrom(dependencies
-				.toArray(new Long[dependencies.size()]));
+		return longArrayFrom(dependencies.toArray(new Long[dependencies.size()]));
 	}
 
 	/**
@@ -108,8 +106,7 @@ public class Util {
 	 * @param admin
 	 * @return the the bundle ids of the bundles requireing the given bundles
 	 */
-	public static long[] getBundlesRequiring(Bundle b, BundleContext bc,
-			PackageAdmin admin) {
+	public static long[] getBundlesRequiring(Bundle b, BundleContext bc, PackageAdmin admin) {
 		Bundle[] all = bc.getBundles();
 		ArrayList<Long> requiring = new ArrayList<Long>();
 		for (Bundle anAll : all) {
@@ -137,8 +134,7 @@ public class Util {
 	 * @param admin
 	 * @return the string representation of the exported packages of the bundle
 	 */
-	public static String[] getBundleExportedPackages(Bundle b,
-			PackageAdmin admin) {
+	public static String[] getBundleExportedPackages(Bundle b, PackageAdmin admin) {
 		ArrayList<String> packages = new ArrayList<String>();
 		ExportedPackage[] exportedPackages = admin.getExportedPackages(b);
 		if (exportedPackages == null) {
@@ -193,8 +189,7 @@ public class Util {
 	 * @param admin
 	 * @return the string representation of the packages imported by a bundle
 	 */
-	public static String[] getBundleImportedPackages(Bundle b,
-			BundleContext bc, PackageAdmin admin) {
+	public static String[] getBundleImportedPackages(Bundle b, BundleContext bc, PackageAdmin admin) {
 		ArrayList<String> imported = new ArrayList<String>();
 		Bundle[] allBundles = bc.getBundles();
 		for (Bundle bundle : allBundles) {
@@ -256,14 +251,12 @@ public class Util {
 	 * @param admin
 	 * @return the required bundle of a bundle
 	 */
-	public static RequiredBundle getRequiredBundle(Bundle bundle,
-			BundleContext bc, PackageAdmin admin) {
+	public static RequiredBundle getRequiredBundle(Bundle bundle, BundleContext bc, PackageAdmin admin) {
 		Bundle[] all = bc.getBundles();
 		for (Bundle anAll : all) {
 			String symbolicName = anAll.getSymbolicName();
 			if (symbolicName != null) {
-				RequiredBundle[] requiring = admin
-						.getRequiredBundles(symbolicName);
+				RequiredBundle[] requiring = admin.getRequiredBundles(symbolicName);
 				if (requiring == null) {
 					continue;
 				}
@@ -295,10 +288,8 @@ public class Util {
 	 * @param sl
 	 * @return true if the bundle has been persitently started
 	 */
-	public static boolean isBundlePersistentlyStarted(Bundle bundle,
-			StartLevel sl) {
-		return bundle.getBundleId() == 0
-				|| sl.isBundlePersistentlyStarted(bundle);
+	public static boolean isBundlePersistentlyStarted(Bundle bundle, StartLevel sl) {
+		return bundle.getBundleId() == 0 || sl.isBundlePersistentlyStarted(bundle);
 	}
 
 	/**
@@ -309,8 +300,7 @@ public class Util {
 	 * @param admin
 	 * @return true if the bundle is required
 	 */
-	public static boolean isBundleRequired(Bundle bundle, BundleContext bc,
-			PackageAdmin admin) {
+	public static boolean isBundleRequired(Bundle bundle, BundleContext bc, PackageAdmin admin) {
 		return getRequiredBundle(bundle, bc, admin) != null;
 	}
 
@@ -322,8 +312,7 @@ public class Util {
 	 * @param admin
 	 * @return true if the bundle is pending removal
 	 */
-	public static boolean isRequiredBundleRemovalPending(Bundle bundle,
-			BundleContext bc, PackageAdmin admin) {
+	public static boolean isRequiredBundleRemovalPending(Bundle bundle, BundleContext bc, PackageAdmin admin) {
 		RequiredBundle r = getRequiredBundle(bundle, bc, admin);
 		return r != null && r.isRemovalPending();
 	}
@@ -399,8 +388,7 @@ public class Util {
 	 */
 	public static ArrayType STRING_ARRAY_TYPE;
 
-	private static final Logger log = Logger.getLogger(Util.class
-			.getCanonicalName());
+	private static final Logger log = Logger.getLogger(Util.class.getCanonicalName());
 
 	static {
 		try {

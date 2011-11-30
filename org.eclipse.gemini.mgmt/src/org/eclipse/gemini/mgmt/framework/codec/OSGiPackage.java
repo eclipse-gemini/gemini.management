@@ -74,13 +74,10 @@ public class OSGiPackage {
 	 */
 	@SuppressWarnings("boxing")
 	public OSGiPackage(CompositeData data) {
-		this((String) data.get(PackageStateMBean.NAME), (String) data
-				.get(PackageStateMBean.VERSION), (Boolean) data
-				.get(PackageStateMBean.REMOVAL_PENDING),
-				longArrayFrom((Long[]) data
-						.get(PackageStateMBean.EXPORTING_BUNDLES)),
-				longArrayFrom((Long[]) data
-						.get(PackageStateMBean.IMPORTING_BUNDLES)));
+		this((String) data.get(PackageStateMBean.NAME), (String) data.get(PackageStateMBean.VERSION), 
+			 (Boolean) data.get(PackageStateMBean.REMOVAL_PENDING),
+			 longArrayFrom((Long[]) data.get(PackageStateMBean.EXPORTING_BUNDLES)),
+			 longArrayFrom((Long[]) data.get(PackageStateMBean.IMPORTING_BUNDLES)));
 	}
 
 	/**
@@ -90,10 +87,8 @@ public class OSGiPackage {
 	 *            - the <link>ExporetedPackage</link>
 	 */
 	public OSGiPackage(ExportedPackage pkg) {
-		this(pkg.getName(), pkg.getVersion().toString(),
-				pkg.isRemovalPending(), new long[] { pkg.getExportingBundle()
-						.getBundleId() }, Util.bundleIds(pkg
-						.getImportingBundles()));
+		this(pkg.getName(), pkg.getVersion().toString(), pkg.isRemovalPending(), 
+				new long[] { pkg.getExportingBundle().getBundleId() }, Util.bundleIds(pkg.getImportingBundles()));
 	}
 
 	/**
@@ -105,8 +100,7 @@ public class OSGiPackage {
 	 * @param exportingBundles
 	 * @param importingBundles
 	 */
-	public OSGiPackage(String name, String version, boolean removalPending,
-			long[] exportingBundles, long[] importingBundles) {
+	public OSGiPackage(String name, String version, boolean removalPending, long[] exportingBundles, long[] importingBundles) {
 		this.name = name;
 		this.version = version;
 		this.removalPending = removalPending;
@@ -121,8 +115,7 @@ public class OSGiPackage {
 	 * @return the tabular data representation of the OSGPacakges
 	 */
 	public static TabularData tableFrom(Set<OSGiPackage> packages) {
-		TabularDataSupport table = new TabularDataSupport(
-				PackageStateMBean.PACKAGES_TYPE);
+		TabularDataSupport table = new TabularDataSupport(PackageStateMBean.PACKAGES_TYPE);
 		for (OSGiPackage pkg : packages) {
 			table.put(pkg.asCompositeData());
 		}
@@ -140,14 +133,11 @@ public class OSGiPackage {
 		items.put(PackageStateMBean.NAME, name);
 		items.put(PackageStateMBean.VERSION, version);
 		items.put(PackageStateMBean.REMOVAL_PENDING, removalPending);
-		items.put(PackageStateMBean.EXPORTING_BUNDLES,
-				LongArrayFrom(exportingBundles));
-		items.put(PackageStateMBean.IMPORTING_BUNDLES,
-				LongArrayFrom(importingBundles));
+		items.put(PackageStateMBean.EXPORTING_BUNDLES, LongArrayFrom(exportingBundles));
+		items.put(PackageStateMBean.IMPORTING_BUNDLES, LongArrayFrom(importingBundles));
 
 		try {
-			return new CompositeDataSupport(PackageStateMBean.PACKAGE_TYPE,
-					items);
+			return new CompositeDataSupport(PackageStateMBean.PACKAGE_TYPE, items);
 		} catch (OpenDataException e) {
 			throw new IllegalStateException("Cannot form package open data", e);
 		}

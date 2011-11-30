@@ -112,7 +112,7 @@ public class OSGiProperties {
 	 * @param ref
 	 * @return the tabular data representing the service reference properties
 	 */
-	public static TabularData tableFrom(ServiceReference ref) {
+	public static TabularData tableFrom(ServiceReference<?> ref) {
 		Hashtable<String, Object> props = new Hashtable<String, Object>();
 		for (String key : ref.getPropertyKeys()) {
 			props.put(key, ref.getProperty(key));
@@ -133,7 +133,7 @@ public class OSGiProperties {
 		if (clazz.isArray()) {
 			return encodeArray(key, value, clazz.getComponentType());
 		} else if (clazz.equals(Vector.class)) {
-			return encodeVector(key, (Vector) value);
+			return encodeVector(key, (Vector<?>) value);
 		}
 		return propertyData(key, value.toString(), typeOf(clazz));
 	}
@@ -150,8 +150,7 @@ public class OSGiProperties {
 			return props;
 		}
 		for (CompositeData data : (Collection<CompositeData>) table.values()) {
-			props.put(data.get(KEY), parse((String) data.get(VALUE),
-					(String) data.get(TYPE)));
+			props.put(data.get(KEY), parse((String) data.get(VALUE), (String) data.get(TYPE)));
 		}
 
 		return props;
@@ -165,8 +164,7 @@ public class OSGiProperties {
 	 * @param componentClazz
 	 * @return the composite data representation
 	 */
-	protected static CompositeData encodeArray(String key, Object value,
-			Class<?> componentClazz) {
+	protected static CompositeData encodeArray(String key, Object value, Class<?> componentClazz) {
 		String type = typeOf(componentClazz);
 		StringBuffer buf = new StringBuffer();
 		if (Integer.TYPE.equals(componentClazz)) {
@@ -329,8 +327,7 @@ public class OSGiProperties {
 	 * @param type
 	 * @return the composite data representation of the key/value pair
 	 */
-	protected static CompositeData propertyData(String key, String value,
-			String type) {
+	protected static CompositeData propertyData(String key, String value, String type) {
 		Object[] itemValues = new Object[PROPERTIES.length];
 		itemValues[0] = key;
 		itemValues[1] = value;
@@ -377,16 +374,13 @@ public class OSGiProperties {
 	 */
 	protected static Object parseArray(String value, StringTokenizer tokens) {
 		if (!tokens.hasMoreTokens()) {
-			throw new IllegalArgumentException(
-					"Expecting <of> token in Array type");
+			throw new IllegalArgumentException("Expecting <of> token in Array type");
 		}
 		if (!"of".equals(tokens.nextToken())) {
-			throw new IllegalArgumentException(
-					"Expecting <of> token in Array type");
+			throw new IllegalArgumentException("Expecting <of> token in Array type");
 		}
 		if (!tokens.hasMoreTokens()) {
-			throw new IllegalArgumentException(
-					"Expecting <primitive>|<scalar> token in Array type");
+			throw new IllegalArgumentException("Expecting <primitive>|<scalar> token in Array type");
 		}
 		String type = tokens.nextToken();
 		if (SCALAR_TYPES.contains(type)) {
@@ -394,9 +388,7 @@ public class OSGiProperties {
 		} else if (PRIMITIVE_TYPES.contains(type)) {
 			return parsePrimitiveArray(value, type);
 		} else {
-			throw new IllegalArgumentException(
-					"Expecting <scalar>|<primitive> type token in Array type: "
-							+ type);
+			throw new IllegalArgumentException("Expecting <scalar>|<primitive> type token in Array type: " + type);
 		}
 	}
 
@@ -534,23 +526,19 @@ public class OSGiProperties {
 	 */
 	protected static Object parseVector(String value, StringTokenizer tokens) {
 		if (!tokens.hasMoreTokens()) {
-			throw new IllegalArgumentException(
-					"Expecting <of> token in Vector type");
+			throw new IllegalArgumentException("Expecting <of> token in Vector type");
 		}
 		if (!tokens.nextElement().equals("of")) {
-			throw new IllegalArgumentException(
-					"Expecting <of> token in Vector type");
+			throw new IllegalArgumentException("Expecting <of> token in Vector type");
 		}
 		if (!tokens.hasMoreTokens()) {
-			throw new IllegalArgumentException(
-					"Expecting <scalar> token in Vector type");
+			throw new IllegalArgumentException("Expecting <scalar> token in Vector type");
 		}
 		String type = tokens.nextToken();
 		StringTokenizer values = new StringTokenizer(value, ",");
 		Vector<Object> vector = new Vector<Object>();
 		if (!SCALAR_TYPES.contains(type)) {
-			throw new IllegalArgumentException(
-					"Expecting <scalar> type token in Vector type: " + type);
+			throw new IllegalArgumentException("Expecting <scalar> type token in Vector type: " + type);
 		}
 		while (values.hasMoreTokens()) {
 			vector.add(parseScalar(values.nextToken().trim(), type));
@@ -559,11 +547,11 @@ public class OSGiProperties {
 	}
 
 	/**
-	 * Construct the scalar valre represented by the string
+	 * Construct the scalar value represented by the string
 	 * 
 	 * @param value
 	 * @param type
-	 * @return the scalar valre represented by the string
+	 * @return the scalar value represented by the string
 	 */
 	@SuppressWarnings("boxing")
 	protected static Object parseScalar(String value, String type) {
@@ -602,11 +590,9 @@ public class OSGiProperties {
 
 	private static TabularType createPropertyTableType() {
 		try {
-			return new TabularType("Properties", "The table of credentials",
-					PROPERTY, new String[] { KEY });
+			return new TabularType("Properties", "The table of credentials", PROPERTY, new String[] { KEY });
 		} catch (OpenDataException e) {
-			throw new IllegalStateException(
-					"Cannot form services table open data", e);
+			throw new IllegalStateException("Cannot form services table open data", e);
 		}
 	}
 
@@ -624,8 +610,7 @@ public class OSGiProperties {
 		itemDescriptions[2] = "The type of the value";
 
 		try {
-			return new CompositeType("Property", description, itemNames,
-					itemDescriptions, itemTypes);
+			return new CompositeType("Property", description, itemNames, itemDescriptions, itemTypes);
 		} catch (OpenDataException e) {
 			throw new IllegalStateException("Cannot form property open data", e);
 		}

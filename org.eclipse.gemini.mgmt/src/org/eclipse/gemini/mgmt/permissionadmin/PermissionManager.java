@@ -32,21 +32,15 @@ public class PermissionManager implements PermissionAdminMBean {
 		this.admin = admin;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.compendium.PermissionManagerMBean#listLocations()
+	/**
+	 * {@inheritDoc}
 	 */
 	public String[] listLocations() throws IOException {
 		return admin.getLocations();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.osgi.jmx.compendium.PermissionManagerMBean#getPermissions(java.lang
-	 * .String)
+	/**
+	 * {@inheritDoc}
 	 */
 	public String[] getPermissions(String location) throws IOException {
 		if (location == null) {
@@ -64,15 +58,10 @@ public class PermissionManager implements PermissionAdminMBean {
 		return encodedPermissions;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.osgi.jmx.compendium.PermissionManagerMBean#setDefaultPermissions(
-	 * java.lang.String[])
+	/**
+	 * {@inheritDoc}
 	 */
-	public void setDefaultPermissions(String[] encodedPermissions)
-			throws IOException {
+	public void setDefaultPermissions(String[] encodedPermissions) throws IOException {
 		if (encodedPermissions == null) {
 			throw new IOException("Encoded permissions must not be null");
 		}
@@ -82,8 +71,7 @@ public class PermissionManager implements PermissionAdminMBean {
 			try {
 				permissions[i] = new PermissionInfo(encodedPermission);
 			} catch (Throwable e) {
-				IOException iox = new IOException(
-						"Invalid encoded permission: " + encodedPermission);
+				IOException iox = new IOException("Invalid encoded permission: " + encodedPermission);
 				iox.initCause(e);
 				throw iox;
 			}
@@ -91,11 +79,8 @@ public class PermissionManager implements PermissionAdminMBean {
 		admin.setDefaultPermissions(permissions);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.osgi.jmx.compendium.PermissionManagerMBean#listDefaultPermissions()
+	/**
+	 * {@inheritDoc}
 	 */
 	public String[] listDefaultPermissions() throws IOException {
 		PermissionInfo[] permissions = admin.getDefaultPermissions();
@@ -110,15 +95,10 @@ public class PermissionManager implements PermissionAdminMBean {
 		return encodedPermissions;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.osgi.jmx.compendium.PermissionManagerMBean#setPermissions(java.lang
-	 * .String, java.lang.String[])
+	/**
+	 * {@inheritDoc}
 	 */
-	public void setPermissions(String location, String[] encodedPermissions)
-			throws IOException {
+	public void setPermissions(String location, String[] encodedPermissions) throws IOException {
 		if (location == null) {
 			throw new IOException("Location must not be null");
 		}
@@ -131,8 +111,7 @@ public class PermissionManager implements PermissionAdminMBean {
 			try {
 				permissions[i] = new PermissionInfo(encodedPermission);
 			} catch (Throwable e) {
-				IOException iox = new IOException(
-						"Invalid encoded permission: " + encodedPermission);
+				IOException iox = new IOException("Invalid encoded permission: " + encodedPermission);
 				iox.initCause(e);
 				throw iox;
 			}

@@ -37,12 +37,8 @@ public class Provisioning implements ProvisioningServiceMBean {
 		this.provisioning = provisioning;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.osgi.jmx.compendium.ProvisioningMBean#addInformation(java.lang.String
-	 * )
+	/**
+	 * {@inheritDoc}
 	 */
 	public void addInformationFromZip(String zipURL) throws IOException {
 		InputStream is = new URL(zipURL).openStream();
@@ -54,32 +50,22 @@ public class Provisioning implements ProvisioningServiceMBean {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.osgi.jmx.compendium.ProvisioningMBean#addInformation(javax.management
-	 * .openmbean.TabularData)
+	/**
+	 * {@inheritDoc}
 	 */
 	public void addInformation(TabularData info) throws IOException {
 		provisioning.addInformation(propertiesFrom(info));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.compendium.ProvisioningMBean#listInformation()
+	/**
+	 * {@inheritDoc}
 	 */
 	public TabularData listInformation() throws IOException {
 		return tableFrom(provisioning.getInformation());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.osgi.jmx.compendium.ProvisioningMBean#setInformation(javax.management
-	 * .openmbean.TabularData)
+	/**
+	 * {@inheritDoc}
 	 */
 	public void setInformation(TabularData info) throws IOException {
 		provisioning.setInformation(propertiesFrom(info));

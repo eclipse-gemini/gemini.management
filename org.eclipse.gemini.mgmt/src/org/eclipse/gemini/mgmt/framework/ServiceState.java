@@ -247,10 +247,8 @@ public class ServiceState extends Monitor implements ServiceStateMBean {
 	protected ServiceListener getServiceListener() {
 		return new AllServiceListener() {
 			public void serviceChanged(ServiceEvent serviceEvent) {
-				Notification notification = new Notification(
-						ServiceStateMBean.EVENT, objectName, sequenceNumber++);
-				notification.setUserData(new OSGiServiceEvent(serviceEvent)
-						.asCompositeData());
+				Notification notification = new Notification(ServiceStateMBean.EVENT, objectName, sequenceNumber++);
+				notification.setUserData(new OSGiServiceEvent(serviceEvent).asCompositeData());
 				sendNotification(notification);
 			}
 		};

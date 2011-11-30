@@ -26,17 +26,29 @@ import javax.management.ObjectName;
 abstract public class Monitor extends NotificationBroadcasterSupport implements
 		MBeanRegistration {
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public void postDeregister() {
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public void postRegister(Boolean registrationDone) {
 		addListener();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public void preDeregister() throws Exception {
 		removeListener();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public ObjectName preRegister(MBeanServer server, ObjectName name)
 			throws Exception {
 		objectName = name;
@@ -44,8 +56,14 @@ abstract public class Monitor extends NotificationBroadcasterSupport implements
 		return name;
 	}
 
+	/**
+	 * Add a listener for the monitored object 
+	 */
 	abstract protected void addListener();
 
+	/**
+	 * Remove the listener for the monitored object
+	 */
 	abstract protected void removeListener();
 
 	protected ObjectName objectName;

@@ -46,17 +46,15 @@ public class BundleState extends Monitor implements CustomBundleStateMBean {
 		this.admin = admin;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.core.BundleStateMBean#getBundles()
+	/**
+	 * {@inheritDoc}
 	 */
 	public TabularData listBundles() throws IOException {
 		return listBundles(CustomBundleStateMBean.DEFAULT);
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.gemini.mgmt.framework.CustomBundleStateMBean#listBundles(int)
+	/**
+	 * {@inheritDoc}
 	 */
 	public TabularData listBundles(int mask) throws IOException {
 		if (mask < 1 || mask > 1048575) {
@@ -75,14 +73,11 @@ public class BundleState extends Monitor implements CustomBundleStateMBean {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.core.BundleStateMBean#getExportedPackages()
+	/**
+	 * {@inheritDoc}
 	 */
 	public String[] getExportedPackages(long bundleId) throws IOException {
-		ExportedPackage[] packages = admin
-				.getExportedPackages(bundle(bundleId));
+		ExportedPackage[] packages = admin.getExportedPackages(bundle(bundleId));
 		if (packages == null) {
 			return new String[0];
 		}
@@ -93,28 +88,22 @@ public class BundleState extends Monitor implements CustomBundleStateMBean {
 		return ep;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.core.BundleStateMBean#getFragments()
+	/**
+	 * {@inheritDoc}
 	 */
 	public long[] getFragments(long bundleId) throws IOException {
 		return Util.getBundleFragments(bundle(bundleId), admin);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.core.BundleStateMBean#getHeaders(long)
+	/**
+	 * {@inheritDoc}
 	 */
 	public TabularData getHeaders(long bundleId) throws IOException {
 		return OSGiBundle.headerTable(bundle(bundleId));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.core.BundleStateMBean#getHosts(long)
+	/**
+	 * {@inheritDoc}
 	 */
 	public long[] getHosts(long fragment) throws IOException {
 		Bundle[] hosts = admin.getHosts(bundle(fragment));
@@ -124,126 +113,106 @@ public class BundleState extends Monitor implements CustomBundleStateMBean {
 		return Util.bundleIds(hosts);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.core.BundleStateMBean#getImportedPackages()
+	/**
+	 * {@inheritDoc}
 	 */
 	public String[] getImportedPackages(long bundleId) throws IOException {
 		return Util.getBundleImportedPackages(bundle(bundleId), bc, admin);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.core.BundleStateMBean#getLastModified(long)
+	/**
+	 * {@inheritDoc}
 	 */
 	public long getLastModified(long bundleId) throws IOException {
 		return bundle(bundleId).getLastModified();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.core.BundleStateMBean#getRegisteredServices()
+	/**
+	 * {@inheritDoc}
 	 */
 	public long[] getRegisteredServices(long bundleId) throws IOException {
 		return Util.serviceIds(bundle(bundleId).getRegisteredServices());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.core.BundleStateMBean#getRequiringBundles()
+	/**
+	 * {@inheritDoc}
 	 */
 	public long[] getRequiringBundles(long bundleIdentifier) throws IOException {
 		return Util.getBundlesRequiring(bundle(bundleIdentifier), bc, admin);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.core.BundleStateMBean#getServicesInUse()
+	/**
+	 * {@inheritDoc}
 	 */
 	public long[] getServicesInUse(long bundleIdentifier) throws IOException {
 		return Util.serviceIds(bundle(bundleIdentifier).getServicesInUse());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.core.BundleStateMBean#getStartLevel(long)
+	/**
+	 * {@inheritDoc}
 	 */
 	public int getStartLevel(long bundleId) throws IOException {
 		return sl.getBundleStartLevel(bundle(bundleId));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.core.BundleStateMBean#getState(long)
+	/**
+	 * {@inheritDoc}
 	 */
 	public String getState(long bundleId) throws IOException {
 		return Util.getBundleState(bundle(bundleId));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.core.BundleStateMBean#getSymbolicName(long)
+	/**
+	 * {@inheritDoc}
 	 */
 	public String getSymbolicName(long bundleId) throws IOException {
 		return bundle(bundleId).getSymbolicName();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public String getLocation(long bundleId) throws IOException {
 		return bundle(bundleId).getLocation();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public long[] getRequiredBundles(long bundleIdentifier) throws IOException {
 		return Util.getDependencies(bundle(bundleIdentifier), admin);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.core.BundleStateMBean#getVersion(long)
+	/**
+	 * {@inheritDoc}
 	 */
 	public String getVersion(long bundleId) throws IOException {
 		return bundle(bundleId).getVersion().toString();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.core.BundleStateMBean#isBundlePersistentlyStarted(long)
+	/**
+	 * {@inheritDoc}
 	 */
 	public boolean isPersistentlyStarted(long bundleId) throws IOException {
 		return Util.isBundlePersistentlyStarted(bundle(bundleId), sl);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.core.BundleStateMBean#isFragment(long)
+	/**
+	 * {@inheritDoc}
 	 */
 	public boolean isFragment(long bundleId) throws IOException {
 		return Util.isBundleFragment(bundle(bundleId), admin);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.core.BundleStateMBean#isRemovalPending(long)
+	/**
+	 * {@inheritDoc}
 	 */
 	public boolean isRemovalPending(long bundleId) throws IOException {
 		return Util.isRequiredBundleRemovalPending(bundle(bundleId), bc, admin);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.core.BundleStateMBean#isRequired(long)
+	/**
+	 * {@inheritDoc}
 	 */
 	public boolean isRequired(long bundleId) throws IOException {
 		return Util.isBundleRequired(bundle(bundleId), bc, admin);
@@ -252,16 +221,13 @@ public class BundleState extends Monitor implements CustomBundleStateMBean {
 	private Bundle bundle(long bundleId) throws IOException {
 		Bundle b = bc.getBundle(bundleId);
 		if (b == null) {
-			throw new IOException("Bundle with id: " + bundleId
-					+ " does not exist");
+			throw new IOException("Bundle with id: " + bundleId + " does not exist");
 		}
 		return b;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.Monitor#addListener()
+	/**
+	 * {@inheritDoc}
 	 */
 	@Override
 	protected void addListener() {
@@ -272,19 +238,15 @@ public class BundleState extends Monitor implements CustomBundleStateMBean {
 	protected BundleListener getBundleListener() {
 		return new BundleListener() {
 			public void bundleChanged(BundleEvent bundleEvent) {
-				Notification notification = new Notification(
-						BundleStateMBean.EVENT, objectName, sequenceNumber++);
-				notification.setUserData(new OSGiBundleEvent(bundleEvent)
-						.asCompositeData());
+				Notification notification = new Notification(BundleStateMBean.EVENT, objectName, sequenceNumber++);
+				notification.setUserData(new OSGiBundleEvent(bundleEvent).asCompositeData());
 				sendNotification(notification);
 			}
 		};
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.Monitor#removeListener()
+	/**
+	 * {@inheritDoc}
 	 */
 	@Override
 	protected void removeListener() {

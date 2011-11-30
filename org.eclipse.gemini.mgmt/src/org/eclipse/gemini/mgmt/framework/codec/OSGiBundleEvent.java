@@ -62,8 +62,7 @@ public class OSGiBundleEvent {
 	 *            - the event to represent
 	 */
 	public OSGiBundleEvent(BundleEvent event) {
-		this(event.getBundle().getBundleId(), event.getBundle().getLocation(),
-				event.getBundle().getSymbolicName(), event.getType());
+		this(event.getBundle().getBundleId(), event.getBundle().getLocation(), event.getBundle().getSymbolicName(), event.getType());
 	}
 
 	/**
@@ -89,8 +88,7 @@ public class OSGiBundleEvent {
 	 * @param symbolicName
 	 * @param eventType
 	 */
-	public OSGiBundleEvent(long bundleId, String location, String symbolicName,
-			int eventType) {
+	public OSGiBundleEvent(long bundleId, String location, String symbolicName, int eventType) {
 		this.bundleId = bundleId;
 		this.location = location;
 		this.symbolicName = symbolicName;
@@ -110,11 +108,9 @@ public class OSGiBundleEvent {
 		items.put(BundleStateMBean.SYMBOLIC_NAME, symbolicName);
 		items.put(BundleStateMBean.EVENT, eventType);
 		try {
-			return new CompositeDataSupport(BundleStateMBean.BUNDLE_EVENT_TYPE,
-					items);
+			return new CompositeDataSupport(BundleStateMBean.BUNDLE_EVENT_TYPE, items);
 		} catch (OpenDataException e) {
-			throw new IllegalStateException(
-					"Cannot form bundle event open data", e);
+			throw new IllegalStateException("Cannot form bundle event open data", e);
 		}
 	}
 

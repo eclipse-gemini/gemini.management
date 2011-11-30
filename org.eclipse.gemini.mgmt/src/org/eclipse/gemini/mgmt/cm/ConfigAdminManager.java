@@ -37,22 +37,16 @@ import org.osgi.service.cm.ConfigurationAdmin;
 public class ConfigAdminManager implements ConfigurationAdminMBean {
 
 	protected ConfigurationAdmin admin;
-	private static final Logger log = Logger.getLogger(ConfigAdminManager.class
-			.getCanonicalName());
+	private static final Logger log = Logger.getLogger(ConfigAdminManager.class.getCanonicalName());
 
 	public ConfigAdminManager(ConfigurationAdmin admin) {
 		this.admin = admin;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.osgi.jmx.compendium.ConfigAdminManagerMBean#createFactoryConfiguration
-	 * (java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
-	public String createFactoryConfiguration(String factoryPid)
-			throws IOException {
+	public String createFactoryConfiguration(String factoryPid) throws IOException {
 		if (factoryPid == null) {
 			throw new IOException("Factory PID must not be null");
 		}
@@ -61,16 +55,10 @@ public class ConfigAdminManager implements ConfigurationAdminMBean {
 		return c.getPid();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.osgi.jmx.compendium.ConfigAdminManagerMBean#createFactoryConfiguration
-	 * (java.lang.String, java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
-	public String createFactoryConfigurationForLocation(String factoryPid,
-			String location)
-			throws IOException {
+	public String createFactoryConfigurationForLocation(String factoryPid, String location) throws IOException {
 		if (factoryPid == null) {
 			throw new IOException("Factory PID must not be null");
 		}
@@ -79,11 +67,8 @@ public class ConfigAdminManager implements ConfigurationAdminMBean {
 		return c.getPid();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.osgi.jmx.compendium.ConfigAdminManagerMBean#delete(java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
 	public void delete(String pid) throws IOException {
 		if (pid == null) {
@@ -92,27 +77,18 @@ public class ConfigAdminManager implements ConfigurationAdminMBean {
 		admin.getConfiguration(pid, null).delete();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.osgi.jmx.compendium.ConfigAdminManagerMBean#delete(java.lang.String,
-	 * java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
-	public void deleteForLocation(String pid, String location)
-			throws IOException {
+	public void deleteForLocation(String pid, String location) throws IOException {
 		if (pid == null) {
 			throw new IOException("PID must not be null");
 		}
 		admin.getConfiguration(pid, location).delete();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.osgi.jmx.compendium.ConfigAdminManagerMBean#deleteConfigurations(
-	 * java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
 	public void deleteConfigurations(String filter) throws IOException {
 		Configuration[] confs;
@@ -129,12 +105,8 @@ public class ConfigAdminManager implements ConfigurationAdminMBean {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.osgi.jmx.compendium.ConfigAdminManagerMBean#getBundleLocation(java
-	 * .lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
 	public String getBundleLocation(String pid) throws IOException {
 		if (pid == null) {
@@ -143,12 +115,8 @@ public class ConfigAdminManager implements ConfigurationAdminMBean {
 		return admin.getConfiguration(pid, null).getBundleLocation();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.osgi.jmx.compendium.ConfigAdminManagerMBean#getFactoryPid(java.lang
-	 * .String)
+	/**
+	 * {@inheritDoc}
 	 */
 	public String getFactoryPid(String pid) throws IOException {
 		if (pid == null) {
@@ -157,12 +125,8 @@ public class ConfigAdminManager implements ConfigurationAdminMBean {
 		return admin.getConfiguration(pid, null).getFactoryPid();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.osgi.jmx.compendium.ConfigAdminManagerMBean#getFactoryPid(java.lang
-	 * .String, java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
 	public String getFactoryPidForLocation(String pid, String location)
 			throws IOException {
@@ -172,47 +136,31 @@ public class ConfigAdminManager implements ConfigurationAdminMBean {
 		return admin.getConfiguration(pid, location).getFactoryPid();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.osgi.jmx.compendium.ConfigAdminManagerMBean#getProperties(java.lang
-	 * .String)
+	/**
+	 * {@inheritDoc}
 	 */
-	@SuppressWarnings("unchecked")
 	public TabularData getProperties(String pid) throws IOException {
 		if (pid == null) {
 			throw new IOException("PID must not be null");
 		}
-		Dictionary properties = admin.getConfiguration(pid, null)
-				.getProperties();
+		Dictionary properties = admin.getConfiguration(pid, null).getProperties();
 		return properties == null ? null : tableFrom(properties);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.osgi.jmx.compendium.ConfigAdminManagerMBean#getProperties(java.lang
-	 * .String, java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
-	@SuppressWarnings("unchecked")
 	public TabularData getPropertiesForLocation(String pid, String location)
 			throws IOException {
 		if (pid == null) {
 			throw new IOException("PID must not be null");
 		}
-		Dictionary properties = admin.getConfiguration(pid, location)
-				.getProperties();
+		Dictionary properties = admin.getConfiguration(pid, location).getProperties();
 		return properties == null ? null : tableFrom(properties);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.osgi.jmx.compendium.ConfigAdminManagerMBean#listConfigurations(java
-	 * .lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
 	public String[][] getConfigurations(String filter) throws IOException {
 		ArrayList<String[]> pids = new ArrayList<String[]>();
@@ -225,34 +173,24 @@ public class ConfigAdminManager implements ConfigurationAdminMBean {
 		}
 		if (configurations != null) {
 			for (Configuration config : configurations) {
-				pids.add(new String[] { config.getPid(),
-						config.getBundleLocation() });
+				pids.add(new String[] { config.getPid(), config.getBundleLocation() });
 			}
 		}
 		return pids.toArray(new String[pids.size()][]);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.osgi.jmx.compendium.ConfigAdminManagerMBean#setBundleLocation(java
-	 * .lang.String, java.lang.String)
+	/**
+	 * {@inheritDoc}
 	 */
-	public void setBundleLocation(String pid, String location)
-			throws IOException {
+	public void setBundleLocation(String pid, String location) throws IOException {
 		if (pid == null) {
 			throw new IOException("PID must not be null");
 		}
 		admin.getConfiguration(pid).setBundleLocation(location);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.osgi.jmx.compendium.ConfigAdminManagerMBean#update(java.lang.String,
-	 * javax.management.openmbean.TabularData)
+	/**
+	 * {@inheritDoc}
 	 */
 	public void update(String pid, TabularData table) throws IOException {
 		if (pid == null) {
@@ -261,15 +199,10 @@ public class ConfigAdminManager implements ConfigurationAdminMBean {
 		admin.getConfiguration(pid, null).update(propertiesFrom(table));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.osgi.jmx.compendium.ConfigAdminManagerMBean#update(java.lang.String,
-	 * java.lang.String, javax.management.openmbean.TabularData)
+	/**
+	 * {@inheritDoc}
 	 */
-	public void updateForLocation(String pid, String location, TabularData table)
-			throws IOException {
+	public void updateForLocation(String pid, String location, TabularData table) throws IOException {
 		if (pid == null) {
 			throw new IOException("PID must not be null");
 		}

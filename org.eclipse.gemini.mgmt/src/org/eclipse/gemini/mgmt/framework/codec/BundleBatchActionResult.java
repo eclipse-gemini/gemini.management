@@ -76,12 +76,10 @@ public class BundleBatchActionResult extends BundleBatchResult {
 	 */
 	@SuppressWarnings("boxing")
 	public BundleBatchActionResult(CompositeData compositeData) {
-		success = ((Boolean) compositeData.get(FrameworkMBean.SUCCESS))
-				.booleanValue();
+		success = ((Boolean) compositeData.get(FrameworkMBean.SUCCESS)).booleanValue();
 		errorMessage = (String) compositeData.get(FrameworkMBean.ERROR);
 		Long[] c = (Long[]) compositeData.get(FrameworkMBean.COMPLETED);
-		bundleInError = (Long) compositeData
-				.get(FrameworkMBean.BUNDLE_IN_ERROR);
+		bundleInError = (Long) compositeData.get(FrameworkMBean.BUNDLE_IN_ERROR);
 		if (c != null) {
 			completed = new long[c.length];
 			for (int i = 0; i < c.length; i++) {
@@ -114,8 +112,7 @@ public class BundleBatchActionResult extends BundleBatchResult {
 	 * @param remaining
 	 *            - the list of bundle identifiers which remain unprocessed
 	 */
-	public BundleBatchActionResult(String errorMessage, long[] completed,
-			long bundleInError, long[] remaining) {
+	public BundleBatchActionResult(String errorMessage, long[] completed, long bundleInError, long[] remaining) {
 		success = false;
 		this.errorMessage = errorMessage;
 		this.completed = completed;
@@ -138,11 +135,9 @@ public class BundleBatchActionResult extends BundleBatchResult {
 		items.put(FrameworkMBean.REMAINING, LongArrayFrom(remaining));
 
 		try {
-			return new CompositeDataSupport(
-					FrameworkMBean.BATCH_ACTION_RESULT_TYPE, items);
+			return new CompositeDataSupport( FrameworkMBean.BATCH_ACTION_RESULT_TYPE, items);
 		} catch (OpenDataException e) {
-			throw new IllegalStateException(
-					"Cannot form batch result open data", e);
+			throw new IllegalStateException("Cannot form batch result open data", e);
 		}
 	}
 

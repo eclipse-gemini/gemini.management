@@ -69,8 +69,7 @@ public class BundleBatchInstallResult extends BundleBatchResult {
 	 */
 	@SuppressWarnings("boxing")
 	public BundleBatchInstallResult(CompositeData compositeData) {
-		success = ((Boolean) compositeData.get(FrameworkMBean.SUCCESS))
-				.booleanValue();
+		success = ((Boolean) compositeData.get(FrameworkMBean.SUCCESS)).booleanValue();
 		errorMessage = (String) compositeData.get(FrameworkMBean.ERROR);
 		Long[] c = (Long[]) compositeData.get(FrameworkMBean.COMPLETED);
 		if (c != null) {
@@ -81,8 +80,7 @@ public class BundleBatchInstallResult extends BundleBatchResult {
 		} else {
 			completed = new long[0];
 		}
-		bundleInError = (String) compositeData
-				.get(FrameworkMBean.BUNDLE_IN_ERROR);
+		bundleInError = (String) compositeData.get(FrameworkMBean.BUNDLE_IN_ERROR);
 		remaining = (String[]) compositeData.get(FrameworkMBean.REMAINING);
 	}
 
@@ -111,8 +109,7 @@ public class BundleBatchInstallResult extends BundleBatchResult {
 	 * @param remaining
 	 *            - the list of bundle identifiers which remain unprocessed
 	 */
-	public BundleBatchInstallResult(String errorMessage, long[] completed,
-			String bundleInError, String[] remaining) {
+	public BundleBatchInstallResult(String errorMessage, long[] completed, String bundleInError, String[] remaining) {
 		success = false;
 		this.errorMessage = errorMessage;
 		this.completed = completed;
@@ -136,11 +133,9 @@ public class BundleBatchInstallResult extends BundleBatchResult {
 		items.put(FrameworkMBean.REMAINING, remaining);
 
 		try {
-			return new CompositeDataSupport(
-					FrameworkMBean.BATCH_INSTALL_RESULT_TYPE, items);
+			return new CompositeDataSupport(FrameworkMBean.BATCH_INSTALL_RESULT_TYPE, items);
 		} catch (OpenDataException e) {
-			IOException iox = new IOException(
-					"Cannot form batch result open data");
+			IOException iox = new IOException("Cannot form batch result open data");
 			iox.initCause(e);
 			throw iox;
 		}
