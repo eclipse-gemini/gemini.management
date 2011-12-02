@@ -40,6 +40,12 @@ import org.eclipse.gemini.mgmt.framework.codec.OSGiBundleEvent;
  * 
  */
 public class BundleState extends Monitor implements CustomBundleStateMBean {
+	
+	protected BundleListener bundleListener;
+	protected BundleContext bc;
+	protected StartLevel sl;
+	protected PackageAdmin admin;
+	
 	public BundleState(BundleContext bc, StartLevel sl, PackageAdmin admin) {
 		this.bc = bc;
 		this.sl = sl;
@@ -254,10 +260,5 @@ public class BundleState extends Monitor implements CustomBundleStateMBean {
 			bc.removeBundleListener(bundleListener);
 		}
 	}
-
-	protected BundleListener bundleListener;
-	protected BundleContext bc;
-	protected StartLevel sl;
-	protected PackageAdmin admin;
 
 }

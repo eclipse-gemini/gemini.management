@@ -59,6 +59,11 @@ import org.osgi.jmx.framework.FrameworkMBean;
  * </table>
  */
 public class BundleBatchInstallResult extends BundleBatchResult {
+
+	private String bundleInError;
+
+	private String[] remaining;
+	
 	/**
 	 * Construct a result representing the contents of the supplied
 	 * CompositeData returned from a batch operation.
@@ -163,7 +168,4 @@ public class BundleBatchInstallResult extends BundleBatchResult {
 		return remaining;
 	}
 
-	private String bundleInError;
-
-	private String[] remaining;
 }

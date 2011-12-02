@@ -22,6 +22,19 @@ package org.eclipse.gemini.mgmt.framework.codec;
 abstract public class BundleBatchResult {
 
 	/**
+	 * The list of bundles successfully completed
+	 */
+	protected long[] completed;
+	/**
+	 * The error message of a failed result
+	 */
+	protected String errorMessage;
+	/**
+	 * True if the action completed without error
+	 */
+	protected boolean success = true;
+	
+	/**
 	 * Answer the list of bundle identifiers that successfully completed the
 	 * batch operation. If the operation was unsuccessful, this will be a
 	 * partial list. If this operation was successful, this will be the full
@@ -54,18 +67,5 @@ abstract public class BundleBatchResult {
 	public boolean isSuccess() {
 		return success;
 	}
-
-	/**
-	 * The list of bundles successfully completed
-	 */
-	protected long[] completed;
-	/**
-	 * The error message of a failed result
-	 */
-	protected String errorMessage;
-	/**
-	 * True if the action completed without error
-	 */
-	protected boolean success = true;
 
 }

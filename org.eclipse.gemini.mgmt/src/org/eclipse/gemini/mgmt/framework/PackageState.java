@@ -36,6 +36,10 @@ import org.eclipse.gemini.mgmt.framework.codec.OSGiPackage;
  * 
  */
 public class PackageState implements PackageStateMBean {
+	
+	protected BundleContext bc;
+	protected PackageAdmin admin;
+	
 	public PackageState(BundleContext bc, PackageAdmin admin) {
 		this.bc = bc;
 		this.admin = admin;
@@ -149,6 +153,4 @@ public class PackageState implements PackageStateMBean {
 		return false;
 	}
 
-	protected BundleContext bc;
-	protected PackageAdmin admin;
 }

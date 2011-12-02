@@ -147,6 +147,27 @@ import org.eclipse.gemini.mgmt.framework.CustomBundleStateMBean;
  */
 public class OSGiBundle {
 	
+	private String[] exportedPackages;
+	private Boolean fragment;
+	private long[] fragments;
+	private Map<String, String> headers;
+	private long[] hosts;
+	private long identifier;
+	private String[] importedPackages;
+	private long lastModified;
+	private String location;
+	private Boolean persistentlyStarted;
+	private long[] registeredServices;
+	private Boolean removalPending;
+	private Boolean required;
+	private long[] requiredBundles;
+	private long[] requiringBundles;
+	private long[] servicesInUse;
+	private int startLevel;
+	private String state;
+	private String symbolicName;
+	private String version;
+	
 	private static final String VALUE = "Value";
 	private static final String KEY = "Key";
 	private static final String[] HEADER_PROPERTY_ITEM_NAMES = new String[] {KEY, VALUE };
@@ -353,11 +374,10 @@ public class OSGiBundle {
 	 * @param b
 	 * @return the bundle headers
 	 */
-	@SuppressWarnings("unchecked")
 	public static TabularData headerTable(Bundle b) {
 		TabularDataSupport table = new TabularDataSupport(BundleStateMBean.HEADERS_TYPE);
-		Dictionary map = b.getHeaders();
-		for (Enumeration headers = map.keys(); headers.hasMoreElements();) {
+		Dictionary<String, String> map = b.getHeaders();
+		for (Enumeration<String> headers = map.keys(); headers.hasMoreElements();) {
 			String key = (String) headers.nextElement();
 			table.put(headerData(key, (String) map.get(key)));
 		}
@@ -681,25 +701,5 @@ public class OSGiBundle {
 		}
 		return headers;
 	}
-
-	private String[] exportedPackages;
-	private Boolean fragment;
-	private long[] fragments;
-	private Map<String, String> headers;
-	private long[] hosts;
-	private long identifier;
-	private String[] importedPackages;
-	private long lastModified;
-	private String location;
-	private Boolean persistentlyStarted;
-	private long[] registeredServices;
-	private Boolean removalPending;
-	private Boolean required;
-	private long[] requiredBundles;
-	private long[] requiringBundles;
-	private long[] servicesInUse;
-	private int startLevel;
-	private String state;
-	private String symbolicName;
-	private String version;
+	
 }

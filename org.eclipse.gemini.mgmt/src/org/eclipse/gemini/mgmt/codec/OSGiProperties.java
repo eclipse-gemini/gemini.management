@@ -85,19 +85,75 @@ import org.osgi.framework.ServiceReference;
  * <p>
  * The
  */
-@SuppressWarnings("unchecked")
 public class OSGiProperties {
 
+	/**
+	 * The key of the entry
+	 */
+	public static final String KEY = "Key";
+	/**
+	 * The value of the entry
+	 */
+	public static final String VALUE = "Value";
+	/**
+	 * The type of the entry
+	 */
+	public static final String TYPE = "Type";
+	/**
+	 * The composite entries for the row
+	 */
+	public static final String[] PROPERTIES = new String[] { KEY, VALUE, TYPE };
+
+	/**
+	 * The property type
+	 */
+	public static final CompositeType PROPERTY = createPropertyType();
+	/**
+	 * The table type
+	 */
+	public static final TabularType PROPERTY_TABLE = createPropertyTableType();
+	/**
+	 * The scalar type
+	 */
+	protected static final Set<String> SCALAR_TYPES = new HashSet<String>();
+	/**
+	 * The primitive types
+	 */
+	protected static final Set<String> PRIMITIVE_TYPES = new HashSet<String>();
+
+	static {
+		SCALAR_TYPES.add("String");
+		SCALAR_TYPES.add("Integer");
+		SCALAR_TYPES.add("Long");
+		SCALAR_TYPES.add("Float");
+		SCALAR_TYPES.add("Double");
+		SCALAR_TYPES.add("Byte");
+		SCALAR_TYPES.add("Short");
+		SCALAR_TYPES.add("Character");
+		SCALAR_TYPES.add("Boolean");
+		SCALAR_TYPES.add("BigDecimal");
+		SCALAR_TYPES.add("BigInteger");
+
+		PRIMITIVE_TYPES.add("int");
+		PRIMITIVE_TYPES.add("long");
+		PRIMITIVE_TYPES.add("float");
+		PRIMITIVE_TYPES.add("double");
+		PRIMITIVE_TYPES.add("byte");
+		PRIMITIVE_TYPES.add("short");
+		PRIMITIVE_TYPES.add("char");
+		PRIMITIVE_TYPES.add("boolean");
+	}
+	
 	/**
 	 * Answer the tabular data representation of the properties dictionary
 	 * 
 	 * @param properties
 	 * @return the tabular data representation of the properties
 	 */
-	public static TabularData tableFrom(Dictionary properties) {
+	public static TabularData tableFrom(Dictionary<String, Object> properties) {
 		TabularDataSupport table = new TabularDataSupport(PROPERTY_TABLE);
 		if (properties != null) {
-			for (Enumeration keys = properties.keys(); keys.hasMoreElements();) {
+			for (Enumeration<?> keys = properties.keys(); keys.hasMoreElements();) {
 				String key = (String) keys.nextElement();
 				table.put(encode(key, properties.get(key)));
 			}
@@ -144,13 +200,14 @@ public class OSGiProperties {
 	 * @param table
 	 * @return the hashtable represented by the tabular data
 	 */
+	@SuppressWarnings("unchecked")
 	public static Hashtable<String, Object> propertiesFrom(TabularData table) {
-		Hashtable props = new Hashtable();
+		Hashtable<String, Object> props = new Hashtable<String, Object>();
 		if (table == null) {
 			return props;
 		}
 		for (CompositeData data : (Collection<CompositeData>) table.values()) {
-			props.put(data.get(KEY), parse((String) data.get(VALUE), (String) data.get(TYPE)));
+			props.put((String) data.get(KEY), parse((String) data.get(VALUE), (String) data.get(TYPE)));
 		}
 
 		return props;
@@ -242,7 +299,7 @@ public class OSGiProperties {
 	 * @param value
 	 * @return the composite data representation
 	 */
-	protected static CompositeData encodeVector(String key, Vector value) {
+	protected static CompositeData encodeVector(String key, Vector<?> value) {
 		String type = "String";
 		if (value.size() > 0) {
 			type = typeOf(value.get(0).getClass());
@@ -596,10 +653,11 @@ public class OSGiProperties {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	private static CompositeType createPropertyType() {
 		String description = "This type encapsulates a key/value pair";
 		String[] itemNames = PROPERTIES;
-		OpenType[] itemTypes = new OpenType[itemNames.length];
+		OpenType<String>[] itemTypes = new OpenType[itemNames.length];
 		String[] itemDescriptions = new String[itemNames.length];
 		itemTypes[0] = SimpleType.STRING;
 		itemTypes[1] = SimpleType.STRING;
@@ -617,60 +675,4 @@ public class OSGiProperties {
 
 	}
 
-	/**
-	 * The key of the entry
-	 */
-	public static final String KEY = "Key";
-	/**
-	 * The value of the entry
-	 */
-	public static final String VALUE = "Value";
-	/**
-	 * The type of the entry
-	 */
-	public static final String TYPE = "Type";
-	/**
-	 * The composite entries for the row
-	 */
-	public static final String[] PROPERTIES = new String[] { KEY, VALUE, TYPE };
-
-	/**
-	 * The property type
-	 */
-	public static final CompositeType PROPERTY = createPropertyType();
-	/**
-	 * The table type
-	 */
-	public static final TabularType PROPERTY_TABLE = createPropertyTableType();
-	/**
-	 * The scalar type
-	 */
-	protected static final Set<String> SCALAR_TYPES = new HashSet<String>();
-	/**
-	 * The primitive types
-	 */
-	protected static final Set<String> PRIMITIVE_TYPES = new HashSet<String>();
-
-	static {
-		SCALAR_TYPES.add("String");
-		SCALAR_TYPES.add("Integer");
-		SCALAR_TYPES.add("Long");
-		SCALAR_TYPES.add("Float");
-		SCALAR_TYPES.add("Double");
-		SCALAR_TYPES.add("Byte");
-		SCALAR_TYPES.add("Short");
-		SCALAR_TYPES.add("Character");
-		SCALAR_TYPES.add("Boolean");
-		SCALAR_TYPES.add("BigDecimal");
-		SCALAR_TYPES.add("BigInteger");
-
-		PRIMITIVE_TYPES.add("int");
-		PRIMITIVE_TYPES.add("long");
-		PRIMITIVE_TYPES.add("float");
-		PRIMITIVE_TYPES.add("double");
-		PRIMITIVE_TYPES.add("byte");
-		PRIMITIVE_TYPES.add("short");
-		PRIMITIVE_TYPES.add("char");
-		PRIMITIVE_TYPES.add("boolean");
-	}
 }

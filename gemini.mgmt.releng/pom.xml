@@ -87,7 +87,7 @@
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>findbugs-maven-plugin</artifactId>
-					<version>2.3.2-SNAPSHOT</version>
+					<version>2.3.2</version>
 					<configuration>
 						<findbugsXmlOutput>true</findbugsXmlOutput>
 						<failOnError>false</failOnError>
@@ -157,7 +157,7 @@
 		</pluginRepository>
 		<pluginRepository>
 			<id>maven.eclipse.org</id>
-			<url>http://maven.eclipse.org/nexus/content/repositories/milestone-indigo</url>
+			<url>http://maven.eclipse.org/nexus/content/repositories/release-indigo</url>
 		</pluginRepository>
 	</pluginRepositories>
 </project>

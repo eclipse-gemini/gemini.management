@@ -217,6 +217,7 @@ public class UserManager extends Monitor implements UserAdminMBean {
 	/**
 	 * {@inheritDoc}
 	 */
+	@SuppressWarnings("unchecked")
 	public TabularData getCredentials(String username) throws IOException {
 		if (username == null) {
 			throw new IOException("User name must not be null");
@@ -333,6 +334,7 @@ public class UserManager extends Monitor implements UserAdminMBean {
 	/**
 	 * {@inheritDoc}
 	 */
+	@SuppressWarnings("unchecked")
 	public TabularData getProperties(String rolename) throws IOException {
 		if (rolename == null) {
 			throw new IOException("Name must not be null");

@@ -60,6 +60,13 @@ import org.osgi.jmx.framework.ServiceStateMBean;
  */
 public class OSGiServiceEvent {
 
+	private long bundleId;
+	private int eventType;
+	private String[] interfaces;
+	private String location;
+	private String symbolicName;
+	private long serviceId;
+	
 	/**
 	 * Construct an OSGiServiceEvent from the CompositeData representing the
 	 * event
@@ -67,7 +74,6 @@ public class OSGiServiceEvent {
 	 * @param data
 	 *            = the CompositeData representation of the event
 	 */
-	@SuppressWarnings("boxing")
 	public OSGiServiceEvent(CompositeData data) {
 		serviceId = (Long) data.get(ServiceStateMBean.IDENTIFIER);
 		bundleId = (Long) data.get(ServiceStateMBean.BUNDLE_IDENTIFIER);
@@ -169,12 +175,5 @@ public class OSGiServiceEvent {
 	public long getServiceId() {
 		return serviceId;
 	}
-
-	private long bundleId;
-	private int eventType;
-	private String[] interfaces;
-	private String location;
-	private String symbolicName;
-	private long serviceId;
 
 }

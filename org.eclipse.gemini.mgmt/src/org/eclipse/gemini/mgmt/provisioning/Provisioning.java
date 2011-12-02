@@ -15,7 +15,8 @@
 
 package org.eclipse.gemini.mgmt.provisioning;
 
-import static org.eclipse.gemini.mgmt.codec.OSGiProperties.*;
+import static org.eclipse.gemini.mgmt.codec.OSGiProperties.propertiesFrom;
+import static org.eclipse.gemini.mgmt.codec.OSGiProperties.tableFrom;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,6 +32,7 @@ import org.osgi.service.provisioning.ProvisioningService;
  * 
  */
 public class Provisioning implements ProvisioningServiceMBean {
+	
 	protected ProvisioningService provisioning;
 
 	public Provisioning(ProvisioningService provisioning) {

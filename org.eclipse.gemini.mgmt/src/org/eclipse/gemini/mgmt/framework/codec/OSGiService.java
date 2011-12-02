@@ -64,6 +64,11 @@ import org.osgi.jmx.framework.ServiceStateMBean;
  */
 public class OSGiService {
 
+	private long bundle;
+	private long identifier;
+	private String[] interfaces;
+	private long[] usingBundles;
+	
 	/**
 	 * Construct an OSGiService encoded in the <link>CompositeData</link>
 	 * 
@@ -169,8 +174,4 @@ public class OSGiService {
 		return usingBundles;
 	}
 
-	private long bundle;
-	private long identifier;
-	private String[] interfaces;
-	private long[] usingBundles;
 }

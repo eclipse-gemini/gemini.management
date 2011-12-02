@@ -58,6 +58,10 @@ import org.osgi.jmx.framework.FrameworkMBean;
  */
 public class BundleBatchActionResult extends BundleBatchResult {
 
+	private long bundleInError;
+
+	private long[] remaining;
+	
 	/**
 	 * Construct a result signifying the successful completion of the batch
 	 * operation.
@@ -163,8 +167,4 @@ public class BundleBatchActionResult extends BundleBatchResult {
 	public long[] getRemaining() {
 		return remaining;
 	}
-
-	private long bundleInError;
-
-	private long[] remaining;
 }

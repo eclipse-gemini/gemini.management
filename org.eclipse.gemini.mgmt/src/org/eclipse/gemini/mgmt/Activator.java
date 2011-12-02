@@ -65,8 +65,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
  */
 public class Activator implements BundleActivator {
 
-	private static final Logger log = Logger.getLogger(Activator.class
-			.getCanonicalName());
+	private static final Logger log = Logger.getLogger(Activator.class.getCanonicalName());
 
 	protected List<MBeanServer> mbeanServers = new CopyOnWriteArrayList<MBeanServer>();
 	protected StandardMBean bundleState;
@@ -100,7 +99,7 @@ public class Activator implements BundleActivator {
 		provisioningServiceName = new ObjectName(ProvisioningServiceMBean.OBJECTNAME);
 		userAdminName = new ObjectName(UserAdminMBean.OBJECTNAME);
 
-		mbeanServiceTracker = new ServiceTracker<MBeanServer, Object>(bundleContext, MBeanServer.class.getCanonicalName(), new MBeanServiceTracker());
+		mbeanServiceTracker = new ServiceTracker<MBeanServer, Object>(bundleContext, MBeanServer.class, new MBeanServiceTracker());
 		log.fine("Awaiting MBeanServer service registration");
 		mbeanServiceTracker.open();
 	}
@@ -306,7 +305,7 @@ public class Activator implements BundleActivator {
 		 * 
 		 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
 		 */
-		public Object addingService(ServiceReference<MBeanServer> servicereference) {
+		public MBeanServer addingService(ServiceReference<MBeanServer> servicereference) {
 			try {
 				log.fine("Adding MBeanServer: " + servicereference);
 				final MBeanServer mbeanServer = bundleContext.getService(servicereference);

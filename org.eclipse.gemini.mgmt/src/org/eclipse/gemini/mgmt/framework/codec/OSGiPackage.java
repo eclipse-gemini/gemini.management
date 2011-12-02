@@ -66,6 +66,12 @@ import org.osgi.service.packageadmin.ExportedPackage;
  */
 public class OSGiPackage {
 
+	private long[] exportingBundles;
+	private long[] importingBundles;
+	private String name;
+	private boolean removalPending;
+	private String version;
+	
 	/**
 	 * Construct an OSGiPackage from the encoded <link>CompositeData</link>
 	 * 
@@ -127,7 +133,6 @@ public class OSGiPackage {
 	 * 
 	 * @return the CompositeData encoding of the receiver.
 	 */
-	@SuppressWarnings("boxing")
 	public CompositeData asCompositeData() {
 		Map<String, Object> items = new HashMap<String, Object>();
 		items.put(PackageStateMBean.NAME, name);
@@ -177,10 +182,5 @@ public class OSGiPackage {
 	public boolean isRemovalPending() {
 		return removalPending;
 	}
-
-	private long[] exportingBundles;
-	private long[] importingBundles;
-	private String name;
-	private boolean removalPending;
-	private String version;
+	
 }

@@ -1,20 +1,24 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.6"?>
 
-<target name="gemini-management" sequenceNumber="4">
+<target includeMode="feature" name="gemini-management" sequenceNumber="36">
 <locations>
-
-<location includeAllPlatforms="false" includeMode="planner" type="InstallableUnit">
-<unit id="org.eclipse.osgi" version="0.0.0"/>
-<unit id="org.eclipse.osgi.services" version="0.0.0"/>
+<location includeAllPlatforms="false" includeMode="planner" includeSource="true" type="InstallableUnit">
+<unit id="org.eclipse.osgi" version="3.7.1.R37x_v20110808-1106"/>
+<unit id="org.eclipse.osgi.services" version="3.3.0.v20110513"/>
 <unit id="org.junit4" version="0.0.0"/>
-<repository location="http://download.eclipse.org/eclipse/updates/3.7milestones/"/>
+<repository location="http://download.eclipse.org/eclipse/updates/3.7/"/>
 </location>
-
-<location includeAllPlatforms="false" includeMode="planner" type="InstallableUnit">
+<location includeAllPlatforms="false" includeMode="planner" includeSource="false" type="InstallableUnit">
 <unit id="osgi.enterprise" version="0.0.0"/>
 <repository location="http://download.eclipse.org/tools/orbit/downloads/drops/S20111018035124/repository/"/>
 </location>
-
 </locations>
+<includeBundles>
+<plugin id="org.junit"/>
+<plugin id="org.junit4"/>
+<plugin id="org.eclipse.osgi"/>
+<plugin id="osgi.enterprise"/>
+<plugin id="org.eclipse.osgi.services"/>
+</includeBundles>
 </target>

@@ -44,7 +44,6 @@ import org.osgi.service.startlevel.StartLevel;
  * Static utilities
  * 
  */
-@SuppressWarnings("unchecked")
 public class Util {
 	/**
 	 * Answer the bundle ids of the bundles
@@ -104,7 +103,7 @@ public class Util {
 	 * @param b
 	 * @param bc
 	 * @param admin
-	 * @return the the bundle ids of the bundles requireing the given bundles
+	 * @return the the bundle ids of the bundles requiring the given bundles
 	 */
 	public static long[] getBundlesRequiring(Bundle b, BundleContext bc, PackageAdmin admin) {
 		Bundle[] all = bc.getBundles();
@@ -173,8 +172,8 @@ public class Util {
 	 */
 	public static Map<String, String> getBundleHeaders(Bundle b) {
 		Map<String, String> headers = new Hashtable<String, String>();
-		Dictionary h = b.getHeaders();
-		for (Enumeration keys = h.keys(); keys.hasMoreElements();) {
+		Dictionary<?, ?> h = b.getHeaders();
+		for (Enumeration<?> keys = h.keys(); keys.hasMoreElements();) {
 			String key = (String) keys.nextElement();
 			headers.put(key, (String) h.get(key));
 		}
@@ -333,7 +332,7 @@ public class Util {
 	 * @param refs
 	 * @return the ids of the service references
 	 */
-	public static long[] serviceIds(ServiceReference[] refs) {
+	public static long[] serviceIds(ServiceReference<?>[] refs) {
 		if (refs == null) {
 			return new long[0];
 		}
@@ -381,19 +380,19 @@ public class Util {
 	/**
 	 * The type for an array of longs
 	 */
-	public static ArrayType LONG_ARRAY_TYPE;
+	public static ArrayType<Long> LONG_ARRAY_TYPE;
 
 	/**
 	 * The type for an array of strings
 	 */
-	public static ArrayType STRING_ARRAY_TYPE;
+	public static ArrayType<String> STRING_ARRAY_TYPE;
 
 	private static final Logger log = Logger.getLogger(Util.class.getCanonicalName());
 
 	static {
 		try {
-			LONG_ARRAY_TYPE = new ArrayType(1, SimpleType.LONG);
-			STRING_ARRAY_TYPE = new ArrayType(1, SimpleType.STRING);
+			LONG_ARRAY_TYPE = new ArrayType<Long>(1, SimpleType.LONG);
+			STRING_ARRAY_TYPE = new ArrayType<String>(1, SimpleType.STRING);
 		} catch (OpenDataException e) {
 			log.log(Level.SEVERE, "Cannot create array open data type", e);
 		}

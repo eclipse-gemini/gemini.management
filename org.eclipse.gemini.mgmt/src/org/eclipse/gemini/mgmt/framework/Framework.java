@@ -36,6 +36,11 @@ import org.osgi.service.startlevel.StartLevel;
  * 
  */
 public class Framework implements FrameworkMBean {
+
+	protected BundleContext bc;
+	protected StartLevel sl;
+	protected PackageAdmin admin;
+	
 	public Framework(BundleContext bc, PackageAdmin admin, StartLevel sl) {
 		this.bc = bc;
 		this.admin = admin;
@@ -483,9 +488,5 @@ public class Framework implements FrameworkMBean {
 		}
 		return b;
 	}
-
-	protected BundleContext bc;
-	protected StartLevel sl;
-	protected PackageAdmin admin;
 
 }

@@ -47,11 +47,10 @@ public class BundleStateTest {
 	@Test
 	public void nameAndVersionTest() throws Exception {
 		BundleContext bc = FrameworkUtil.getBundle(Activator.class).getBundleContext();
-		ServiceReference ref = bc.getServiceReference(MBeanServer.class.getCanonicalName());
+		ServiceReference<MBeanServer> ref = bc.getServiceReference(MBeanServer.class);
 		if (ref == null) {
 			bc.registerService(MBeanServer.class.getCanonicalName(), ManagementFactory.getPlatformMBeanServer(), null);
 		}
-		JMXConnector connector = null;
 		CompositeData bundleInfo;
 		String symbolicName;
 		String version;
@@ -63,14 +62,13 @@ public class BundleStateTest {
 		TabularDataSupport table = jmxInvokeListBundles(mask);
 		long end = System.currentTimeMillis();
 		assertTrue((end - start) < 1000);
-		Set keys = table.keySet();
-		Iterator iter = keys.iterator();
+		Set<?> keys = table.keySet();
+		Iterator<?> iter = keys.iterator();
 		while (iter.hasNext()) {
 			key = iter.next();
-			keysArray = ((Collection) key).toArray();
+			keysArray = ((Collection<?>) key).toArray();
 			bundleInfo = (CompositeData) table.get(keysArray);
-			symbolicName = (String) bundleInfo
-					.get(BundleStateMBean.SYMBOLIC_NAME);
+			symbolicName = (String) bundleInfo.get(BundleStateMBean.SYMBOLIC_NAME);
 			version = (String) bundleInfo.get(BundleStateMBean.VERSION);
 			bundle = bc.getBundle((Long) keysArray[0]);
 			assertEquals(symbolicName, bundle.getSymbolicName());
@@ -78,9 +76,9 @@ public class BundleStateTest {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void fullMaskTest() throws Exception {
-		JMXConnector connector = null;
 		CompositeData bundleInfo;
 		String location;
 		String symbolicName;
@@ -115,51 +113,35 @@ public class BundleStateTest {
 				+ BundleState.FRAGMENTS + BundleState.HOSTS
 				+ BundleState.REQUIRING_BUNDLES + BundleState.REQUIRED_BUNDLES;
 		TabularDataSupport table = jmxInvokeListBundles(mask);
-		Set keys = table.keySet();
-		Iterator iter = keys.iterator();
+		Set<?> keys = table.keySet();
+		Iterator<?> iter = keys.iterator();
 		BundleContext bc = FrameworkUtil.getBundle(BundleState.class).getBundleContext();
-		StartLevel sl = (StartLevel) bc.getService(bc
-				.getServiceReference(StartLevel.class.getCanonicalName()));
-		PackageAdmin admin = (PackageAdmin) bc.getService(bc
-				.getServiceReference(PackageAdmin.class.getCanonicalName()));
+		StartLevel sl = (StartLevel) bc.getService(bc.getServiceReference(StartLevel.class.getCanonicalName()));
+		PackageAdmin admin = (PackageAdmin) bc.getService(bc.getServiceReference(PackageAdmin.class.getCanonicalName()));
 		while (iter.hasNext()) {
 			key = iter.next();
-			keysArray = ((Collection) key).toArray();
+			keysArray = ((Collection<?>) key).toArray();
 			bundleInfo = (CompositeData) table.get(keysArray);
 
 			location = (String) bundleInfo.get(BundleStateMBean.LOCATION);
-			symbolicName = (String) bundleInfo
-					.get(BundleStateMBean.SYMBOLIC_NAME);
+			symbolicName = (String) bundleInfo.get(BundleStateMBean.SYMBOLIC_NAME);
 			version = (String) bundleInfo.get(BundleStateMBean.VERSION);
-			startLevel = ((Integer) bundleInfo
-					.get(BundleStateMBean.START_LEVEL)).intValue();
+			startLevel = ((Integer) bundleInfo.get(BundleStateMBean.START_LEVEL)).intValue();
 			state = (String) bundleInfo.get(BundleStateMBean.STATE);
-			lastModified = ((Long) bundleInfo
-					.get(BundleStateMBean.LAST_MODIFIED)).longValue();
-			persistenlyStarted = ((Boolean) bundleInfo
-					.get(BundleStateMBean.PERSISTENTLY_STARTED)).booleanValue();
-			removalPending = ((Boolean) bundleInfo
-					.get(BundleStateMBean.REMOVAL_PENDING)).booleanValue();
-			required = ((Boolean) bundleInfo.get(BundleStateMBean.REQUIRED))
-					.booleanValue();
-			fragment = ((Boolean) bundleInfo.get(BundleStateMBean.FRAGMENT))
-					.booleanValue();
-			registeredServices = (Long[]) bundleInfo
-					.get(BundleStateMBean.REGISTERED_SERVICES);
-			servicesInUse = (Long[]) bundleInfo
-					.get(BundleStateMBean.SERVICES_IN_USE);
-			headers = (Map<String, CompositeData>) bundleInfo
-					.get(BundleStateMBean.HEADERS);
-			exportedPackages = (String[]) bundleInfo
-					.get(BundleStateMBean.EXPORTED_PACKAGES);
-			importedPackages = (String[]) bundleInfo
-					.get(BundleStateMBean.IMPORTED_PACKAGES);
+			lastModified = ((Long) bundleInfo.get(BundleStateMBean.LAST_MODIFIED)).longValue();
+			persistenlyStarted = ((Boolean) bundleInfo.get(BundleStateMBean.PERSISTENTLY_STARTED)).booleanValue();
+			removalPending = ((Boolean) bundleInfo.get(BundleStateMBean.REMOVAL_PENDING)).booleanValue();
+			required = ((Boolean) bundleInfo.get(BundleStateMBean.REQUIRED)).booleanValue();
+			fragment = ((Boolean) bundleInfo.get(BundleStateMBean.FRAGMENT)).booleanValue();
+			registeredServices = (Long[]) bundleInfo.get(BundleStateMBean.REGISTERED_SERVICES);
+			servicesInUse = (Long[]) bundleInfo.get(BundleStateMBean.SERVICES_IN_USE);
+			headers = (Map<String, CompositeData>) bundleInfo.get(BundleStateMBean.HEADERS);
+			exportedPackages = (String[]) bundleInfo.get(BundleStateMBean.EXPORTED_PACKAGES);
+			importedPackages = (String[]) bundleInfo.get(BundleStateMBean.IMPORTED_PACKAGES);
 			fragments = (Long[]) bundleInfo.get(BundleStateMBean.FRAGMENTS);
 			hosts = (Long[]) bundleInfo.get(BundleStateMBean.HOSTS);
-			requiringBundles = (Long[]) bundleInfo
-					.get(BundleStateMBean.REQUIRING_BUNDLES);
-			requiredBundles = (Long[]) bundleInfo
-					.get(BundleStateMBean.REQUIRED_BUNDLES);
+			requiringBundles = (Long[]) bundleInfo.get(BundleStateMBean.REQUIRING_BUNDLES);
+			requiredBundles = (Long[]) bundleInfo.get(BundleStateMBean.REQUIRED_BUNDLES);
 
 			bundle = bc.getBundle((Long) keysArray[0]);
 			assertEquals(location, bundle.getLocation());
@@ -168,10 +150,8 @@ public class BundleStateTest {
 			assertEquals(startLevel, sl.getBundleStartLevel(bundle));
 			assertEquals(state, stateToString(bundle.getState()));
 			assertEquals(lastModified, bundle.getLastModified());
-			assertEquals(persistenlyStarted,
-					Util.isBundlePersistentlyStarted(bundle, sl));
-			assertEquals(removalPending,
-					Util.isRequiredBundleRemovalPending(bundle, bc, admin));
+			assertEquals(persistenlyStarted, Util.isBundlePersistentlyStarted(bundle, sl));
+			assertEquals(removalPending, Util.isRequiredBundleRemovalPending(bundle, bc, admin));
 			assertEquals(required, Util.isBundleRequired(bundle, bc, admin));
 			assertEquals(fragment, Util.isBundleFragment(bundle, admin));
 
@@ -193,17 +173,14 @@ public class BundleStateTest {
 			Arrays.sort(siu2);
 			assertTrue(Arrays.equals(siu, siu2));
 
-			assertEquals((TabularData) headers,
-					OSGiBundle.headerTable(Util.getBundleHeaders(bundle)));
+			assertEquals((TabularData) headers,	OSGiBundle.headerTable(Util.getBundleHeaders(bundle)));
 
-			String[] exportedPackages2 = Util.getBundleExportedPackages(bundle,
-					admin);
+			String[] exportedPackages2 = Util.getBundleExportedPackages(bundle,	admin);
 			Arrays.sort(exportedPackages);
 			Arrays.sort(exportedPackages2);
 			assertTrue(Arrays.equals(exportedPackages, exportedPackages2));
 
-			String[] importedPackages2 = Util.getBundleImportedPackages(bundle,
-					bc, admin);
+			String[] importedPackages2 = Util.getBundleImportedPackages(bundle, bc, admin);
 			Arrays.sort(importedPackages);
 			Arrays.sort(importedPackages2);
 			assertTrue(Arrays.equals(importedPackages, importedPackages2));
@@ -248,7 +225,6 @@ public class BundleStateTest {
 
 	@Test
 	public void randomMaskTest() throws Exception {
-		JMXConnector connector = null;
 		CompositeData bundleInfo;
 		String version;
 		String state;
@@ -265,52 +241,40 @@ public class BundleStateTest {
 		Object[] keysArray;
 		Bundle bundle;
 		int mask = BundleState.IDENTIFIER + BundleState.VERSION
-		+ BundleState.STATE + BundleState.LAST_MODIFIED
-		+ BundleState.PERSISTENTLY_STARTED + BundleState.REMOVAL_PENDING
-		+ BundleState.REGISTERED_SERVICES + BundleState.SERVICES_IN_USE
-		+ BundleState.EXPORTED_PACKAGES + BundleState.IMPORTED_PACKAGES
-		+ BundleState.HOSTS + BundleState.REQUIRING_BUNDLES;
+				+ BundleState.STATE + BundleState.LAST_MODIFIED
+				+ BundleState.PERSISTENTLY_STARTED + BundleState.REMOVAL_PENDING
+				+ BundleState.REGISTERED_SERVICES + BundleState.SERVICES_IN_USE
+				+ BundleState.EXPORTED_PACKAGES + BundleState.IMPORTED_PACKAGES
+				+ BundleState.HOSTS + BundleState.REQUIRING_BUNDLES;
 		TabularDataSupport table = jmxInvokeListBundles(mask);
-		Set keys = table.keySet();
-		Iterator iter = keys.iterator();
+		Set<?> keys = table.keySet();
+		Iterator<?> iter = keys.iterator();
 		BundleContext bc = FrameworkUtil.getBundle(BundleState.class).getBundleContext();
-		StartLevel sl = (StartLevel) bc.getService(bc
-				.getServiceReference(StartLevel.class.getCanonicalName()));
-		PackageAdmin admin = (PackageAdmin) bc.getService(bc
-				.getServiceReference(PackageAdmin.class.getCanonicalName()));
+		StartLevel sl = (StartLevel) bc.getService(bc.getServiceReference(StartLevel.class.getCanonicalName()));
+		PackageAdmin admin = (PackageAdmin) bc.getService(bc.getServiceReference(PackageAdmin.class.getCanonicalName()));
 		while (iter.hasNext()) {
 			key = iter.next();
-			keysArray = ((Collection) key).toArray();
+			keysArray = ((Collection<?>) key).toArray();
 			bundleInfo = (CompositeData) table.get(keysArray);
 
 			version = (String) bundleInfo.get(BundleStateMBean.VERSION);
 			state = (String) bundleInfo.get(BundleStateMBean.STATE);
-			lastModified = ((Long) bundleInfo
-					.get(BundleStateMBean.LAST_MODIFIED)).longValue();
-			persistenlyStarted = ((Boolean) bundleInfo
-					.get(BundleStateMBean.PERSISTENTLY_STARTED)).booleanValue();
-			removalPending = ((Boolean) bundleInfo
-					.get(BundleStateMBean.REMOVAL_PENDING)).booleanValue();
-			registeredServices = (Long[]) bundleInfo
-					.get(BundleStateMBean.REGISTERED_SERVICES);
-			servicesInUse = (Long[]) bundleInfo
-					.get(BundleStateMBean.SERVICES_IN_USE);
-			exportedPackages = (String[]) bundleInfo
-					.get(BundleStateMBean.EXPORTED_PACKAGES);
-			importedPackages = (String[]) bundleInfo
-					.get(BundleStateMBean.IMPORTED_PACKAGES);
+			lastModified = ((Long) bundleInfo.get(BundleStateMBean.LAST_MODIFIED)).longValue();
+			persistenlyStarted = ((Boolean) bundleInfo.get(BundleStateMBean.PERSISTENTLY_STARTED)).booleanValue();
+			removalPending = ((Boolean) bundleInfo.get(BundleStateMBean.REMOVAL_PENDING)).booleanValue();
+			registeredServices = (Long[]) bundleInfo.get(BundleStateMBean.REGISTERED_SERVICES);
+			servicesInUse = (Long[]) bundleInfo.get(BundleStateMBean.SERVICES_IN_USE);
+			exportedPackages = (String[]) bundleInfo.get(BundleStateMBean.EXPORTED_PACKAGES);
+			importedPackages = (String[]) bundleInfo.get(BundleStateMBean.IMPORTED_PACKAGES);
 			hosts = (Long[]) bundleInfo.get(BundleStateMBean.HOSTS);
-			requiringBundles = (Long[]) bundleInfo
-					.get(BundleStateMBean.REQUIRING_BUNDLES);
+			requiringBundles = (Long[]) bundleInfo.get(BundleStateMBean.REQUIRING_BUNDLES);
 			bundle = bc.getBundle((Long) keysArray[0]);
 
 			assertEquals(version, bundle.getVersion().toString());
 			assertEquals(state, stateToString(bundle.getState()));
 			assertEquals(lastModified, bundle.getLastModified());
-			assertEquals(persistenlyStarted,
-					Util.isBundlePersistentlyStarted(bundle, sl));
-			assertEquals(removalPending,
-					Util.isRequiredBundleRemovalPending(bundle, bc, admin));
+			assertEquals(persistenlyStarted, Util.isBundlePersistentlyStarted(bundle, sl));
+			assertEquals(removalPending, Util.isRequiredBundleRemovalPending(bundle, bc, admin));
 
 			long[] rs = new long[registeredServices.length];
 			for (int i = 0; i < registeredServices.length; i++) {
@@ -330,14 +294,12 @@ public class BundleStateTest {
 			Arrays.sort(siu2);
 			assertTrue(Arrays.equals(siu, siu2));
 
-			String[] exportedPackages2 = Util.getBundleExportedPackages(bundle,
-					admin);
+			String[] exportedPackages2 = Util.getBundleExportedPackages(bundle,	admin);
 			Arrays.sort(exportedPackages);
 			Arrays.sort(exportedPackages2);
 			assertTrue(Arrays.equals(exportedPackages, exportedPackages2));
 
-			String[] importedPackages2 = Util.getBundleImportedPackages(bundle,
-					bc, admin);
+			String[] importedPackages2 = Util.getBundleImportedPackages(bundle,	bc, admin);
 			Arrays.sort(importedPackages);
 			Arrays.sort(importedPackages2);
 			assertTrue(Arrays.equals(importedPackages, importedPackages2));
@@ -380,24 +342,24 @@ public class BundleStateTest {
 
 	@Test
 	public void illegalMaskTest() throws Exception {
-		JMXConnector connector = null;
-		CompositeData bundleInfo;
-		String version;
-		String state;
-		long lastModified;
-		boolean persistenlyStarted;
-		boolean removalPending;
-		Long[] registeredServices;
-		Long[] servicesInUse;
-		String[] exportedPackages;
-		String[] importedPackages;
-		Long[] hosts;
-		Long[] requiringBundles;
-		Object key;
-		Object[] keysArray;
-		Bundle bundle;
+//		CompositeData bundleInfo;
+//		String version;
+//		String state;
+//		long lastModified;
+//		boolean persistenlyStarted;
+//		boolean removalPending;
+//		Long[] registeredServices;
+//		Long[] servicesInUse;
+//		String[] exportedPackages;
+//		String[] importedPackages;
+//		Long[] hosts;
+//		Long[] requiringBundles;
+//		Object key;
+//		Object[] keysArray;
+//		Bundle bundle;
 		int mask = 1048576;
 		try {
+			@SuppressWarnings("unused")
 			TabularDataSupport table = jmxInvokeListBundles(mask);
 			fail("Expected exception did not occur!");
 		} catch (Exception e) {

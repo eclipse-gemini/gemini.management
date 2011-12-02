@@ -55,6 +55,14 @@ import org.osgi.jmx.framework.BundleStateMBean;
  */
 public class OSGiBundleEvent {
 
+	private long bundleId;
+
+	private int eventType;
+
+	private String location;
+
+	private String symbolicName;
+	
 	/**
 	 * Construct an OSGiBundleEvent from the supplied <ling>BundleEvent</link>
 	 * 
@@ -141,13 +149,5 @@ public class OSGiBundleEvent {
 	public String getSymbolicName() {
 		return symbolicName;
 	}
-
-	private long bundleId;
-
-	private int eventType;
-
-	private String location;
-
-	private String symbolicName;
 
 }

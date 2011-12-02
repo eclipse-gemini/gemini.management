@@ -66,7 +66,6 @@ public class OSGiRole {
 	 * @return the
 	 * @throws OpenDataException
 	 */
-	@SuppressWarnings("boxing")
 	public CompositeData asCompositeData() throws OpenDataException {
 		Map<String, Object> items = new HashMap<String, Object>();
 		items.put(UserAdminMBean.NAME, name);
