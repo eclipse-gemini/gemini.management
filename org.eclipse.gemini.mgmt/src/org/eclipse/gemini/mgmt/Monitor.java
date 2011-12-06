@@ -23,9 +23,14 @@ import javax.management.ObjectName;
 /** 
  * 
  */
-abstract public class Monitor extends NotificationBroadcasterSupport implements
-		MBeanRegistration {
+abstract public class Monitor extends NotificationBroadcasterSupport implements	MBeanRegistration {
 
+	protected ObjectName objectName;
+
+	protected volatile long sequenceNumber = 0;
+
+	protected MBeanServer server;
+	
 	/**
 	 * {@inheritDoc}
 	 */
@@ -49,8 +54,7 @@ abstract public class Monitor extends NotificationBroadcasterSupport implements
 	/**
 	 * {@inheritDoc}
 	 */
-	public ObjectName preRegister(MBeanServer server, ObjectName name)
-			throws Exception {
+	public ObjectName preRegister(MBeanServer server, ObjectName name) throws Exception {
 		objectName = name;
 		this.server = server;
 		return name;
@@ -66,9 +70,4 @@ abstract public class Monitor extends NotificationBroadcasterSupport implements
 	 */
 	abstract protected void removeListener();
 
-	protected ObjectName objectName;
-
-	protected volatile long sequenceNumber = 0;
-
-	protected MBeanServer server;
 }
