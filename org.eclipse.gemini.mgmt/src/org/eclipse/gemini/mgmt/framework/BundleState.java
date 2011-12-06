@@ -144,7 +144,7 @@ public class BundleState extends Monitor implements CustomBundleStateMBean {
 	 * {@inheritDoc}
 	 */
 	public long[] getRequiringBundles(long bundleIdentifier) throws IOException {
-		return Util.getBundlesRequiring(bundle(bundleIdentifier), bc, admin);
+		return Util.getRequiringBundles(bundleIdentifier, bc);
 	}
 
 	/**
@@ -186,7 +186,7 @@ public class BundleState extends Monitor implements CustomBundleStateMBean {
 	 * {@inheritDoc}
 	 */
 	public long[] getRequiredBundles(long bundleIdentifier) throws IOException {
-		return Util.getDependencies(bundle(bundleIdentifier), admin);
+		return Util.getRequiredBundles(bundleIdentifier, bc);
 	}
 
 	/**
@@ -214,14 +214,14 @@ public class BundleState extends Monitor implements CustomBundleStateMBean {
 	 * {@inheritDoc}
 	 */
 	public boolean isRemovalPending(long bundleId) throws IOException {
-		return Util.isRequiredBundleRemovalPending(bundle(bundleId), bc, admin);
+		return Util.isRemovalPending(bundleId, bc);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public boolean isRequired(long bundleId) throws IOException {
-		return Util.isBundleRequired(bundle(bundleId), bc, admin);
+		return Util.isRequired(bundleId, bc);
 	}
 
 	private Bundle bundle(long bundleId) throws IOException {

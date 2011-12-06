@@ -17,15 +17,15 @@ package org.eclipse.gemini.mgmt.codec;
 
 import static org.osgi.framework.Constants.SERVICE_ID;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.Set;
-import java.util.HashSet;
 
 import javax.management.openmbean.ArrayType;
 import javax.management.openmbean.OpenDataException;
@@ -34,6 +34,9 @@ import javax.management.openmbean.SimpleType;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.wiring.BundleRevision;
+import org.osgi.framework.wiring.BundleWire;
+import org.osgi.framework.wiring.BundleWiring;
 
 import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.PackageAdmin;
@@ -79,53 +82,28 @@ public class Util {
 		return ids;
 	}
 
-	public static long[] getDependencies(Bundle b, PackageAdmin admin) {
-		Set<Long> dependencies = new HashSet<Long>();
-		for (ExportedPackage pkg : admin.getExportedPackages((Bundle) null)) {
-			if (!dependencies.contains(pkg.getExportingBundle().getBundleId())) {
-				Bundle[] importing = pkg.getImportingBundles();
-				if (importing != null) {
-					for (Bundle bundle : importing) {
-						if (bundle == b) {
-							dependencies.add(pkg.getExportingBundle().getBundleId());
-							break;
-						}
-					}
-				}
-			}
-		}
-		return longArrayFrom(dependencies.toArray(new Long[dependencies.size()]));
-	}
+    public static long[] getRequiredBundles(long bundleId, BundleContext bundleContext) throws IOException {
+        BundleWiring wiring = bundleContext.getBundle(bundleId).adapt(BundleWiring.class);
+        List<BundleWire> consumedWires = wiring.getRequiredWires(BundleRevision.BUNDLE_NAMESPACE);
+        long[] providerWires = new long[consumedWires.size()];
+        int i = 0;
+        for (BundleWire bundleWire : consumedWires) {
+            providerWires[i] = bundleWire.getProviderWiring().getBundle().getBundleId();
+        }
+        return providerWires;
+    }
 
-	/**
-	 * Answer the the bundle ids of the bundles requiring the given bundles
-	 * 
-	 * @param b
-	 * @param bc
-	 * @param admin
-	 * @return the the bundle ids of the bundles requiring the given bundles
-	 */
-	public static long[] getBundlesRequiring(Bundle b, BundleContext bc, PackageAdmin admin) {
-		Bundle[] all = bc.getBundles();
-		ArrayList<Long> requiring = new ArrayList<Long>();
-		for (Bundle anAll : all) {
-			long[] dependencies = getDependencies(anAll, admin);
-			if (dependencies == null) {
-				continue;
-			}
-			for (long r : dependencies) {
-				if (r == b.getBundleId()) {
-					requiring.add(anAll.getBundleId());
-				}
-			}
-		}
-		long[] ids = new long[requiring.size()];
-		for (int i = 0; i < requiring.size(); i++) {
-			ids[i] = requiring.get(i);
-		}
-		return ids;
-	}
-
+    public static long[] getRequiringBundles(long bundleId, BundleContext bundleContext) throws IOException {
+        BundleWiring wiring = bundleContext.getBundle(bundleId).adapt(BundleWiring.class);
+        List<BundleWire> providedWirings = wiring.getProvidedWires(BundleRevision.BUNDLE_NAMESPACE);
+        long[] consumerWirings = new long[providedWirings.size()];
+        int i = 0;
+        for (BundleWire bundleWire : providedWirings) {
+            consumerWirings[i] = bundleWire.getRequirerWiring().getBundle().getBundleId();
+        }
+        return consumerWirings;
+    }
+	
 	/**
 	 * Answer the string representation of the exported packages of the bundle
 	 * 
@@ -243,33 +221,6 @@ public class Util {
 	}
 
 	/**
-	 * Answer the required bundle of a bundle
-	 * 
-	 * @param bundle
-	 * @param bc
-	 * @param admin
-	 * @return the required bundle of a bundle
-	 */
-	public static RequiredBundle getRequiredBundle(Bundle bundle, BundleContext bc, PackageAdmin admin) {
-		Bundle[] all = bc.getBundles();
-		for (Bundle anAll : all) {
-			String symbolicName = anAll.getSymbolicName();
-			if (symbolicName != null) {
-				RequiredBundle[] requiring = admin.getRequiredBundles(symbolicName);
-				if (requiring == null) {
-					continue;
-				}
-				for (RequiredBundle r : requiring) {
-					if (r.getBundle().equals(bundle)) {
-						return r;
-					}
-				}
-			}
-		}
-		return null;
-	}
-
-	/**
 	 * Answer true if the bundle is a fragment
 	 * 
 	 * @param bundle
@@ -296,11 +247,11 @@ public class Util {
 	 * 
 	 * @param bundle
 	 * @param bc
-	 * @param admin
 	 * @return true if the bundle is required
 	 */
-	public static boolean isBundleRequired(Bundle bundle, BundleContext bc, PackageAdmin admin) {
-		return getRequiredBundle(bundle, bc, admin) != null;
+	public static boolean isRequired(long bundleId, BundleContext bc) {
+		BundleWiring wiring = bc.getBundle(bundleId).adapt(BundleWiring.class);
+		return wiring.getProvidedWires(BundleRevision.BUNDLE_NAMESPACE).size() > 0;
 	}
 
 	/**
@@ -308,12 +259,11 @@ public class Util {
 	 * 
 	 * @param bundle
 	 * @param bc
-	 * @param admin
 	 * @return true if the bundle is pending removal
 	 */
-	public static boolean isRequiredBundleRemovalPending(Bundle bundle, BundleContext bc, PackageAdmin admin) {
-		RequiredBundle r = getRequiredBundle(bundle, bc, admin);
-		return r != null && r.isRemovalPending();
+	public static boolean isRemovalPending(long bundleId, BundleContext bc) {
+        BundleWiring wiring = bc.getBundle(bundleId).adapt(BundleWiring.class);
+        return (!wiring.isCurrent()) && wiring.isInUse();
 	}
 
 	/**
@@ -377,24 +327,4 @@ public class Util {
 		return result;
 	}
 
-	/**
-	 * The type for an array of longs
-	 */
-	public static ArrayType<Long> LONG_ARRAY_TYPE;
-
-	/**
-	 * The type for an array of strings
-	 */
-	public static ArrayType<String> STRING_ARRAY_TYPE;
-
-	private static final Logger log = Logger.getLogger(Util.class.getCanonicalName());
-
-	static {
-		try {
-			LONG_ARRAY_TYPE = new ArrayType<Long>(1, SimpleType.LONG);
-			STRING_ARRAY_TYPE = new ArrayType<String>(1, SimpleType.STRING);
-		} catch (OpenDataException e) {
-			log.log(Level.SEVERE, "Cannot create array open data type", e);
-		}
-	}
 }
