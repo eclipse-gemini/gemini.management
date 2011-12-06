@@ -5,13 +5,18 @@
 	<parent>
 		<groupId>org.eclipse.gemini.mgmt</groupId>
 		<artifactId>org.eclipse.gemini.mgmt_parent</artifactId>
-		<version>1.0.0-SNAPSHOT</version>
+		<version>1.0.0.M01</version>
 		<relativePath>../gemini.mgmt.releng/pom.xml</relativePath>
 	</parent>
 
 	<artifactId>gemini.mgmt.repository</artifactId>
 	<packaging>eclipse-update-site</packaging>
 	<name>Gemini Management Update Site</name>
+
+  <properties>
+		<site-folder-name>milestone</site-folder-name>
+		<zip-folder-name>milestone-zips</zip-folder-name>
+	</properties>
 
 	<build>
 		<plugins>
@@ -44,13 +49,25 @@
 									<tasks>
 										<delete includeemptydirs="false">
 											<fileset
-												dir="/home/data/httpd/download.eclipse.org/gemini/management/nightly">
+												dir="/home/data/httpd/download.eclipse.org/gemini/management/${site-folder-name}">
+												<include name="**" />
+											</fileset>
+										</delete>
+										<delete includeemptydirs="false">
+											<fileset
+												dir="/home/data/httpd/download.eclipse.org/gemini/management/${zip-folder-name}">
 												<include name="**" />
 											</fileset>
 										</delete>
 										<copy includeemptydirs="false"
-											todir="/home/data/httpd/download.eclipse.org/gemini/management/nightly">
+											todir="/home/data/httpd/download.eclipse.org/gemini/management/${site-folder-name}">
 											<fileset dir="target/site">
+												<include name="**" />
+											</fileset>
+										</copy>
+										<copy includeemptydirs="false"
+											todir="/home/data/httpd/download.eclipse.org/gemini/management/${zip-folder-name}">
+											<fileset dir="target/site/plugins">
 												<include name="**" />
 											</fileset>
 										</copy>
