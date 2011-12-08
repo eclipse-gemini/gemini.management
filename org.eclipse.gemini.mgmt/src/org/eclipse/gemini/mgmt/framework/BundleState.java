@@ -27,10 +27,6 @@ import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
 import org.osgi.jmx.framework.BundleStateMBean;
 
-import org.osgi.service.packageadmin.ExportedPackage;
-import org.osgi.service.packageadmin.PackageAdmin;
-import org.osgi.service.startlevel.StartLevel;
-
 import org.eclipse.gemini.mgmt.Monitor;
 import org.eclipse.gemini.mgmt.codec.Util;
 import org.eclipse.gemini.mgmt.framework.codec.OSGiBundle;
@@ -42,14 +38,10 @@ import org.eclipse.gemini.mgmt.framework.codec.OSGiBundleEvent;
 public class BundleState extends Monitor implements CustomBundleStateMBean {
 	
 	protected BundleListener bundleListener;
-	protected BundleContext bc;
-	protected StartLevel sl;
-	protected PackageAdmin admin;
+	protected BundleContext bundleContext;
 	
-	public BundleState(BundleContext bc, StartLevel sl, PackageAdmin admin) {
-		this.bc = bc;
-		this.sl = sl;
-		this.admin = admin;
+	public BundleState(BundleContext bc) {
+		this.bundleContext = bc;
 	}
 
 	/**
@@ -68,8 +60,8 @@ public class BundleState extends Monitor implements CustomBundleStateMBean {
 		}
 		try {
 			ArrayList<OSGiBundle> bundles = new ArrayList<OSGiBundle>();
-			for (Bundle bundle : bc.getBundles()) {
-				bundles.add(new OSGiBundle(bc, admin, sl, bundle));
+			for (Bundle bundle : bundleContext.getBundles()) {
+				bundles.add(new OSGiBundle(bundleContext, bundle));
 			}
 			TabularData table = OSGiBundle.tableFrom(bundles, mask);
 			return table;
@@ -83,149 +75,137 @@ public class BundleState extends Monitor implements CustomBundleStateMBean {
 	 * {@inheritDoc}
 	 */
 	public String[] getExportedPackages(long bundleId) throws IOException {
-		ExportedPackage[] packages = admin.getExportedPackages(bundle(bundleId));
-		if (packages == null) {
-			return new String[0];
-		}
-		String[] ep = new String[packages.length];
-		for (int i = 0; i < packages.length; i++) {
-			ep[i] = packages[i].getName() + ";" + packages[i].getVersion();
-		}
-		return ep;
+		return Util.getBundleExportedPackages(getBundle(bundleId));
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public long[] getFragments(long bundleId) throws IOException {
-		return Util.getBundleFragments(bundle(bundleId), admin);
+		return Util.getBundleFragments(getBundle(bundleId));
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public TabularData getHeaders(long bundleId) throws IOException {
-		return OSGiBundle.headerTable(bundle(bundleId));
+		return OSGiBundle.headerTable(getBundle(bundleId));
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public long[] getHosts(long fragment) throws IOException {
-		Bundle[] hosts = admin.getHosts(bundle(fragment));
-		if (hosts == null) {
-			return new long[0];
-		}
-		return Util.bundleIds(hosts);
+		return Util.getBundleHosts(getBundle(fragment));
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public String[] getImportedPackages(long bundleId) throws IOException {
-		return Util.getBundleImportedPackages(bundle(bundleId), bc, admin);
+		return Util.getBundleImportedPackages(getBundle(bundleId));
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public long getLastModified(long bundleId) throws IOException {
-		return bundle(bundleId).getLastModified();
+		return getBundle(bundleId).getLastModified();
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public long[] getRegisteredServices(long bundleId) throws IOException {
-		return Util.serviceIds(bundle(bundleId).getRegisteredServices());
+		return Util.serviceIds(getBundle(bundleId).getRegisteredServices());
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public long[] getRequiringBundles(long bundleIdentifier) throws IOException {
-		return Util.getRequiringBundles(bundleIdentifier, bc);
+	public long[] getRequiringBundles(long bundleId) throws IOException {
+		return Util.getRequiringBundles(getBundle(bundleId));
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public long[] getServicesInUse(long bundleIdentifier) throws IOException {
-		return Util.serviceIds(bundle(bundleIdentifier).getServicesInUse());
+		return Util.serviceIds(getBundle(bundleIdentifier).getServicesInUse());
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public int getStartLevel(long bundleId) throws IOException {
-		return sl.getBundleStartLevel(bundle(bundleId));
+		return Util.getBundleStartLevel(getBundle(bundleId));
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public String getState(long bundleId) throws IOException {
-		return Util.getBundleState(bundle(bundleId));
+		return Util.getBundleState(getBundle(bundleId));
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public String getSymbolicName(long bundleId) throws IOException {
-		return bundle(bundleId).getSymbolicName();
+		return getBundle(bundleId).getSymbolicName();
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public String getLocation(long bundleId) throws IOException {
-		return bundle(bundleId).getLocation();
+		return getBundle(bundleId).getLocation();
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public long[] getRequiredBundles(long bundleIdentifier) throws IOException {
-		return Util.getRequiredBundles(bundleIdentifier, bc);
+		return Util.getRequiredBundles(getBundle(bundleIdentifier));
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public String getVersion(long bundleId) throws IOException {
-		return bundle(bundleId).getVersion().toString();
+		return getBundle(bundleId).getVersion().toString();
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public boolean isPersistentlyStarted(long bundleId) throws IOException {
-		return Util.isBundlePersistentlyStarted(bundle(bundleId), sl);
+		return Util.isBundlePersistentlyStarted(getBundle(bundleId));
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public boolean isFragment(long bundleId) throws IOException {
-		return Util.isBundleFragment(bundle(bundleId), admin);
+		return Util.isBundleFragment(getBundle(bundleId));
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public boolean isRemovalPending(long bundleId) throws IOException {
-		return Util.isRemovalPending(bundleId, bc);
+		return Util.isRemovalPending(bundleId, bundleContext);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public boolean isRequired(long bundleId) throws IOException {
-		return Util.isRequired(bundleId, bc);
+		return Util.isRequired(bundleId, bundleContext);
 	}
 
-	private Bundle bundle(long bundleId) throws IOException {
-		Bundle b = bc.getBundle(bundleId);
+	private Bundle getBundle(long bundleId) throws IOException {
+		Bundle b = bundleContext.getBundle(bundleId);
 		if (b == null) {
 			throw new IOException("Bundle with id: " + bundleId + " does not exist");
 		}
@@ -238,7 +218,7 @@ public class BundleState extends Monitor implements CustomBundleStateMBean {
 	@Override
 	protected void addListener() {
 		bundleListener = getBundleListener();
-		bc.addBundleListener(bundleListener);
+		bundleContext.addBundleListener(bundleListener);
 	}
 
 	protected BundleListener getBundleListener() {
@@ -257,7 +237,7 @@ public class BundleState extends Monitor implements CustomBundleStateMBean {
 	@Override
 	protected void removeListener() {
 		if (bundleListener != null) {
-			bc.removeBundleListener(bundleListener);
+			bundleContext.removeBundleListener(bundleListener);
 		}
 	}
 

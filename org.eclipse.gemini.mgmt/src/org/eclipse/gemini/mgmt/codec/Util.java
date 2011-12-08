@@ -24,24 +24,16 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import javax.management.openmbean.ArrayType;
-import javax.management.openmbean.OpenDataException;
-import javax.management.openmbean.SimpleType;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.BundleWire;
 import org.osgi.framework.wiring.BundleWiring;
-
-import org.osgi.service.packageadmin.ExportedPackage;
-import org.osgi.service.packageadmin.PackageAdmin;
-import org.osgi.service.packageadmin.RequiredBundle;
-import org.osgi.service.startlevel.StartLevel;
+import org.osgi.framework.startlevel.BundleStartLevel;
 
 /**
  * Static utilities
@@ -66,24 +58,14 @@ public class Util {
 	}
 
 	/**
-	 * Answer the bundle ids of the bundles
 	 * 
-	 * @param bundles
-	 * @return the bundle ids of the bundles
+	 * @param bundleId
+	 * @param bundleContext
+	 * @return
+	 * @throws IOException
 	 */
-	public static long[] bundleIds(RequiredBundle[] bundles) {
-		if (bundles == null) {
-			return new long[0];
-		}
-		long[] ids = new long[bundles.length];
-		for (int i = 0; i < bundles.length; i++) {
-			ids[i] = bundles[i].getBundle().getBundleId();
-		}
-		return ids;
-	}
-
-    public static long[] getRequiredBundles(long bundleId, BundleContext bundleContext) throws IOException {
-        BundleWiring wiring = bundleContext.getBundle(bundleId).adapt(BundleWiring.class);
+    public static long[] getRequiredBundles(Bundle bundle) throws IOException {
+        BundleWiring wiring = bundle.adapt(BundleWiring.class);
         List<BundleWire> consumedWires = wiring.getRequiredWires(BundleRevision.BUNDLE_NAMESPACE);
         long[] providerWires = new long[consumedWires.size()];
         int i = 0;
@@ -93,8 +75,15 @@ public class Util {
         return providerWires;
     }
 
-    public static long[] getRequiringBundles(long bundleId, BundleContext bundleContext) throws IOException {
-        BundleWiring wiring = bundleContext.getBundle(bundleId).adapt(BundleWiring.class);
+    /**
+     * 
+     * @param bundleId
+     * @param bundleContext
+     * @return
+     * @throws IOException
+     */
+    public static long[] getRequiringBundles(Bundle bundle) throws IOException {
+        BundleWiring wiring = bundle.adapt(BundleWiring.class);
         List<BundleWire> providedWirings = wiring.getProvidedWires(BundleRevision.BUNDLE_NAMESPACE);
         long[] consumerWirings = new long[providedWirings.size()];
         int i = 0;
@@ -111,37 +100,55 @@ public class Util {
 	 * @param admin
 	 * @return the string representation of the exported packages of the bundle
 	 */
-	public static String[] getBundleExportedPackages(Bundle b, PackageAdmin admin) {
-		ArrayList<String> packages = new ArrayList<String>();
-		ExportedPackage[] exportedPackages = admin.getExportedPackages(b);
-		if (exportedPackages == null) {
-			return new String[0];
-		}
-		for (ExportedPackage pkg : exportedPackages) {
-			packages.add(packageString(pkg));
-		}
-		return packages.toArray(new String[packages.size()]);
+	public static String[] getBundleExportedPackages(Bundle bundle) {
+		BundleWiring wiring = bundle.adapt(BundleWiring.class);
+		List<BundleWire> providedWires = wiring.getProvidedWires(BundleRevision.PACKAGE_NAMESPACE);
+		List<String> packages = new ArrayList<String>();
+        for(BundleWire wire: providedWires){
+        	String packageName = String.format("%s;%s", wire.getCapability().getAttributes().get(BundleRevision.PACKAGE_NAMESPACE), wire.getCapability().getAttributes().get(Constants.VERSION_ATTRIBUTE));
+        	if(!packages.contains(packageName)){
+        		packages.add(packageName);
+        	}
+        }
+        return packages.toArray(new String[packages.size()]);
 	}
 
 	/**
 	 * Answer the ids of the fragments hosted by the bundle
 	 * 
-	 * @param b
+	 * @param bundle
 	 * @param admin
 	 * @return the ids of the fragments hosted by the bundle
 	 */
-	public static long[] getBundleFragments(Bundle b, PackageAdmin admin) {
-		Bundle[] fragments = admin.getFragments(b);
-		if (fragments == null) {
-			return new long[0];
-		}
-		long ids[] = new long[fragments.length];
-		for (int i = 0; i < fragments.length; i++) {
-			ids[i] = fragments[i].getBundleId();
-		}
-		return ids;
+	public static long[] getBundleFragments(Bundle bundle) {
+		BundleWiring wiring = bundle.adapt(BundleWiring.class);
+		List<BundleWire> consumedWires = wiring.getRequiredWires(BundleRevision.HOST_NAMESPACE);
+        long[] providerWires = new long[consumedWires.size()];
+        int i = 0;
+        for (BundleWire bundleWire : consumedWires) {
+            providerWires[i] = bundleWire.getProviderWiring().getBundle().getBundleId();
+        }
+        return providerWires;
 	}
 
+	/**
+	 * Answer the ids of the hosts this fragment is attached to
+	 * 
+	 * @param bundle
+	 * @param admin
+	 * @return the ids of the hosts this fragment is attached to
+	 */
+	public static long[] getBundleHosts(Bundle bundle) {
+		BundleWiring wiring = bundle.adapt(BundleWiring.class);
+		List<BundleWire> consumedWires = wiring.getProvidedWires(BundleRevision.HOST_NAMESPACE);
+        long[] providerWires = new long[consumedWires.size()];
+        int i = 0;
+        for (BundleWire bundleWire : consumedWires) {
+            providerWires[i] = bundleWire.getRequirerWiring().getBundle().getBundleId();
+        }
+        return providerWires;
+	}
+	
 	/**
 	 * Answer the map of bundle headers
 	 * 
@@ -162,37 +169,21 @@ public class Util {
 	 * Answer the string representation of the packages imported by a bundle
 	 * 
 	 * @param b
-	 * @param bc
+	 * @param bundleContext
 	 * @param admin
 	 * @return the string representation of the packages imported by a bundle
 	 */
-	public static String[] getBundleImportedPackages(Bundle b, BundleContext bc, PackageAdmin admin) {
-		ArrayList<String> imported = new ArrayList<String>();
-		Bundle[] allBundles = bc.getBundles();
-		for (Bundle bundle : allBundles) {
-			ExportedPackage[] eps = admin.getExportedPackages(bundle);
-			if (eps == null) {
-				continue;
-			}
-			for (ExportedPackage ep : eps) {
-				Bundle[] imp = ep.getImportingBundles();
-				if (imp == null) {
-					continue;
-				}
-				for (Bundle b2 : imp) {
-					if (b2.getBundleId() == b.getBundleId()) {
-						imported.add(packageString(ep));
-						break;
-					}
-				}
-			}
-		}
-		if (imported.size() == 0) {
-			return new String[0];
-		} else {
-			return imported.toArray(new String[imported.size()]);
-		}
-
+	public static String[] getBundleImportedPackages(Bundle bundle) {
+		BundleWiring wiring = bundle.adapt(BundleWiring.class);
+		List<BundleWire> providedWires = wiring.getRequiredWires(BundleRevision.PACKAGE_NAMESPACE);
+        List<String> packages = new ArrayList<String>();
+        for(BundleWire wire: providedWires){
+            String packageName = String.format("%s;%s", wire.getCapability().getAttributes().get(BundleRevision.PACKAGE_NAMESPACE), wire.getCapability().getAttributes().get(Constants.VERSION_ATTRIBUTE));
+            if(!packages.contains(packageName)){
+                packages.add(packageName);
+            }
+        }
+        return packages.toArray(new String[packages.size()]);
 	}
 
 	/**
@@ -227,10 +218,16 @@ public class Util {
 	 * @param admin
 	 * @return true if the bundle is a fragment
 	 */
-	public static boolean isBundleFragment(Bundle bundle, PackageAdmin admin) {
-		return admin.getBundleType(bundle) == PackageAdmin.BUNDLE_TYPE_FRAGMENT;
+	public static boolean isBundleFragment(Bundle bundle) {
+		BundleWiring wiring = bundle.adapt(BundleWiring.class);
+		return 0 != (wiring.getRevision().getTypes() & BundleRevision.TYPE_FRAGMENT);
 	}
 
+	public static int getBundleStartLevel(Bundle bundle) {
+		BundleStartLevel startLevel = bundle.adapt(BundleStartLevel.class);
+		return startLevel.getStartLevel();
+	}
+	
 	/**
 	 * Answer true if the bundle has been persitently started
 	 * 
@@ -238,8 +235,9 @@ public class Util {
 	 * @param sl
 	 * @return true if the bundle has been persitently started
 	 */
-	public static boolean isBundlePersistentlyStarted(Bundle bundle, StartLevel sl) {
-		return bundle.getBundleId() == 0 || sl.isBundlePersistentlyStarted(bundle);
+	public static boolean isBundlePersistentlyStarted(Bundle bundle) {
+		BundleStartLevel startLevel = bundle.adapt(BundleStartLevel.class);
+		return startLevel.isPersistentlyStarted();
 	}
 
 	/**
@@ -264,16 +262,6 @@ public class Util {
 	public static boolean isRemovalPending(long bundleId, BundleContext bc) {
         BundleWiring wiring = bc.getBundle(bundleId).adapt(BundleWiring.class);
         return (!wiring.isCurrent()) && wiring.isInUse();
-	}
-
-	/**
-	 * Answer the string representation of the exported package
-	 * 
-	 * @param pkg
-	 * @return the string representation of the exported package
-	 */
-	public static String packageString(ExportedPackage pkg) {
-		return pkg.getName() + ";" + pkg.getVersion();
 	}
 
 	/**
@@ -304,23 +292,6 @@ public class Util {
 			return new Long[0];
 		}
 		Long[] result = new Long[array.length];
-		for (int i = 0; i < array.length; i++) {
-			result[i] = array[i];
-		}
-		return result;
-	}
-
-	/**
-	 * Answer an array of longs from an array of Longs
-	 * 
-	 * @param array
-	 * @return an array of longs from an array of Longs
-	 */
-	public static long[] longArrayFrom(Long[] array) {
-		if (array == null) {
-			return new long[0];
-		}
-		long[] result = new long[array.length];
 		for (int i = 0; i < array.length; i++) {
 			result[i] = array[i];
 		}

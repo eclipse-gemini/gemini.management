@@ -16,7 +16,6 @@
 package org.eclipse.gemini.mgmt.framework.codec;
 
 import static org.eclipse.gemini.mgmt.codec.Util.LongArrayFrom;
-import static org.eclipse.gemini.mgmt.codec.Util.longArrayFrom;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -71,20 +70,6 @@ public class OSGiPackage {
 	private String name;
 	private boolean removalPending;
 	private String version;
-	
-	/**
-	 * Construct an OSGiPackage from the encoded <link>CompositeData</link>
-	 * 
-	 * @param data
-	 *            - the <link>CompositeData</link> encoding the OSGiPackage
-	 */
-	@SuppressWarnings("boxing")
-	public OSGiPackage(CompositeData data) {
-		this((String) data.get(PackageStateMBean.NAME), (String) data.get(PackageStateMBean.VERSION), 
-			 (Boolean) data.get(PackageStateMBean.REMOVAL_PENDING),
-			 longArrayFrom((Long[]) data.get(PackageStateMBean.EXPORTING_BUNDLES)),
-			 longArrayFrom((Long[]) data.get(PackageStateMBean.IMPORTING_BUNDLES)));
-	}
 
 	/**
 	 * Construct an OSGiPackage from the <link>ExporetedPackage</link>
@@ -93,8 +78,7 @@ public class OSGiPackage {
 	 *            - the <link>ExporetedPackage</link>
 	 */
 	public OSGiPackage(ExportedPackage pkg) {
-		this(pkg.getName(), pkg.getVersion().toString(), pkg.isRemovalPending(), 
-				new long[] { pkg.getExportingBundle().getBundleId() }, Util.bundleIds(pkg.getImportingBundles()));
+		this(pkg.getName(), pkg.getVersion().toString(), pkg.isRemovalPending(), new long[] { pkg.getExportingBundle().getBundleId() }, Util.bundleIds(pkg.getImportingBundles()));
 	}
 
 	/**

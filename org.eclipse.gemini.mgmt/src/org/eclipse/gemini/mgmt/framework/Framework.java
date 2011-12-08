@@ -18,47 +18,52 @@ package org.eclipse.gemini.mgmt.framework;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 import javax.management.openmbean.CompositeData;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.startlevel.BundleStartLevel;
+import org.osgi.framework.startlevel.FrameworkStartLevel;
+import org.osgi.framework.wiring.FrameworkWiring;
 
 import org.eclipse.gemini.mgmt.framework.codec.BundleBatchActionResult;
 import org.eclipse.gemini.mgmt.framework.codec.BundleBatchInstallResult;
 
 import org.osgi.jmx.framework.FrameworkMBean;
-import org.osgi.service.packageadmin.PackageAdmin;
-import org.osgi.service.startlevel.StartLevel;
 
-/** 
- * 
+/**
+ * {@inheritDoc}
  */
 public class Framework implements FrameworkMBean {
 
-	protected BundleContext bc;
-	protected StartLevel sl;
-	protected PackageAdmin admin;
+	private BundleContext bc;
+	private FrameworkStartLevel frameworkStartLevel;
+	private FrameworkWiring frameworkWiring;
 	
-	public Framework(BundleContext bc, PackageAdmin admin, StartLevel sl) {
+	public Framework(BundleContext bc) {
 		this.bc = bc;
-		this.admin = admin;
-		this.sl = sl;
+		this.frameworkStartLevel = bc.getBundle(0).adapt(FrameworkStartLevel.class);
+		this.frameworkWiring = bc.getBundle(0).adapt(FrameworkWiring.class);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public int getFrameworkStartLevel() throws IOException {
-		return sl.getStartLevel();
+		return frameworkStartLevel.getStartLevel();
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public int getInitialBundleStartLevel() throws IOException {
-		return sl.getInitialBundleStartLevel();
+		return frameworkStartLevel.getInitialBundleStartLevel();
 	}
 
 	/**
@@ -152,20 +157,19 @@ public class Framework implements FrameworkMBean {
 	 * {@inheritDoc}
 	 */
 	public void refreshBundle(long bundleIdentifier) throws IOException {
-		admin.refreshPackages(new Bundle[] { bundle(bundleIdentifier) });
+		Collection<Bundle> bundles = Arrays.asList(bundle(bundleIdentifier));
+		this.frameworkWiring.refreshBundles(bundles);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public void refreshBundles(long[] bundleIdentifiers) throws IOException {
-		Bundle[] bundles = null;
-
+		List<Bundle> bundles = new ArrayList<Bundle>();
 		if (bundleIdentifiers != null) {
-			bundles = new Bundle[bundleIdentifiers.length];
 			for (int i = 0; i < bundleIdentifiers.length; i++) {
 				try {
-					bundles[i] = bundle(bundleIdentifiers[i]);
+					bundles.add(bundle(bundleIdentifiers[i]));
 				} catch (Throwable e) {
 					IOException iox = new IOException("Unable to refresh packages");
 					iox.initCause(e);
@@ -174,7 +178,7 @@ public class Framework implements FrameworkMBean {
 			}
 		}
 		try {
-			admin.refreshPackages(bundles);
+			this.frameworkWiring.refreshBundles(bundles);
 		} catch (Throwable e) {
 			IOException iox = new IOException("Unable to refresh packages");
 			iox.initCause(e);
@@ -186,23 +190,21 @@ public class Framework implements FrameworkMBean {
 	 * {@inheritDoc}
 	 */
 	public boolean resolveBundle(long bundleIdentifier) throws IOException {
-		return admin.resolveBundles(new Bundle[] { bundle(bundleIdentifier) });
+		Collection<Bundle> bundles = Arrays.asList(bundle(bundleIdentifier));
+		return this.frameworkWiring.resolveBundles(bundles);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.jmx.core.FrameworkMBean#resolveBundles(long[])
+	/**
+	 * {@inheritDoc}
 	 */
 	public boolean resolveBundles(long[] bundleIdentifiers) throws IOException {
-		Bundle[] bundles = null;
+		List<Bundle> bundles = new ArrayList<Bundle>();
 		if (bundleIdentifiers != null) {
-			bundles = new Bundle[bundleIdentifiers.length];
 			for (int i = 0; i < bundleIdentifiers.length; i++) {
-				bundles[i] = bundle(bundleIdentifiers[i]);
+				bundles.add(bundle(bundleIdentifiers[i]));
 			}
 		}
-		return admin.resolveBundles(bundles);
+		return this.frameworkWiring.resolveBundles(bundles);
 	}
 
 	/**
@@ -221,7 +223,7 @@ public class Framework implements FrameworkMBean {
 	 */
 	public void setBundleStartLevel(long bundleIdentifier, int newlevel) throws IOException {
 		try {
-			sl.setBundleStartLevel(bundle(bundleIdentifier), newlevel);
+			bundle(bundleIdentifier).adapt(BundleStartLevel.class).setStartLevel(newlevel);
 		} catch (Throwable e) {
 			IOException iox = new IOException("Cannot set start level: " + e);
 			iox.initCause(e);
@@ -241,7 +243,7 @@ public class Framework implements FrameworkMBean {
 		}
 		for (int i = 0; i < bundleIdentifiers.length; i++) {
 			try {
-				sl.setBundleStartLevel(bundle(bundleIdentifiers[i]), newlevels[i]);
+				bundle(bundleIdentifiers[i]).adapt(BundleStartLevel.class).setStartLevel(newlevels[i]);
 			} catch (Throwable e) {
 				long[] completed = new long[i];
 				System.arraycopy(bundleIdentifiers, 0, completed, 0, completed.length);
@@ -258,7 +260,7 @@ public class Framework implements FrameworkMBean {
 	 */
 	public void setFrameworkStartLevel(int newlevel) throws IOException {
 		try {
-			sl.setStartLevel(newlevel);
+			this.frameworkStartLevel.setStartLevel(newlevel);
 		} catch (Throwable e) {
 			IOException iox = new IOException("Cannot set start level: " + e);
 			iox.initCause(e);
@@ -271,7 +273,7 @@ public class Framework implements FrameworkMBean {
 	 */
 	public void setInitialBundleStartLevel(int newlevel) throws IOException {
 		try {
-			sl.setInitialBundleStartLevel(newlevel);
+			this.frameworkStartLevel.setInitialBundleStartLevel(newlevel);
 		} catch (Throwable e) {
 			IOException iox = new IOException("Cannot set start level: " + e);
 			iox.initCause(e);
@@ -475,16 +477,14 @@ public class Framework implements FrameworkMBean {
 		try {
 			bundle(0).update();
 		} catch (BundleException be) {
-			throw new IOException(
-					"Update of the framework is not implemented: " + be);
+			throw new IOException("Update of the framework is not implemented: " + be);
 		}
 	}
 
 	protected Bundle bundle(long bundleIdentifier) throws IOException {
 		Bundle b = bc.getBundle(bundleIdentifier);
 		if (b == null) {
-			throw new IOException("Bundle <" + bundleIdentifier
-					+ "> does not exist");
+			throw new IOException("Bundle <" + bundleIdentifier + "> does not exist");
 		}
 		return b;
 	}

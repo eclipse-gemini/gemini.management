@@ -49,10 +49,8 @@ import org.osgi.jmx.service.permissionadmin.PermissionAdminMBean;
 import org.osgi.jmx.service.provisioning.ProvisioningServiceMBean;
 import org.osgi.jmx.service.useradmin.UserAdminMBean;
 import org.osgi.service.cm.ConfigurationAdmin;
-import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.permissionadmin.PermissionAdmin;
 import org.osgi.service.provisioning.ProvisioningService;
-import org.osgi.service.startlevel.StartLevel;
 import org.osgi.service.useradmin.UserAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -224,16 +222,14 @@ public class Activator implements BundleActivator {
 	 * @param mbeanServer MBean Server to register the MBeans in
      */
 	protected synchronized void registerServices(MBeanServer mbeanServer) {
-		PackageAdmin admin = (PackageAdmin) bundleContext.getService(bundleContext.getServiceReference(PackageAdmin.class));
-		StartLevel sl = (StartLevel) bundleContext.getService(bundleContext.getServiceReference(StartLevel.class));
 		try {
-			framework = new StandardMBean(new Framework(bundleContext, admin, sl), FrameworkMBean.class);
+			framework = new StandardMBean(new Framework(bundleContext), FrameworkMBean.class);
 		} catch (NotCompliantMBeanException e) {
 			LOGGER.log(Level.SEVERE, "Unable to create StandardMBean for Framework", e);
 			return;
 		}
 		try {
-			bundleState = new StandardMBean(new BundleState(bundleContext, sl, admin), CustomBundleStateMBean.class);
+			bundleState = new StandardMBean(new BundleState(bundleContext), CustomBundleStateMBean.class);
 		} catch (NotCompliantMBeanException e) {
 			LOGGER.log(Level.SEVERE, "Unable to create StandardMBean for BundleState", e);
 			return;
@@ -245,7 +241,7 @@ public class Activator implements BundleActivator {
 			return;
 		}
 		try {
-			packageState = new StandardMBean(new PackageState(bundleContext, admin), PackageStateMBean.class);
+			packageState = new StandardMBean(new PackageState(bundleContext), PackageStateMBean.class);
 		} catch (NotCompliantMBeanException e) {
 			LOGGER.log(Level.SEVERE, "Unable to create StandardMBean for PackageState", e);
 			return;

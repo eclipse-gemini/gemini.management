@@ -196,7 +196,7 @@ public class ServiceState extends Monitor implements ServiceStateMBean {
 				} else {
 					usingBundles = null;
 				}
-				services.add(new OSGiService(identifier, interfaces, bundle, usingBundles));
+				services.add(new OSGiService(reference));
 			}
 			return OSGiService.tableFrom(services);
 		} catch (InvalidSyntaxException e) {

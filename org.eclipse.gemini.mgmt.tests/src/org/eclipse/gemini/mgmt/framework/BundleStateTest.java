@@ -32,12 +32,10 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.startlevel.BundleStartLevel;
 import org.osgi.jmx.framework.BundleStateMBean;
-import org.osgi.service.packageadmin.PackageAdmin;
-import org.osgi.service.startlevel.StartLevel;
 
 import org.eclipse.gemini.mgmt.Activator;
-//import com.sap.core.js.conf.bundlestate.util.BundleState;
 import org.eclipse.gemini.mgmt.codec.Util;
 import org.eclipse.gemini.mgmt.framework.codec.OSGiBundle;
 import org.eclipse.gemini.mgmt.framework.BundleState;
@@ -116,8 +114,6 @@ public class BundleStateTest {
 		Set<?> keys = table.keySet();
 		Iterator<?> iter = keys.iterator();
 		BundleContext bc = FrameworkUtil.getBundle(BundleState.class).getBundleContext();
-		StartLevel sl = (StartLevel) bc.getService(bc.getServiceReference(StartLevel.class.getCanonicalName()));
-		PackageAdmin admin = (PackageAdmin) bc.getService(bc.getServiceReference(PackageAdmin.class.getCanonicalName()));
 		while (iter.hasNext()) {
 			key = iter.next();
 			keysArray = ((Collection<?>) key).toArray();
@@ -147,13 +143,13 @@ public class BundleStateTest {
 			assertEquals(location, bundle.getLocation());
 			assertEquals(symbolicName, bundle.getSymbolicName());
 			assertEquals(version, bundle.getVersion().toString());
-			assertEquals(startLevel, sl.getBundleStartLevel(bundle));
+			assertEquals(startLevel, bundle.adapt(BundleStartLevel.class).getStartLevel());
 			assertEquals(state, stateToString(bundle.getState()));
 			assertEquals(lastModified, bundle.getLastModified());
-			assertEquals(persistenlyStarted, Util.isBundlePersistentlyStarted(bundle, sl));
+			assertEquals(persistenlyStarted, Util.isBundlePersistentlyStarted(bundle));
 			assertEquals(removalPending, Util.isRemovalPending(bundle.getBundleId(), bc));
 			assertEquals(required, Util.isRequired(bundle.getBundleId(), bc));
-			assertEquals(fragment, Util.isBundleFragment(bundle, admin));
+			assertEquals(fragment, Util.isBundleFragment(bundle));
 
 			long[] rs = new long[registeredServices.length];
 			for (int i = 0; i < registeredServices.length; i++) {
@@ -175,12 +171,12 @@ public class BundleStateTest {
 
 			assertEquals((TabularData) headers,	OSGiBundle.headerTable(Util.getBundleHeaders(bundle)));
 
-			String[] exportedPackages2 = Util.getBundleExportedPackages(bundle,	admin);
+			String[] exportedPackages2 = Util.getBundleExportedPackages(bundle);
 			Arrays.sort(exportedPackages);
 			Arrays.sort(exportedPackages2);
 			assertTrue(Arrays.equals(exportedPackages, exportedPackages2));
 
-			String[] importedPackages2 = Util.getBundleImportedPackages(bundle, bc, admin);
+			String[] importedPackages2 = Util.getBundleImportedPackages(bundle);
 			Arrays.sort(importedPackages);
 			Arrays.sort(importedPackages2);
 			assertTrue(Arrays.equals(importedPackages, importedPackages2));
@@ -190,7 +186,7 @@ public class BundleStateTest {
 				frags[i] = fragments[i].longValue();
 			}
 			Arrays.sort(frags);
-			long[] frags2 = Util.getBundleFragments(bundle, admin);
+			long[] frags2 = Util.getBundleFragments(bundle);
 			Arrays.sort(frags2);
 			assertTrue(Arrays.equals(frags, frags2));
 
@@ -199,7 +195,7 @@ public class BundleStateTest {
 				hst[i] = hosts[i].longValue();
 			}
 			Arrays.sort(hst);
-			long[] hst2 = Util.bundleIds(admin.getHosts(bundle));
+			long[] hst2 = Util.getBundleHosts(bundle);
 			Arrays.sort(hst2);
 			assertTrue(Arrays.equals(hst, hst2));
 
@@ -208,7 +204,7 @@ public class BundleStateTest {
 				reqB[i] = requiringBundles[i].longValue();
 			}
 			Arrays.sort(reqB);
-			long[] reqB2 = Util.getRequiringBundles(bundle.getBundleId(), bc);
+			long[] reqB2 = Util.getRequiringBundles(bundle);
 			Arrays.sort(reqB2);
 			assertTrue(Arrays.equals(reqB, reqB2));
 
@@ -217,7 +213,7 @@ public class BundleStateTest {
 				requiredB[i] = requiredBundles[i].longValue();
 			}
 			Arrays.sort(requiredB);
-			long[] requiredB2 = Util.getRequiredBundles(bundle.getBundleId(), bc);
+			long[] requiredB2 = Util.getRequiredBundles(bundle);
 			Arrays.sort(requiredB2);
 			assertTrue(Arrays.equals(requiredB, requiredB2));
 		}
@@ -250,8 +246,6 @@ public class BundleStateTest {
 		Set<?> keys = table.keySet();
 		Iterator<?> iter = keys.iterator();
 		BundleContext bc = FrameworkUtil.getBundle(BundleState.class).getBundleContext();
-		StartLevel sl = (StartLevel) bc.getService(bc.getServiceReference(StartLevel.class.getCanonicalName()));
-		PackageAdmin admin = (PackageAdmin) bc.getService(bc.getServiceReference(PackageAdmin.class.getCanonicalName()));
 		while (iter.hasNext()) {
 			key = iter.next();
 			keysArray = ((Collection<?>) key).toArray();
@@ -273,7 +267,7 @@ public class BundleStateTest {
 			assertEquals(version, bundle.getVersion().toString());
 			assertEquals(state, stateToString(bundle.getState()));
 			assertEquals(lastModified, bundle.getLastModified());
-			assertEquals(persistenlyStarted, Util.isBundlePersistentlyStarted(bundle, sl));
+			assertEquals(persistenlyStarted, Util.isBundlePersistentlyStarted(bundle));
 			assertEquals(removalPending, Util.isRemovalPending(bundle.getBundleId(), bc));
 
 			long[] rs = new long[registeredServices.length];
@@ -294,12 +288,12 @@ public class BundleStateTest {
 			Arrays.sort(siu2);
 			assertTrue(Arrays.equals(siu, siu2));
 
-			String[] exportedPackages2 = Util.getBundleExportedPackages(bundle,	admin);
+			String[] exportedPackages2 = Util.getBundleExportedPackages(bundle);
 			Arrays.sort(exportedPackages);
 			Arrays.sort(exportedPackages2);
 			assertTrue(Arrays.equals(exportedPackages, exportedPackages2));
 
-			String[] importedPackages2 = Util.getBundleImportedPackages(bundle,	bc, admin);
+			String[] importedPackages2 = Util.getBundleImportedPackages(bundle);
 			Arrays.sort(importedPackages);
 			Arrays.sort(importedPackages2);
 			assertTrue(Arrays.equals(importedPackages, importedPackages2));
@@ -309,7 +303,7 @@ public class BundleStateTest {
 				hst[i] = hosts[i].longValue();
 			}
 			Arrays.sort(hst);
-			long[] hst2 = Util.bundleIds(admin.getHosts(bundle));
+			long[] hst2 = Util.getBundleHosts(bundle);
 			Arrays.sort(hst2);
 			assertTrue(Arrays.equals(hst, hst2));
 
@@ -318,7 +312,7 @@ public class BundleStateTest {
 				reqB[i] = requiringBundles[i].longValue();
 			}
 			Arrays.sort(reqB);
-			long[] reqB2 = Util.getRequiringBundles(bundle.getBundleId(), bc);
+			long[] reqB2 = Util.getRequiringBundles(bundle);
 			Arrays.sort(reqB2);
 			assertTrue(Arrays.equals(reqB, reqB2));
 		}
@@ -363,7 +357,7 @@ public class BundleStateTest {
 			TabularDataSupport table = jmxInvokeListBundles(mask);
 			fail("Expected exception did not occur!");
 		} catch (Exception e) {
-			assertTrue(e.getCause() instanceof java.lang.IllegalArgumentException);
+			assertTrue(e.getCause() instanceof IllegalArgumentException);
 		}
 	}
 
@@ -394,5 +388,6 @@ public class BundleStateTest {
 		}
 		return strState;
 	}
+	
 }
 

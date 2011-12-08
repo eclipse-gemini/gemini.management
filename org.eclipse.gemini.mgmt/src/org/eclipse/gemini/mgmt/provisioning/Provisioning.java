@@ -62,6 +62,7 @@ public class Provisioning implements ProvisioningServiceMBean {
 	/**
 	 * {@inheritDoc}
 	 */
+	@SuppressWarnings("unchecked")
 	public TabularData listInformation() throws IOException {
 		return tableFrom(provisioning.getInformation());
 	}

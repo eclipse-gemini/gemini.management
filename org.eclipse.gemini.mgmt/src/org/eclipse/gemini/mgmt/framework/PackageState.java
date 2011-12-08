@@ -37,12 +37,12 @@ import org.eclipse.gemini.mgmt.framework.codec.OSGiPackage;
  */
 public class PackageState implements PackageStateMBean {
 	
-	protected BundleContext bc;
-	protected PackageAdmin admin;
+	private BundleContext bc;
+	private PackageAdmin admin;
 	
-	public PackageState(BundleContext bc, PackageAdmin admin) {
-		this.bc = bc;
-		this.admin = admin;
+	public PackageState(BundleContext bundleContext) {
+		this.bc = bundleContext;
+		this.admin = (PackageAdmin) bundleContext.getService(bundleContext.getServiceReference(PackageAdmin.class));
 	}
 
 	/**

@@ -18,7 +18,6 @@ package org.eclipse.gemini.mgmt.framework.codec;
 import static org.osgi.framework.Constants.OBJECTCLASS;
 import static org.osgi.framework.Constants.SERVICE_ID;
 import static org.eclipse.gemini.mgmt.codec.Util.LongArrayFrom;
-import static org.eclipse.gemini.mgmt.codec.Util.longArrayFrom;
 
 import java.util.HashMap;
 import java.util.List;
@@ -68,35 +67,6 @@ public class OSGiService {
 	private long identifier;
 	private String[] interfaces;
 	private long[] usingBundles;
-	
-	/**
-	 * Construct an OSGiService encoded in the <link>CompositeData</link>
-	 * 
-	 * @param data
-	 *            - the <link>CompositeData</link> encoding the OSGiService
-	 */
-	public OSGiService(CompositeData data) {
-		this((Long) data.get(ServiceStateMBean.IDENTIFIER), 
-			 (String[]) data.get(ServiceStateMBean.OBJECT_CLASS), 
-			 (Long) data.get(ServiceStateMBean.BUNDLE_IDENTIFIER), 
-			 longArrayFrom((Long[]) data.get(ServiceStateMBean.USING_BUNDLES)));
-	}
-
-	/**
-	 * Construct an OSGiService
-	 * 
-	 * @param identifier
-	 * @param interfaces
-	 * @param properties
-	 * @param bundle
-	 * @param usingBundles
-	 */
-	public OSGiService(long identifier, String[] interfaces, long bundle, long[] usingBundles) {
-		this.identifier = identifier;
-		this.interfaces = interfaces;
-		this.bundle = bundle;
-		this.usingBundles = usingBundles;
-	}
 
 	/**
 	 * Construct an OSGiService from the underlying
@@ -105,10 +75,11 @@ public class OSGiService {
 	 * @param reference
 	 *            - the reference of the service
 	 */
-	@SuppressWarnings("boxing")
 	public OSGiService(ServiceReference<?> reference) {
-		this((Long) reference.getProperty(SERVICE_ID), (String[]) reference.getProperty(OBJECTCLASS), 
-			 reference.getBundle().getBundleId(), Util.bundleIds(reference.getUsingBundles()));
+		this.identifier = (Long) reference.getProperty(SERVICE_ID);
+		this.interfaces = (String[]) reference.getProperty(OBJECTCLASS);
+		this.bundle = reference.getBundle().getBundleId();
+		this.usingBundles = Util.bundleIds(reference.getUsingBundles());
 	}
 
 	/**
