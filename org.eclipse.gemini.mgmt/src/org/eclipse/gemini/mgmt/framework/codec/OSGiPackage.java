@@ -29,7 +29,6 @@ import javax.management.openmbean.TabularDataSupport;
 
 import org.osgi.framework.Bundle;
 import org.osgi.jmx.framework.PackageStateMBean;
-import org.osgi.service.packageadmin.ExportedPackage;
 
 /**
  * <p>
@@ -63,22 +62,29 @@ import org.osgi.service.packageadmin.ExportedPackage;
  * </tr>
  * </table>
  */
-public class OSGiPackage {
+public final class OSGiPackage {
 
 	private long[] exportingBundles;
 	private long[] importingBundles;
 	private String name;
 	private boolean removalPending;
 	private String version;
-
+	
 	/**
-	 * Construct an OSGiPackage from the <link>ExporetedPackage</link>
+	 * Construct and OSGiPackage from the supplied data
 	 * 
-	 * @param pkg
-	 *            - the <link>ExporetedPackage</link>
+	 * @param name
+	 * @param version
+	 * @param removalPending
+	 * @param exportingBundles
+	 * @param importingBundles
 	 */
-	public OSGiPackage(ExportedPackage pkg) {
-		this(pkg.getName(), pkg.getVersion().toString(), pkg.isRemovalPending(), new long[] { pkg.getExportingBundle().getBundleId() }, OSGiPackage.bundleIds(pkg.getImportingBundles()));
+	public OSGiPackage(String name, String version, boolean removalPending, Bundle[] exportingBundles, Bundle[] importingBundles) {
+		this.name = name;
+		this.version = version;
+		this.removalPending = removalPending;
+		this.exportingBundles = OSGiPackage.bundleIds(exportingBundles);
+		this.importingBundles = OSGiPackage.bundleIds(importingBundles);
 	}
 
 	/**
@@ -98,23 +104,6 @@ public class OSGiPackage {
 		return ids;
 	}
 	
-	/**
-	 * Construct and OSGiPackage from the supplied data
-	 * 
-	 * @param name
-	 * @param version
-	 * @param removalPending
-	 * @param exportingBundles
-	 * @param importingBundles
-	 */
-	public OSGiPackage(String name, String version, boolean removalPending, long[] exportingBundles, long[] importingBundles) {
-		this.name = name;
-		this.version = version;
-		this.removalPending = removalPending;
-		this.exportingBundles = exportingBundles;
-		this.importingBundles = importingBundles;
-	}
-
 	/**
 	 * Construct the tabular data from the list of OSGiPacakges
 	 * 

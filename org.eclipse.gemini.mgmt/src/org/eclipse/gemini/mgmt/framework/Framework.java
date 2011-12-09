@@ -40,14 +40,14 @@ import org.osgi.jmx.framework.FrameworkMBean;
 /**
  * {@inheritDoc}
  */
-public class Framework implements FrameworkMBean {
+public final class Framework implements FrameworkMBean {
 
-	private BundleContext bc;
+	private BundleContext bundleContext;
 	private FrameworkStartLevel frameworkStartLevel;
 	private FrameworkWiring frameworkWiring;
 	
 	public Framework(BundleContext bc) {
-		this.bc = bc;
+		this.bundleContext = bc;
 		this.frameworkStartLevel = bc.getBundle(0).adapt(FrameworkStartLevel.class);
 		this.frameworkWiring = bc.getBundle(0).adapt(FrameworkWiring.class);
 	}
@@ -71,7 +71,7 @@ public class Framework implements FrameworkMBean {
 	 */
 	public long installBundle(String location) throws IOException {
 		try {
-			return bc.installBundle(location).getBundleId();
+			return bundleContext.installBundle(location).getBundleId();
 		} catch (Throwable e) {
 			throw new IOException("Unable to install bundle: " + e);
 		}
@@ -84,7 +84,7 @@ public class Framework implements FrameworkMBean {
 		InputStream is = null;
 		try {
 			is = new URL(url).openStream();
-			return bc.installBundle(location, is).getBundleId();
+			return bundleContext.installBundle(location, is).getBundleId();
 		} catch (Throwable e) {
 			throw new IOException("Unable to install bundle: " + e);
 		} finally {
@@ -107,7 +107,7 @@ public class Framework implements FrameworkMBean {
 		long ids[] = new long[locations.length];
 		for (int i = 0; i < locations.length; i++) {
 			try {
-				ids[i] = bc.installBundle(locations[i]).getBundleId();
+				ids[i] = bundleContext.installBundle(locations[i]).getBundleId();
 			} catch (Throwable e) {
 				long[] completed = new long[i];
 				System.arraycopy(ids, 0, completed, 0, completed.length);
@@ -134,7 +134,7 @@ public class Framework implements FrameworkMBean {
 			InputStream is = null;
 			try {
 				is = new URL(urls[i]).openStream();
-				ids[i] = bc.installBundle(locations[i], is).getBundleId();
+				ids[i] = bundleContext.installBundle(locations[i], is).getBundleId();
 			} catch (Throwable e) {
 				long[] completed = new long[i];
 				System.arraycopy(ids, 0, completed, 0, completed.length);
@@ -481,8 +481,8 @@ public class Framework implements FrameworkMBean {
 		}
 	}
 
-	protected Bundle bundle(long bundleIdentifier) throws IOException {
-		Bundle b = bc.getBundle(bundleIdentifier);
+	private Bundle bundle(long bundleIdentifier) throws IOException {
+		Bundle b = bundleContext.getBundle(bundleIdentifier);
 		if (b == null) {
 			throw new IOException("Bundle <" + bundleIdentifier + "> does not exist");
 		}

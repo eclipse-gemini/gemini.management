@@ -29,9 +29,11 @@ import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 import javax.management.StandardMBean;
 
-import org.eclipse.gemini.mgmt.cm.ConfigAdminManager;
+import org.eclipse.gemini.mgmt.configurationadmin.ConfigAdminManager;
 import org.eclipse.gemini.mgmt.framework.BundleState;
+import org.eclipse.gemini.mgmt.framework.BundleWiringState;
 import org.eclipse.gemini.mgmt.framework.CustomBundleStateMBean;
+import org.eclipse.gemini.mgmt.framework.CustomBundleWiringStateMBean;
 import org.eclipse.gemini.mgmt.framework.Framework;
 import org.eclipse.gemini.mgmt.framework.PackageState;
 import org.eclipse.gemini.mgmt.framework.ServiceState;
@@ -70,9 +72,11 @@ public class Activator implements BundleActivator {
 	protected List<MBeanServer> mbeanServers = new CopyOnWriteArrayList<MBeanServer>();
 	protected BundleContext bundleContext = null;
 	protected StandardMBean bundleState;
+	protected StandardMBean bundleWiringState;
 	protected StandardMBean packageState;
 	protected StandardMBean serviceState;
-	protected ObjectName bundlesStateName;
+	protected ObjectName bundleStateName;
+	protected ObjectName bundleWiringStateName;
 	protected StandardMBean framework;
 	protected ObjectName frameworkName;
 	protected ServiceTracker<MBeanServer, ?> mbeanServiceTracker;
@@ -100,7 +104,8 @@ public class Activator implements BundleActivator {
 			LOGGER.info("Starting OSGi JMX system");
 		}
 		frameworkName = new ObjectName(FrameworkMBean.OBJECTNAME);
-		bundlesStateName = new ObjectName(CustomBundleStateMBean.OBJECTNAME);
+		bundleStateName = new ObjectName(CustomBundleStateMBean.OBJECTNAME);
+		bundleWiringStateName = new ObjectName(CustomBundleWiringStateMBean.OBJECTNAME);
 		serviceStateName = new ObjectName(ServiceStateMBean.OBJECTNAME);
 		packageStateName = new ObjectName(PackageStateMBean.OBJECTNAME);
 		configAdminName = new ObjectName(ConfigurationAdminMBean.OBJECTNAME);
@@ -140,8 +145,9 @@ public class Activator implements BundleActivator {
 		}
 		framework = null;
 
+		LOGGER.fine("Deregistering bundle state with MBeanServer: " + mbeanServer);
 		try {
-			mbeanServer.unregisterMBean(bundlesStateName);
+			mbeanServer.unregisterMBean(bundleStateName);
 		} catch (InstanceNotFoundException e) {
 			LOGGER.log(Level.FINEST, "OSGi BundleStateMBean not found on deregistration", e);
 		} catch (MBeanRegistrationException e) {
@@ -149,6 +155,16 @@ public class Activator implements BundleActivator {
 		}
 		bundleState = null;
 
+		LOGGER.fine("Deregistering bundle wiring state with MBeanServer: " + mbeanServer);
+		try {
+			mbeanServer.unregisterMBean(bundleWiringStateName);
+		} catch (InstanceNotFoundException e) {
+			LOGGER.log(Level.FINEST, "OSGi BundleWiringStateMBean not found on deregistration", e);
+		} catch (MBeanRegistrationException e) {
+			LOGGER.log(Level.FINE, "OSGi BundleWiringStateMBean deregistration problem", e);
+		}
+		bundleWiringState = null;
+		
 		LOGGER.fine("Deregistering services monitor with MBeanServer: " + mbeanServer);
 		try {
 			mbeanServer.unregisterMBean(serviceStateName);
@@ -235,6 +251,12 @@ public class Activator implements BundleActivator {
 			return;
 		}
 		try {
+			bundleWiringState = new StandardMBean(new BundleWiringState(bundleContext), CustomBundleWiringStateMBean.class);
+		} catch (NotCompliantMBeanException e) {
+			LOGGER.log(Level.SEVERE, "Unable to create StandardMBean for BundleWiringState", e);
+			return;
+		}
+		try {
 			serviceState = new StandardMBean(new ServiceState(bundleContext), ServiceStateMBean.class);
 		} catch (NotCompliantMBeanException e) {
 			LOGGER.log(Level.SEVERE, "Unable to create StandardMBean for ServiceState", e);
@@ -258,16 +280,26 @@ public class Activator implements BundleActivator {
 			LOGGER.log(Level.SEVERE, "Cannot register OSGi framework MBean", e);
 		}
 
-		LOGGER.fine("Registering bundle state monitor with MBeanServer: "
-				+ mbeanServer + " with name: " + bundlesStateName);
+		LOGGER.fine("Registering bundle state with MBeanServer: " + mbeanServer + " with name: " + bundleStateName);
 		try {
-			mbeanServer.registerMBean(bundleState, bundlesStateName);
+			mbeanServer.registerMBean(bundleState, bundleStateName);
 		} catch (InstanceAlreadyExistsException e) {
 			LOGGER.log(Level.FINE, "Cannot register OSGi BundleStateMBean", e);
 		} catch (MBeanRegistrationException e) {
 			LOGGER.log(Level.SEVERE, "Cannot register OSGi BundleStateMBean", e);
 		} catch (NotCompliantMBeanException e) {
 			LOGGER.log(Level.SEVERE, "Cannot register OSGi BundleStateMBean", e);
+		}
+
+		LOGGER.fine("Registering bundle wiring state with MBeanServer: " + mbeanServer + " with name: " + bundleStateName);
+		try {
+			mbeanServer.registerMBean(bundleWiringState, bundleWiringStateName);
+		} catch (InstanceAlreadyExistsException e) {
+			LOGGER.log(Level.FINE, "Cannot register OSGi BundleWiringStateMBean", e);
+		} catch (MBeanRegistrationException e) {
+			LOGGER.log(Level.SEVERE, "Cannot register OSGi BundleWiringStateMBean", e);
+		} catch (NotCompliantMBeanException e) {
+			LOGGER.log(Level.SEVERE, "Cannot register OSGi BundleWiringStateMBean", e);
 		}
 
 		LOGGER.fine("Registering services monitor with MBeanServer: " + mbeanServer + " with name: " + serviceStateName);

@@ -35,13 +35,13 @@ import org.eclipse.gemini.mgmt.framework.codec.OSGiPackage;
 /** 
  * 
  */
-public class PackageState implements PackageStateMBean {
+public final class PackageState implements PackageStateMBean {
 	
-	private BundleContext bc;
+	private BundleContext bundleContext;
 	private PackageAdmin admin;
 	
 	public PackageState(BundleContext bundleContext) {
-		this.bc = bundleContext;
+		this.bundleContext = bundleContext;
 		this.admin = (PackageAdmin) bundleContext.getService(bundleContext.getServiceReference(PackageAdmin.class));
 	}
 
@@ -115,11 +115,11 @@ public class PackageState implements PackageStateMBean {
 	 */
 	public TabularData listPackages() {
 		Set<OSGiPackage> packages = new HashSet<OSGiPackage>();
-		for (Bundle bundle : bc.getBundles()) {
+		for (Bundle bundle : bundleContext.getBundles()) {
 			ExportedPackage[] pkgs = admin.getExportedPackages(bundle);
 			if (pkgs != null) {
 				for (ExportedPackage pkg : pkgs) {
-					packages.add(new OSGiPackage(pkg));
+					packages.add(new OSGiPackage(pkg.getName(), pkg.getVersion().toString(), pkg.isRemovalPending(), new Bundle[] { pkg.getExportingBundle() }, pkg.getImportingBundles()));
 				}
 			}
 		}

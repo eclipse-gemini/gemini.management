@@ -35,7 +35,7 @@ import org.eclipse.gemini.mgmt.framework.codec.OSGiBundleEvent;
 /** 
  * 
  */
-public class BundleState extends Monitor implements CustomBundleStateMBean {
+public final class BundleState extends Monitor implements CustomBundleStateMBean {
 	
 	protected BundleListener bundleListener;
 	protected BundleContext bundleContext;
@@ -48,7 +48,16 @@ public class BundleState extends Monitor implements CustomBundleStateMBean {
 	 * {@inheritDoc}
 	 */
 	public TabularData listBundles() throws IOException {
-		return listBundles(CustomBundleStateMBean.DEFAULT);
+		try {
+			ArrayList<OSGiBundle> bundles = new ArrayList<OSGiBundle>();
+			for (Bundle bundle : bundleContext.getBundles()) {
+				bundles.add(new OSGiBundle(bundleContext, bundle));
+			}
+			TabularData table = OSGiBundle.tableFrom(bundles);
+			return table;
+		} catch (Throwable e) {
+			throw new IOException(e);
+		}
 	}
 	
 	/**
@@ -66,8 +75,7 @@ public class BundleState extends Monitor implements CustomBundleStateMBean {
 			TabularData table = OSGiBundle.tableFrom(bundles, mask);
 			return table;
 		} catch (Throwable e) {
-			e.printStackTrace();
-			return null;
+			throw new IOException(e);
 		}
 	}
 
@@ -215,7 +223,6 @@ public class BundleState extends Monitor implements CustomBundleStateMBean {
 	/**
 	 * {@inheritDoc}
 	 */
-	@Override
 	protected void addListener() {
 		bundleListener = getBundleListener();
 		bundleContext.addBundleListener(bundleListener);
@@ -234,7 +241,6 @@ public class BundleState extends Monitor implements CustomBundleStateMBean {
 	/**
 	 * {@inheritDoc}
 	 */
-	@Override
 	protected void removeListener() {
 		if (bundleListener != null) {
 			bundleContext.removeBundleListener(bundleListener);

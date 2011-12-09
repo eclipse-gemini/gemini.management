@@ -38,9 +38,9 @@ import org.osgi.service.useradmin.UserAdmin;
 /** 
  * 
  */
-public class UserManager extends Monitor implements UserAdminMBean {
+public final class UserManager extends Monitor implements UserAdminMBean {
 
-	protected UserAdmin admin;
+	private UserAdmin admin;
 
 	public UserManager(UserAdmin admin) {
 		this.admin = admin;

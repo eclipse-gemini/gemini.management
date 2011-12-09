@@ -56,7 +56,7 @@ import org.osgi.jmx.framework.FrameworkMBean;
  * </tr>
  * </table>
  */
-public class BundleBatchActionResult extends BundleBatchResult {
+public final class BundleBatchActionResult extends BundleBatchResult {
 
 	private long bundleInError;
 

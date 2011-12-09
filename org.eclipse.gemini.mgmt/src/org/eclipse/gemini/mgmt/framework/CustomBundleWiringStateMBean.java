@@ -15,7 +15,6 @@
  */
 package org.eclipse.gemini.mgmt.framework;
 
-
 import java.io.IOException;
 
 import javax.management.openmbean.ArrayType;
@@ -41,16 +40,15 @@ public interface CustomBundleWiringStateMBean {
     /*
      * The Object Name for a Bundle Revisions MBean.
      */
-    String OBJECTNAME = JmxConstants.OSGI_CORE
-        + ":type=wiringState,version=1.0";
+    String OBJECTNAME = JmxConstants.OSGI_CORE + ":type=wiringState,version=1.0";
 
     /*
-     * Namespaces
-     *
+     * Namespaces - Duplicated from BundleRevision.class
+     * 
      */
-    String BUNDLE_NAMESPACE = "osgi.wiring.bundle";
-    String HOST_NAMESPACE = "osgi.wiring.host";
-    String PACKAGE_NAMESPACE = "osgi.wiring.package";
+//    String BUNDLE_NAMESPACE = "osgi.wiring.bundle";
+//    String HOST_NAMESPACE = "osgi.wiring.host";
+//    String PACKAGE_NAMESPACE = "osgi.wiring.package";
 
     /*
      * Items, CompositeData, TabularData, ArrayTypes
@@ -60,12 +58,13 @@ public interface CustomBundleWiringStateMBean {
     Item KEY_ITEM = new Item(KEY, "The directive key", SimpleType.STRING);
 
     String VALUE = "Value";
-    Item VALUE_ITEM = new Item(VALUE, "The directive value",
-            SimpleType.STRING);
+    
+    Item VALUE_ITEM = new Item(VALUE, "The directive value", SimpleType.STRING);
 
     CompositeType DIRECTIVE_TYPE = Item.compositeType("DIRECTIVE",
             "Describes a directive of a capability or requirement",
             KEY_ITEM, VALUE_ITEM);
+    
     TabularType DIRECTIVES_TYPE = Item.tabularType("DIRECTIVES",
             "Describes the directives of a capability or requirement",
             DIRECTIVE_TYPE, KEY
@@ -76,7 +75,7 @@ public interface CustomBundleWiringStateMBean {
             "The directives of a capability or requirement",
             DIRECTIVES_TYPE);
 
-    // REVIEW should we reuse from JmxConstants here or create our own?
+    // REVIEW should we reuse from JmxConstants here or create our own? ** REUSE
     TabularType ATTRIBUTES_TYPE = Item.tabularType("ATTRIBUTES",
             "Describes attributes of a capability or requirement",
             JmxConstants.PROPERTY_TYPE, JmxConstants.KEY
@@ -145,8 +144,7 @@ public interface CustomBundleWiringStateMBean {
                 REQUIRER_BUNDLE_ID_ITEM,
                 REQUIRER_BUNDLE_REVISION_ID_ITEM
                 );
-    ArrayType BUNDLE_WIRES_TYPE_ARRAY =
-        Item.arrayType(1, BUNDLE_WIRE_TYPE);
+    ArrayType<CompositeData> BUNDLE_WIRES_TYPE_ARRAY = Item.arrayType(1, BUNDLE_WIRE_TYPE);
 
     String BUNDLE_REVISION_ID = "BundleRevisionId";
     Item BUNDLE_REVISION_ID_ITEM = new Item(BUNDLE_REVISION_ID,
@@ -154,19 +152,14 @@ public interface CustomBundleWiringStateMBean {
             SimpleType.INTEGER);
 
     String BUNDLE_ID = "BundleId";
-    Item BUNDLE_ID_ITEM = new Item(BUNDLE_ID,
-            "The bundle identifier of the bundle revision",
-            SimpleType.LONG);
+    Item BUNDLE_ID_ITEM = new Item(BUNDLE_ID, "The bundle identifier of the bundle revision", SimpleType.LONG);
 
-    ArrayType REQUIREMENT_TYPE_ARRAY =
-        Item.arrayType(1, BUNDLE_REQUIREMENT_TYPE);
-    ArrayType CAPABILITY_TYPE_ARRAY =
-        Item.arrayType(1, BUNDLE_CAPABILITY_TYPE);
+    ArrayType<CompositeData> REQUIREMENT_TYPE_ARRAY = Item.arrayType(1, BUNDLE_REQUIREMENT_TYPE);
+    
+    ArrayType<CompositeData> CAPABILITY_TYPE_ARRAY = Item.arrayType(1, BUNDLE_CAPABILITY_TYPE);
 
     String REQUIREMENTS = "Requirements";
-    Item REQUIREMENTS_ITEM = new Item(REQUIREMENTS,
-            "The bundle requirements of a bundle revision wiring",
-            REQUIREMENT_TYPE_ARRAY);
+    Item REQUIREMENTS_ITEM = new Item(REQUIREMENTS, "The bundle requirements of a bundle revision wiring", REQUIREMENT_TYPE_ARRAY);
 
     CompositeType REVISION_REQUIREMENTS_TYPE =
         Item.compositeType("REVISION_REQUIREMENTS",
@@ -219,14 +212,12 @@ public interface CustomBundleWiringStateMBean {
                 REQUIRED_WIRES_ITEM,          /* BUNDLE_WIRE_TYPE [] */
                 PROVIDED_WIRES_ITEM           /* BUNDLE_WIRE_TYPE [] */
                 );
-    ArrayType BUNDLE_WIRING_TYPE_ARRAY =
-        Item.arrayType(1, BUNDLE_WIRING_TYPE);
+    
+    ArrayType BUNDLE_WIRING_TYPE_ARRAY = Item.arrayType(1, BUNDLE_WIRING_TYPE);
 
-    ArrayType REVISIONS_REQUIREMENT_TYPE_ARRAY =
-        Item.arrayType(2, BUNDLE_REQUIREMENT_TYPE);
+    ArrayType REVISIONS_REQUIREMENT_TYPE_ARRAY = Item.arrayType(2, BUNDLE_REQUIREMENT_TYPE);
 
-    ArrayType REVISIONS_CAPABILITY_TYPE_ARRAY =
-        Item.arrayType(2, BUNDLE_CAPABILITY_TYPE);
+    ArrayType REVISIONS_CAPABILITY_TYPE_ARRAY = Item.arrayType(2, BUNDLE_CAPABILITY_TYPE);
 
     TabularType BUNDLE_WIRING_CLOSURE_TYPE = Item.tabularType("BUNDLE_WIRING_CLOSURE",
             "A table of bundle wirings describing a full wiring closure",
@@ -243,8 +234,7 @@ public interface CustomBundleWiringStateMBean {
      * and <code>namespace</code>
      *
      */
-    CompositeData[] getCurrentRevisionDeclaredRequirements(long bundleId,
-            String namespace) throws IOException;
+    CompositeData[] getCurrentRevisionDeclaredRequirements(long bundleId, String namespace) throws IOException;
 
     /**
      * Returns the capabilities for the current bundle revision.
@@ -255,8 +245,7 @@ public interface CustomBundleWiringStateMBean {
      * @return the declared capabilities for the current revision of <code>bundleId</code>
      * and <code>namespace</code>
      */
-    CompositeData[] getCurrentRevisionDeclaredCapabilities(long bundleId,
-            String namespace) throws IOException;
+    CompositeData[] getCurrentRevisionDeclaredCapabilities(long bundleId, String namespace) throws IOException;
 
     /**
      * Returns the bundle wiring for the current bundle revision.
@@ -293,8 +282,7 @@ public interface CustomBundleWiringStateMBean {
      * @return the declared requirements for all revisions of <code>bundleId</code>
      *
      */
-    TabularData getRevisionsDeclaredRequirements(long bundleId,
-            String namespace) throws IOException;
+    TabularData getRevisionsDeclaredRequirements(long bundleId, String namespace) throws IOException;
 
     /**
      * Returns the capabilities for all revisions of the bundle.
@@ -306,8 +294,7 @@ public interface CustomBundleWiringStateMBean {
      * @param namespace
      * @return the declared capabilities for all revisions of <code>bundleId</code>
      */
-    TabularData getRevisionsDeclaredCapabilities(long bundleId,
-            String namespace) throws IOException;
+    TabularData getRevisionsDeclaredCapabilities(long bundleId, String namespace) throws IOException;
 
     /**
      * Returns the bundle wirings for all revisions of the bundle.
@@ -322,33 +309,18 @@ public interface CustomBundleWiringStateMBean {
     ArrayType getRevisionsWiring(long bundleId, String namespace) throws IOException;
 
     /**
-     * Returns a closure of all bundle wirings linked by their
-     *  bundle wires, starting at <code>rootBundleId</code>.
+     * Returns a closure of all bundle wirings for all revisions of the 
+     * bundle linked by their bundle wires, starting at <code>rootBundleId</code>.
+     * 
      * The ArrayType is typed by the {@link #BUNDLE_WIRING_TYPE_ARRAY}
-     * The bundle wirings are in no particular order, and may
-     *  change in subsequent calls to this operation. Furthermore,
-     * the bundle wiring IDs are local and cannot be reused across invocations.
+     * The bundle wirings are in no particular order, and may change 
+     * in subsequent calls to this operation. Furthermore, the bundle 
+     * wiring IDs are local and cannot be reused across invocations.
      *
      * @param rootBundleId
      * @param namespace
      * @return a closure of bundle wirings linked together by wires.
      */
-    ArrayType getWiringClosure(long rootBundleId, String namespace) throws IOException;
+    ArrayType getRevisionsWiringClosure(long rootBundleId, String namespace) throws IOException;
 
-    /**
-     * Returns true if capability provided by <code>provider</code> matches
-     *  with the requirement being required by <code>requirer</code>.
-     * The <code>provider</code>'s CompositeType is typed by the
-     *  {@link #BUNDLE_CAPABILITY_TYPE}
-     * The <code>requirer</code>'s CompositeType is typed by the
-     *  {@link #BUNDLE_REQUIREMENT_TYPE}
-     *
-     * REVIEW This method would have worked better should the requirements and
-     *  capabilities have an ID
-     *
-     * @param requirer bundle id of the bundle requirer
-     * @param provider bundle id of the bundle provider
-     * @return true if capability matches with requirement.
-     */
-    boolean matches(CompositeType provider, CompositeType requirer) throws IOException;
 }

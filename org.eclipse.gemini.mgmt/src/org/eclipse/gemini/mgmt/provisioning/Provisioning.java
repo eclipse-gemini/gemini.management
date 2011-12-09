@@ -31,9 +31,9 @@ import org.osgi.service.provisioning.ProvisioningService;
 /** 
  * 
  */
-public class Provisioning implements ProvisioningServiceMBean {
+public final class Provisioning implements ProvisioningServiceMBean {
 	
-	protected ProvisioningService provisioning;
+	private ProvisioningService provisioning;
 
 	public Provisioning(ProvisioningService provisioning) {
 		this.provisioning = provisioning;

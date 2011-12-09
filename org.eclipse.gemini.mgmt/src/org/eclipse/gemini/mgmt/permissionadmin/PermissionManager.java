@@ -24,9 +24,9 @@ import org.osgi.service.permissionadmin.PermissionInfo;
 /** 
  * 
  */
-public class PermissionManager implements PermissionAdminMBean {
+public final class PermissionManager implements PermissionAdminMBean {
 
-	protected PermissionAdmin admin;
+	private PermissionAdmin admin;
 
 	public PermissionManager(PermissionAdmin admin) {
 		this.admin = admin;

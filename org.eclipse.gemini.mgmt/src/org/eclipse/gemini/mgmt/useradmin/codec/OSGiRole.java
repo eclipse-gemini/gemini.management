@@ -34,6 +34,7 @@ public class OSGiRole {
 	 * The role name
 	 */
 	protected String name;
+	
 	/**
 	 * The type of the role
 	 */

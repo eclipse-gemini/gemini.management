@@ -58,7 +58,7 @@ import org.osgi.jmx.framework.FrameworkMBean;
  * </tr>
  * </table>
  */
-public class BundleBatchInstallResult extends BundleBatchResult {
+public final class BundleBatchInstallResult extends BundleBatchResult {
 
 	private String bundleInError;
 

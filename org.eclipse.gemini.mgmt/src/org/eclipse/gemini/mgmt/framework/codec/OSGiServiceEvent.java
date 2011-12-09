@@ -58,7 +58,7 @@ import org.osgi.jmx.framework.ServiceStateMBean;
  * </tr>
  * </table>
  */
-public class OSGiServiceEvent {
+public final class OSGiServiceEvent {
 
 	private long bundleId;
 	private int eventType;

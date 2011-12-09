@@ -136,7 +136,7 @@ import org.eclipse.gemini.mgmt.framework.CustomBundleStateMBean;
  * </tr>
  * </table>
  */
-public class OSGiBundle {
+public final class OSGiBundle {
 	
 	private String[] exportedPackages;
 	private Boolean fragment;
@@ -159,9 +159,7 @@ public class OSGiBundle {
 	private String symbolicName;
 	private String version;
 	
-	private static final String VALUE = "Value";
-	private static final String KEY = "Key";
-	private static final String[] HEADER_PROPERTY_ITEM_NAMES = new String[] {KEY, VALUE };
+	private static final String[] HEADER_PROPERTY_ITEM_NAMES = new String[] {BundleStateMBean.KEY, BundleStateMBean.VALUE };
 	
 	private BundleContext bundleContext;
 	private Bundle bundle;
@@ -181,23 +179,38 @@ public class OSGiBundle {
 	public OSGiBundle(BundleContext bc, Bundle b) {
 		this.bundleContext = bc;
 		this.bundle = b;
-
 	}
 
 	/**
 	 * Answer the TabularData representing the list of OSGiBundle state
 	 * 
-	 * @param bundles
-	 *            - the list of bundles to represent
+	 * @param bundles - the list of bundles to represent
+	 * 
+	 * @return the Tabular data which represents the list of bundles
+	 * @throws IOException 
+	 */
+	public static TabularData tableFrom(ArrayList<OSGiBundle> bundles) throws IOException {
+		TabularDataSupport table = new TabularDataSupport(BundleStateMBean.BUNDLES_TYPE);
+		for (OSGiBundle bundle : bundles) {
+			table.put(bundle.asCompositeData());
+		}
+		return table;
+	}
+
+	/**
+	 * Answer the TabularData representing the list of OSGiBundle state
+	 * 
+	 * @param bundles - the list of bundles to represent
 	 * @param mask 
 	 * 
 	 * @return the Tabular data which represents the list of bundles
 	 * @throws IOException 
 	 */
 	public static TabularData tableFrom(ArrayList<OSGiBundle> bundles, int mask) throws IOException {
-		TabularDataSupport table = new TabularDataSupport(Item.tabularType("BUNDLES", "A list of bundles", OSGiBundle.computeBundleType(mask), new String[] { BundleStateMBean.IDENTIFIER }));
+		CompositeType computeBundleType = OSGiBundle.computeBundleType(mask);
+		TabularDataSupport table = new TabularDataSupport(Item.tabularType("BUNDLES", "A list of bundles", computeBundleType, new String[] { BundleStateMBean.IDENTIFIER }));
 		for (OSGiBundle bundle : bundles) {
-			table.put(bundle.asCompositeData(mask));
+			table.put(bundle.asCompositeData(computeBundleType, mask));
 		}
 		return table;
 	}
@@ -316,14 +329,48 @@ public class OSGiBundle {
 	 * @return the CompositeData encoding of the receiver.
 	 * @throws IOException 
 	 */
-	public CompositeData asCompositeData(int mask) throws IOException {
+	private CompositeData asCompositeData() throws IOException {
 		Map<String, Object> items = new HashMap<String, Object>();
+		items.put(BundleStateMBean.IDENTIFIER, getIdentifier());
+		items.put(BundleStateMBean.LOCATION, getLocation());
+		items.put(BundleStateMBean.SYMBOLIC_NAME, getSymbolicName());
+		items.put(BundleStateMBean.VERSION, getVersion());
+		items.put(BundleStateMBean.START_LEVEL, getStartLevel());
+		items.put(BundleStateMBean.STATE, getState());
+		items.put(BundleStateMBean.LAST_MODIFIED, getLastModified());
+		items.put(BundleStateMBean.PERSISTENTLY_STARTED, isPersistentlyStarted());
+		items.put(BundleStateMBean.REMOVAL_PENDING, isRemovalPending());
+		items.put(BundleStateMBean.REQUIRED, isRequired());
+		items.put(BundleStateMBean.FRAGMENT, isFragment());
+		items.put(BundleStateMBean.REGISTERED_SERVICES, LongArrayFrom(getRegisteredServices()));
+		items.put(BundleStateMBean.SERVICES_IN_USE, LongArrayFrom(getServicesInUse()));
+		items.put(BundleStateMBean.HEADERS, headerTable(getHeaders()));
+		items.put(BundleStateMBean.EXPORTED_PACKAGES, getExportedPackages());
+		items.put(BundleStateMBean.IMPORTED_PACKAGES, getImportedPackages());
+		items.put(BundleStateMBean.FRAGMENTS, LongArrayFrom(getFragments()));
+		items.put(BundleStateMBean.HOSTS, LongArrayFrom(getHosts()));
+		items.put(BundleStateMBean.REQUIRING_BUNDLES, LongArrayFrom(getRequiringBundles()));
+		items.put(BundleStateMBean.REQUIRED_BUNDLES, LongArrayFrom(getRequiredBundles()));
+		try {
+			return new CompositeDataSupport(BundleStateMBean.BUNDLE_TYPE, items);
+		} catch (OpenDataException e) {
+			throw new IllegalStateException("Cannot form bundle open data", e);
+		}
+	}
+	
+	/**
+	 * Answer the receiver encoded as CompositeData
+	 * @param mask 
+	 * 
+	 * @return the CompositeData encoding of the receiver.
+	 * @throws IOException 
+	 */
+	private CompositeData asCompositeData(CompositeType computeBundleType, int mask) throws IOException {
+		Map<String, Object> items = new HashMap<String, Object>();
+		items.put(BundleStateMBean.IDENTIFIER, getIdentifier());
 		if((mask | CustomBundleStateMBean.LOCATION) == mask) {
 			items.put(BundleStateMBean.LOCATION, getLocation());
 		}
-//		if((mask | IDENTIFIER) == mask) {
-			items.put(BundleStateMBean.IDENTIFIER, getIdentifier());
-//		}
 		if((mask | CustomBundleStateMBean.SYMBOLIC_NAME) == mask) {
 			items.put(BundleStateMBean.SYMBOLIC_NAME, getSymbolicName());
 		}
@@ -380,7 +427,7 @@ public class OSGiBundle {
 		}
 
 		try {
-			return new CompositeDataSupport(OSGiBundle.computeBundleType(mask), items);
+			return new CompositeDataSupport(computeBundleType, items);
 		} catch (OpenDataException e) {
 			throw new IllegalStateException("Cannot form bundle open data", e);
 		}

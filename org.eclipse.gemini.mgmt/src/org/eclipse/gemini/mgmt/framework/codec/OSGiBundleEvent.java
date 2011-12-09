@@ -53,7 +53,7 @@ import org.osgi.jmx.framework.BundleStateMBean;
  * </tr>
  * </table>
  */
-public class OSGiBundleEvent {
+public final class OSGiBundleEvent {
 
 	private long bundleId;
 

@@ -28,15 +28,17 @@ import org.osgi.service.useradmin.Role;
 
 /** 
  */
-public class OSGiGroup extends OSGiUser {
+public final class OSGiGroup extends OSGiUser {
+	
 	/**
 	 * the members
 	 */
-	protected String[] members;
+	private String[] members;
+	
 	/**
 	 * the required members
 	 */
-	protected String[] requiredMembers;
+	private String[] requiredMembers;
 
 	/**
 	 * Construct an instance from the OSGi group

@@ -13,7 +13,7 @@
  *     Hal Hildebrand - Initial JMX support 
  ******************************************************************************/
 
-package org.eclipse.gemini.mgmt.cm;
+package org.eclipse.gemini.mgmt.configurationadmin;
 
 import static org.eclipse.gemini.mgmt.codec.OSGiProperties.*;
 
@@ -34,9 +34,10 @@ import org.osgi.service.cm.ConfigurationAdmin;
 /** 
  * 
  */
-public class ConfigAdminManager implements ConfigurationAdminMBean {
+public final class ConfigAdminManager implements ConfigurationAdminMBean {
 
-	protected ConfigurationAdmin admin;
+	private final ConfigurationAdmin admin;
+	
 	private static final Logger log = Logger.getLogger(ConfigAdminManager.class.getCanonicalName());
 
 	public ConfigAdminManager(ConfigurationAdmin admin) {

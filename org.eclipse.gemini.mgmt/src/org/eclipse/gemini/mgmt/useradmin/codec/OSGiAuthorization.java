@@ -28,15 +28,17 @@ import org.osgi.service.useradmin.Authorization;
 /** 
  * 
  */
-public class OSGiAuthorization {
+public final class OSGiAuthorization {
+	
 	/**
 	 * The name of the authorization
 	 */
-	protected String name;
+	private String name;
+	
 	/**
 	 * The roles
 	 */
-	protected String[] roles;
+	private String[] roles;
 
 	/**
 	 * Construct the instance from the supplied composite data
