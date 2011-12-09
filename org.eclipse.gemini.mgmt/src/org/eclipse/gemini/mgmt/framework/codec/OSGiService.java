@@ -19,18 +19,23 @@ import static org.osgi.framework.Constants.OBJECTCLASS;
 import static org.osgi.framework.Constants.SERVICE_ID;
 import static org.eclipse.gemini.mgmt.codec.Util.LongArrayFrom;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.CompositeDataSupport;
+import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularDataSupport;
 
 import org.osgi.framework.ServiceReference;
 import org.eclipse.gemini.mgmt.codec.Util;
+import org.osgi.jmx.Item;
 import org.osgi.jmx.framework.ServiceStateMBean;
 
 /**
@@ -61,7 +66,7 @@ import org.osgi.jmx.framework.ServiceStateMBean;
  * </tr>
  * </table>
  */
-public class OSGiService {
+public final class OSGiService {
 
 	private long bundle;
 	private long identifier;
@@ -98,6 +103,41 @@ public class OSGiService {
 		}
 		return table;
 	}
+	
+	/**
+	 * Answer the TabularData representing the list of OSGiService state
+	 * 
+	 * @param bundles
+	 *            - the list of bundles to represent
+	 * @param mask 
+	 * 
+	 * @return the Tabular data which represents the list of bundles
+	 * @throws IOException 
+	 */
+	public static TabularData tableFrom(ArrayList<OSGiService> services, String... serviceTypeItems) throws IOException {
+		List<String> serviceTypes = Arrays.asList(serviceTypeItems);
+		TabularDataSupport table = new TabularDataSupport(Item.tabularType("SERVICES", "The table of all services", OSGiService.computeServiceType(serviceTypes), ServiceStateMBean.IDENTIFIER));
+		for (OSGiService service : services) {
+			table.put(service.asCompositeData(serviceTypes));
+		}
+		return table;
+	}
+	
+	private static CompositeType computeServiceType(List<String> serviceTypes) {
+		List<Item> serviceTypeItems = new ArrayList<Item>();
+		serviceTypeItems.add(ServiceStateMBean.IDENTIFIER_ITEM);
+		if(serviceTypes.contains(ServiceStateMBean.OBJECT_CLASS)){
+			serviceTypeItems.add(ServiceStateMBean.OBJECT_CLASS_ITEM);
+		}
+		if(serviceTypes.contains(ServiceStateMBean.BUNDLE_IDENTIFIER)){
+			serviceTypeItems.add(ServiceStateMBean.BUNDLE_IDENTIFIER_ITEM);
+		}
+		if(serviceTypes.contains(ServiceStateMBean.USING_BUNDLES)){
+			serviceTypeItems.add(ServiceStateMBean.USING_BUNDLES_ITEM);
+		}
+		CompositeType currentCompositeType = Item.compositeType("SERVICE", "This type encapsulates an OSGi service", serviceTypeItems.toArray(new Item[]{}));
+		return currentCompositeType;
+	}
 
 	/**
 	 * Answer the receiver encoded as CompositeData
@@ -111,6 +151,32 @@ public class OSGiService {
 		items.put(ServiceStateMBean.BUNDLE_IDENTIFIER, bundle);
 		items.put(ServiceStateMBean.USING_BUNDLES, LongArrayFrom(usingBundles));
 
+		try {
+			return new CompositeDataSupport(ServiceStateMBean.SERVICE_TYPE, items);
+		} catch (OpenDataException e) {
+			throw new IllegalStateException("Cannot form service open data", e);
+		}
+	}
+
+	/**
+	 * Answer the receiver encoded as CompositeData
+	 * 
+	 * @return the CompositeData encoding of the receiver.
+	 */
+	private CompositeData asCompositeData(List<String> serviceTypes) {
+		Map<String, Object> items = new HashMap<String, Object>();
+		if(serviceTypes.contains(ServiceStateMBean.IDENTIFIER)){
+			items.put(ServiceStateMBean.IDENTIFIER, identifier);
+		}
+		if(serviceTypes.contains(ServiceStateMBean.OBJECT_CLASS)){
+			items.put(ServiceStateMBean.OBJECT_CLASS, interfaces);
+		}
+		if(serviceTypes.contains(ServiceStateMBean.BUNDLE_IDENTIFIER)){
+			items.put(ServiceStateMBean.BUNDLE_IDENTIFIER, bundle);
+		}
+		if(serviceTypes.contains(ServiceStateMBean.USING_BUNDLES)){
+			items.put(ServiceStateMBean.USING_BUNDLES, LongArrayFrom(usingBundles));
+		}
 		try {
 			return new CompositeDataSupport(ServiceStateMBean.SERVICE_TYPE, items);
 		} catch (OpenDataException e) {

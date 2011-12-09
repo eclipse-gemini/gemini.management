@@ -14,12 +14,60 @@
  ******************************************************************************/
 package org.eclipse.gemini.mgmt.framework;
 
+import java.io.IOException;
+
+import javax.management.openmbean.CompositeData;
+import javax.management.openmbean.TabularData;
+
 import org.osgi.jmx.framework.ServiceStateMBean;
 
 /**
- * @author cgfrost
  *
  */
 public interface CustomServiceStateMBean extends ServiceStateMBean {
 
+
+	/**
+	 * 
+	 * @param serviceId
+	 * @return
+	 * @throws IOException
+	 */
+	public CompositeData getService(long serviceId) throws IOException;
+
+	/**
+	 * 
+	 * @param serviceId
+	 * @param key
+	 * @return
+	 * @throws IOException
+	 */
+	public CompositeData getProperty(long serviceId, String key) throws IOException;
+
+	/**
+	 * 
+	 * @param clazz
+	 * @param filter
+	 * @return
+	 * @throws IOException
+	 */
+	public TabularData listServices(String clazz, String filter) throws IOException;
+
+	/**
+	 * 
+	 * @param clazz
+	 * @param filter
+	 * @param serviceTypeItems
+	 * @return
+	 * @throws IOException
+	 */
+	public TabularData listServices(String clazz, String filter, String... serviceTypeItems) throws IOException;
+
+	/**
+	 * 
+	 * @return array of the bundle IDs of the bundles using this service
+	 * @throws IOException
+	 */
+	public long[] getServiceIds() throws IOException;
+	
 }

@@ -39,7 +39,7 @@ import org.osgi.framework.startlevel.BundleStartLevel;
  * Static utilities
  * 
  */
-public class Util {
+public final class Util {
 	
 	/**
 	 * 

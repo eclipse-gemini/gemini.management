@@ -17,12 +17,9 @@
 package org.eclipse.gemini.mgmt.framework;
 
 import static org.osgi.framework.Constants.OBJECTCLASS;
-import static org.osgi.framework.Constants.SERVICE_ID;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 import javax.management.Notification;
 import javax.management.openmbean.CompositeData;
@@ -48,11 +45,11 @@ import org.osgi.util.tracker.ServiceTracker;
 /** 
  * 
  */
-public class ServiceState extends Monitor implements CustomServiceStateMBean {
+public final class ServiceState extends Monitor implements CustomServiceStateMBean {
 
-	protected ServiceListener serviceListener;
+	private ServiceListener serviceListener;
 	
-	protected BundleContext bundleContext;
+	private BundleContext bundleContext;
 	
 	/**
 	 * Constructor
@@ -126,7 +123,6 @@ public class ServiceState extends Monitor implements CustomServiceStateMBean {
 
 	/**
 	 * {@inheritDoc}
-	 * @param <T>
 	 */
 	public CompositeData getProperty(long serviceId, String key) throws IOException {
 		for (Bundle bundle : bundleContext.getBundles()) {
@@ -146,11 +142,11 @@ public class ServiceState extends Monitor implements CustomServiceStateMBean {
 	 * {@inheritDoc}
 	 */
 	public TabularData listServices(String clazz, String filter) throws IOException {
-		ArrayList<OSGiService> services = new ArrayList<OSGiService>();
 		try {
+			ArrayList<OSGiService> services = new ArrayList<OSGiService>();
 			ServiceReference<?>[] allServiceReferences = bundleContext.getAllServiceReferences(clazz, filter);
-			for (ServiceReference<?> ref : allServiceReferences) {
-				services.add(new OSGiService(ref));
+			for (ServiceReference<?> reference : allServiceReferences) {
+				services.add(new OSGiService(reference));
 			}
 			return OSGiService.tableFrom(services);
 		} catch (InvalidSyntaxException e) {
@@ -162,38 +158,14 @@ public class ServiceState extends Monitor implements CustomServiceStateMBean {
 	 * {@inheritDoc}
 	 */
 	public TabularData listServices(String clazz, String filter, String... serviceTypeItems) throws IOException {
-		ArrayList<OSGiService> services = new ArrayList<OSGiService>();
-		List<String> serviceTypeNames = Arrays.asList(serviceTypeItems);
 		try {
+			ArrayList<OSGiService> services = new ArrayList<OSGiService>();
 			ServiceReference<?>[] allServiceReferences = bundleContext.getAllServiceReferences(clazz, filter);
 			for (ServiceReference<?> reference : allServiceReferences) {
-				Long identifier;
-				if(serviceTypeNames.contains(ServiceStateMBean.IDENTIFIER)){
-					identifier = (Long) reference.getProperty(SERVICE_ID);
-				} else {
-					identifier = null;
-				}
-				String[] interfaces;
-				if(serviceTypeNames.contains(ServiceStateMBean.OBJECT_CLASS)){
-					interfaces = (String[]) reference.getProperty(OBJECTCLASS);
-				} else {
-					interfaces = null;
-				}
-				Long bundle;
-				if(serviceTypeNames.contains(ServiceStateMBean.BUNDLE_IDENTIFIER)){
-					bundle = reference.getBundle().getBundleId();
-				} else {
-					bundle = null;
-				}
-				long[] usingBundles;
-				if(serviceTypeNames.contains(ServiceStateMBean.USING_BUNDLES)){
-					usingBundles = Util.getBundlesUsingBundles(reference);
-				} else {
-					usingBundles = null;
-				}
 				services.add(new OSGiService(reference));
 			}
-			return OSGiService.tableFrom(services);
+			TabularData table = OSGiService.tableFrom(services, serviceTypeItems);
+			return table;
 		} catch (InvalidSyntaxException e) {
 			throw new IOException(e);
 		}
@@ -212,7 +184,6 @@ public class ServiceState extends Monitor implements CustomServiceStateMBean {
 			}
 			return serviceIds;
 		} catch (InvalidSyntaxException e) {
-			//passing in null so should never happen
 			throw new IOException(e);
 		}
 	}

@@ -85,7 +85,7 @@ import org.osgi.framework.ServiceReference;
  * <p>
  * The
  */
-public class OSGiProperties {
+public final class OSGiProperties {
 
 	/**
 	 * The key of the entry
@@ -384,7 +384,7 @@ public class OSGiProperties {
 	 * @param type
 	 * @return the composite data representation of the key/value pair
 	 */
-	protected static CompositeData propertyData(String key, String value, String type) {
+	private static CompositeData propertyData(String key, String value, String type) {
 		Object[] itemValues = new Object[PROPERTIES.length];
 		itemValues[0] = key;
 		itemValues[1] = value;
