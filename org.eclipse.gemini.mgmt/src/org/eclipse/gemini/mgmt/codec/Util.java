@@ -40,16 +40,15 @@ import org.osgi.framework.startlevel.BundleStartLevel;
  * 
  */
 public class Util {
+	
 	/**
-	 * Answer the bundle ids of the bundles
 	 * 
-	 * @param bundles
-	 * @return the bundle ids of the bundles
+	 * @param serviceRef
+	 * @return
+	 * @throws IOException
 	 */
-	public static long[] bundleIds(Bundle[] bundles) {
-		if (bundles == null) {
-			return new long[0];
-		}
+	public static long[] getBundlesUsingBundles(ServiceReference<?> serviceRef) {
+		Bundle[] bundles = serviceRef.getUsingBundles();
 		long[] ids = new long[bundles.length];
 		for (int i = 0; i < bundles.length; i++) {
 			ids[i] = bundles[i].getBundleId();
@@ -64,7 +63,7 @@ public class Util {
 	 * @return
 	 * @throws IOException
 	 */
-    public static long[] getRequiredBundles(Bundle bundle) throws IOException {
+    public static long[] getRequiredBundles(Bundle bundle) {
         BundleWiring wiring = bundle.adapt(BundleWiring.class);
         List<BundleWire> consumedWires = wiring.getRequiredWires(BundleRevision.BUNDLE_NAMESPACE);
         long[] providerWires = new long[consumedWires.size()];
@@ -82,7 +81,7 @@ public class Util {
      * @return
      * @throws IOException
      */
-    public static long[] getRequiringBundles(Bundle bundle) throws IOException {
+    public static long[] getRequiringBundles(Bundle bundle) {
         BundleWiring wiring = bundle.adapt(BundleWiring.class);
         List<BundleWire> providedWirings = wiring.getProvidedWires(BundleRevision.BUNDLE_NAMESPACE);
         long[] consumerWirings = new long[providedWirings.size()];

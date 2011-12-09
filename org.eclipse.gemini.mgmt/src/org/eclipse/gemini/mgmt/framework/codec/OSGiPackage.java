@@ -27,7 +27,7 @@ import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularDataSupport;
 
-import org.eclipse.gemini.mgmt.codec.Util;
+import org.osgi.framework.Bundle;
 import org.osgi.jmx.framework.PackageStateMBean;
 import org.osgi.service.packageadmin.ExportedPackage;
 
@@ -78,9 +78,26 @@ public class OSGiPackage {
 	 *            - the <link>ExporetedPackage</link>
 	 */
 	public OSGiPackage(ExportedPackage pkg) {
-		this(pkg.getName(), pkg.getVersion().toString(), pkg.isRemovalPending(), new long[] { pkg.getExportingBundle().getBundleId() }, Util.bundleIds(pkg.getImportingBundles()));
+		this(pkg.getName(), pkg.getVersion().toString(), pkg.isRemovalPending(), new long[] { pkg.getExportingBundle().getBundleId() }, OSGiPackage.bundleIds(pkg.getImportingBundles()));
 	}
 
+	/**
+	 * Answer the bundle ids of the bundles
+	 * 
+	 * @param bundles
+	 * @return the bundle ids of the bundles
+	 */
+	private static long[] bundleIds(Bundle[] bundles) {
+		if (bundles == null) {
+			return new long[0];
+		}
+		long[] ids = new long[bundles.length];
+		for (int i = 0; i < bundles.length; i++) {
+			ids[i] = bundles[i].getBundleId();
+		}
+		return ids;
+	}
+	
 	/**
 	 * Construct and OSGiPackage from the supplied data
 	 * 

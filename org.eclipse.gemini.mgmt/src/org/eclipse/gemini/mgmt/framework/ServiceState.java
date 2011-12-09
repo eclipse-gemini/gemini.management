@@ -48,7 +48,7 @@ import org.osgi.util.tracker.ServiceTracker;
 /** 
  * 
  */
-public class ServiceState extends Monitor implements ServiceStateMBean {
+public class ServiceState extends Monitor implements CustomServiceStateMBean {
 
 	protected ServiceListener serviceListener;
 	
@@ -104,12 +104,7 @@ public class ServiceState extends Monitor implements ServiceStateMBean {
 	 * {@inheritDoc}
 	 */
 	public long[] getUsingBundles(long serviceId) throws IOException {
-		Bundle[] bundles = ref(serviceId).getUsingBundles();
-		long[] ids = new long[bundles.length];
-		for (int i = 0; i < bundles.length; i++) {
-			ids[i] = bundles[i].getBundleId();
-		}
-		return ids;
+		return Util.getBundlesUsingBundles(ref(serviceId));
 	}
 
 	/**
@@ -192,7 +187,7 @@ public class ServiceState extends Monitor implements ServiceStateMBean {
 				}
 				long[] usingBundles;
 				if(serviceTypeNames.contains(ServiceStateMBean.USING_BUNDLES)){
-					usingBundles = Util.bundleIds(reference.getUsingBundles());
+					usingBundles = Util.getBundlesUsingBundles(reference);
 				} else {
 					usingBundles = null;
 				}

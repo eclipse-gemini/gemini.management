@@ -74,12 +74,13 @@ public class OSGiService {
 	 * 
 	 * @param reference
 	 *            - the reference of the service
+	 * @throws  
 	 */
 	public OSGiService(ServiceReference<?> reference) {
 		this.identifier = (Long) reference.getProperty(SERVICE_ID);
 		this.interfaces = (String[]) reference.getProperty(OBJECTCLASS);
 		this.bundle = reference.getBundle().getBundleId();
-		this.usingBundles = Util.bundleIds(reference.getUsingBundles());
+		this.usingBundles = Util.getBundlesUsingBundles(reference);
 	}
 
 	/**
