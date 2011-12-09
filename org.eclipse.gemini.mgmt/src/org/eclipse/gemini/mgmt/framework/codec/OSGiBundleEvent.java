@@ -80,7 +80,6 @@ public final class OSGiBundleEvent {
 	 * @param data
 	 *            - the CompositeData representing the event.
 	 */
-	@SuppressWarnings("boxing")
 	public OSGiBundleEvent(CompositeData data) {
 		bundleId = (Long) data.get(BundleStateMBean.IDENTIFIER);
 		location = (String) data.get(BundleStateMBean.LOCATION);
@@ -108,7 +107,6 @@ public final class OSGiBundleEvent {
 	 * 
 	 * @return the CompositeData encoding of the receiver.
 	 */
-	@SuppressWarnings("boxing")
 	public CompositeData asCompositeData() {
 		Map<String, Object> items = new HashMap<String, Object>();
 		items.put(BundleStateMBean.IDENTIFIER, bundleId);

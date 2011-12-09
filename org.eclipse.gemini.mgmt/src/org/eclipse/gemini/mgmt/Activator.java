@@ -33,6 +33,7 @@ import org.eclipse.gemini.mgmt.configurationadmin.ConfigAdminManager;
 import org.eclipse.gemini.mgmt.framework.BundleState;
 import org.eclipse.gemini.mgmt.framework.BundleWiringState;
 import org.eclipse.gemini.mgmt.framework.CustomBundleStateMBean;
+import org.eclipse.gemini.mgmt.framework.CustomServiceStateMBean;
 import org.eclipse.gemini.mgmt.framework.CustomBundleWiringStateMBean;
 import org.eclipse.gemini.mgmt.framework.Framework;
 import org.eclipse.gemini.mgmt.framework.PackageState;
@@ -45,7 +46,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.jmx.framework.FrameworkMBean;
 import org.osgi.jmx.framework.PackageStateMBean;
-import org.osgi.jmx.framework.ServiceStateMBean;
 import org.osgi.jmx.service.cm.ConfigurationAdminMBean;
 import org.osgi.jmx.service.permissionadmin.PermissionAdminMBean;
 import org.osgi.jmx.service.provisioning.ProvisioningServiceMBean;
@@ -67,7 +67,7 @@ public class Activator implements BundleActivator {
 
 	private static final Logger LOGGER = Logger.getLogger(Activator.class.getCanonicalName());
 
-	private static final String VIRGO_BUNDLE_ID = "org.eclipse.virgo.management.bundleId";
+	private static final String VIRGO_BUNDLE_ID = "org.eclipse.virgo.management.bundle";
 	
 	protected List<MBeanServer> mbeanServers = new CopyOnWriteArrayList<MBeanServer>();
 	protected BundleContext bundleContext = null;
@@ -106,7 +106,7 @@ public class Activator implements BundleActivator {
 		frameworkName = new ObjectName(FrameworkMBean.OBJECTNAME);
 		bundleStateName = new ObjectName(CustomBundleStateMBean.OBJECTNAME);
 		bundleWiringStateName = new ObjectName(CustomBundleWiringStateMBean.OBJECTNAME);
-		serviceStateName = new ObjectName(ServiceStateMBean.OBJECTNAME);
+		serviceStateName = new ObjectName(CustomServiceStateMBean.OBJECTNAME);
 		packageStateName = new ObjectName(PackageStateMBean.OBJECTNAME);
 		configAdminName = new ObjectName(ConfigurationAdminMBean.OBJECTNAME);
 		permissionAdminName = new ObjectName(PermissionAdminMBean.OBJECTNAME);
@@ -257,7 +257,7 @@ public class Activator implements BundleActivator {
 			return;
 		}
 		try {
-			serviceState = new StandardMBean(new ServiceState(bundleContext), ServiceStateMBean.class);
+			serviceState = new StandardMBean(new ServiceState(bundleContext), CustomServiceStateMBean.class);
 		} catch (NotCompliantMBeanException e) {
 			LOGGER.log(Level.SEVERE, "Unable to create StandardMBean for ServiceState", e);
 			return;
@@ -337,9 +337,7 @@ public class Activator implements BundleActivator {
 
 	class MBeanServiceTracker implements ServiceTrackerCustomizer<MBeanServer, Object> {
 
-		/*
-		 * (non-Javadoc)
-		 * 
+		/**
 		 * Register all MBeans in a newly registered MBean server
 		 * 
 		 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
@@ -370,10 +368,8 @@ public class Activator implements BundleActivator {
 			// no op
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 *  Unregister all MBeans from a MBean server when it gets unregistered
+		/**
+		 * Unregister all MBeans from a MBean server when it gets unregistered
 		 *  
 		 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
 		 */
@@ -399,11 +395,10 @@ public class Activator implements BundleActivator {
 	}
 
 	class ConfigAdminTracker implements ServiceTrackerCustomizer<ConfigurationAdmin, Object> {
-		StandardMBean manager;
+		
+		private StandardMBean manager;
 
-		/*
-		 * (non-Javadoc)
-		 * 
+		/**
 		 * Register a MBean for the ConfigurationAdmin service in all MBean servers
 		 * 
 		 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
@@ -441,11 +436,10 @@ public class Activator implements BundleActivator {
 		}
 
 		public void modifiedService(ServiceReference<ConfigurationAdmin> reference, Object service) {
+			// no op
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
+		/**
 		 * Unregister the MBean for the ConfigurationAdmin service from all MBean servers
 		 * 
 		 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
@@ -466,11 +460,10 @@ public class Activator implements BundleActivator {
 	}
 
 	class PermissionAdminTracker implements ServiceTrackerCustomizer<PermissionAdmin, Object> {
-		StandardMBean manager;
+		
+		private StandardMBean manager;
 
-		/*
-		 * (non-Javadoc)
-		 * 
+		/**
 		 * Register a MBean for the PermissionAdmin service in all MBean servers
 		 * 
 		 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
@@ -505,11 +498,10 @@ public class Activator implements BundleActivator {
 		}
 
 		public void modifiedService(ServiceReference<PermissionAdmin> reference, Object service) {
+			// no op
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
+		/**
 		 * Unregister the MBean for the PermissionAdmin service from all MBean servers
 		 * 
 		 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
@@ -529,11 +521,10 @@ public class Activator implements BundleActivator {
 	}
 
 	class ProvisioningServiceTracker implements ServiceTrackerCustomizer<ProvisioningService, Object> {
-		StandardMBean provisioning;
+		
+		private StandardMBean provisioning;
 
-		/*
-		 * (non-Javadoc)
-		 * 
+		/**
 		 * Register a MBean for the Provisioning service in all MBean servers
 		 * 
 		 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
@@ -571,11 +562,10 @@ public class Activator implements BundleActivator {
 		}
 
 		public void modifiedService(ServiceReference<ProvisioningService> reference, Object service) {
+			// no op
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
+		/**
 		 * Unregister the MBean for the Provisioning service from all MBean servers
 		 * 
 		 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
@@ -595,11 +585,10 @@ public class Activator implements BundleActivator {
 	}
 
 	class UserAdminTracker implements ServiceTrackerCustomizer<UserAdmin, Object> {
-		StandardMBean manager;
+		
+		private StandardMBean manager;
 
-		/*
-		 * (non-Javadoc)
-		 * 
+		/**
 		 * Register a MBean for the UserAdmin service in all MBean servers
 		 * 
 		 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
@@ -636,11 +625,10 @@ public class Activator implements BundleActivator {
 		}
 
 		public void modifiedService(ServiceReference<UserAdmin> reference, Object service) {
+			// no op
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
+		/**
 		 * Unregister the MBean for the UserAdmin service from all MBean servers
 		 * 
 		 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
@@ -658,4 +646,5 @@ public class Activator implements BundleActivator {
 			}
 		}
 	}
+	
 }

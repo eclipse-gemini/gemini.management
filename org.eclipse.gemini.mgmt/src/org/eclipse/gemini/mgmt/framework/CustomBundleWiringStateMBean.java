@@ -144,7 +144,7 @@ public interface CustomBundleWiringStateMBean {
                 REQUIRER_BUNDLE_ID_ITEM,
                 REQUIRER_BUNDLE_REVISION_ID_ITEM
                 );
-    ArrayType<CompositeData> BUNDLE_WIRES_TYPE_ARRAY = Item.arrayType(1, BUNDLE_WIRE_TYPE);
+    ArrayType BUNDLE_WIRES_TYPE_ARRAY = Item.arrayType(1, BUNDLE_WIRE_TYPE);
 
     String BUNDLE_REVISION_ID = "BundleRevisionId";
     Item BUNDLE_REVISION_ID_ITEM = new Item(BUNDLE_REVISION_ID,
@@ -154,9 +154,9 @@ public interface CustomBundleWiringStateMBean {
     String BUNDLE_ID = "BundleId";
     Item BUNDLE_ID_ITEM = new Item(BUNDLE_ID, "The bundle identifier of the bundle revision", SimpleType.LONG);
 
-    ArrayType<CompositeData> REQUIREMENT_TYPE_ARRAY = Item.arrayType(1, BUNDLE_REQUIREMENT_TYPE);
+    ArrayType REQUIREMENT_TYPE_ARRAY = Item.arrayType(1, BUNDLE_REQUIREMENT_TYPE);
     
-    ArrayType<CompositeData> CAPABILITY_TYPE_ARRAY = Item.arrayType(1, BUNDLE_CAPABILITY_TYPE);
+    ArrayType CAPABILITY_TYPE_ARRAY = Item.arrayType(1, BUNDLE_CAPABILITY_TYPE);
 
     String REQUIREMENTS = "Requirements";
     Item REQUIREMENTS_ITEM = new Item(REQUIREMENTS, "The bundle requirements of a bundle revision wiring", REQUIREMENT_TYPE_ARRAY);
