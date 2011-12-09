@@ -19,7 +19,6 @@ Import-Package: javax.management,
  org.osgi.service.packageadmin,
  org.osgi.service.permissionadmin,
  org.osgi.service.provisioning,
- org.osgi.service.startlevel,
  org.osgi.service.useradmin,
  org.osgi.util.tracker
 Bundle-Activator: org.eclipse.gemini.mgmt.Activator
