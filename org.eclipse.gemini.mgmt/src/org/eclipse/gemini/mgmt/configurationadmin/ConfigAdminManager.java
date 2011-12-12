@@ -15,7 +15,7 @@
 
 package org.eclipse.gemini.mgmt.configurationadmin;
 
-import static org.eclipse.gemini.mgmt.codec.OSGiProperties.*;
+import static org.eclipse.gemini.mgmt.internal.OSGiProperties.*;
 
 import java.io.IOException;
 import java.util.ArrayList;

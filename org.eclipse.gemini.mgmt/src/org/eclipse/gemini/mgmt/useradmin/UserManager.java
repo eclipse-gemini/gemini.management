@@ -24,11 +24,11 @@ import javax.management.openmbean.TabularData;
 
 import org.osgi.framework.InvalidSyntaxException;
 import org.eclipse.gemini.mgmt.Monitor;
-import org.eclipse.gemini.mgmt.codec.OSGiProperties;
-import org.eclipse.gemini.mgmt.useradmin.codec.OSGiAuthorization;
-import org.eclipse.gemini.mgmt.useradmin.codec.OSGiGroup;
-import org.eclipse.gemini.mgmt.useradmin.codec.OSGiRole;
-import org.eclipse.gemini.mgmt.useradmin.codec.OSGiUser;
+import org.eclipse.gemini.mgmt.internal.OSGiProperties;
+import org.eclipse.gemini.mgmt.useradmin.internal.OSGiAuthorization;
+import org.eclipse.gemini.mgmt.useradmin.internal.OSGiGroup;
+import org.eclipse.gemini.mgmt.useradmin.internal.OSGiRole;
+import org.eclipse.gemini.mgmt.useradmin.internal.OSGiUser;
 import org.osgi.jmx.service.useradmin.UserAdminMBean;
 import org.osgi.service.useradmin.Group;
 import org.osgi.service.useradmin.Role;

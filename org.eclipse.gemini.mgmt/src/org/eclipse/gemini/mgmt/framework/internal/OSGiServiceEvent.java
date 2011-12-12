@@ -13,7 +13,7 @@
  *     Hal Hildebrand - Initial JMX support 
  ******************************************************************************/
 
-package org.eclipse.gemini.mgmt.framework.codec;
+package org.eclipse.gemini.mgmt.framework.internal;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -61,46 +61,16 @@ import org.osgi.jmx.framework.ServiceStateMBean;
 public final class OSGiServiceEvent {
 
 	private long bundleId;
-	private int eventType;
-	private String[] interfaces;
-	private String location;
-	private String symbolicName;
-	private long serviceId;
 	
-	/**
-	 * Construct an OSGiServiceEvent from the CompositeData representing the
-	 * event
-	 * 
-	 * @param data
-	 *            = the CompositeData representation of the event
-	 */
-	public OSGiServiceEvent(CompositeData data) {
-		serviceId = (Long) data.get(ServiceStateMBean.IDENTIFIER);
-		bundleId = (Long) data.get(ServiceStateMBean.BUNDLE_IDENTIFIER);
-		location = (String) data.get(ServiceStateMBean.BUNDLE_LOCATION);
-		symbolicName = (String) data.get(ServiceStateMBean.BUNDLE_SYMBOLIC_NAME);
-		interfaces = (String[]) data.get(ServiceStateMBean.OBJECT_CLASS);
-		eventType = (Integer) data.get(ServiceStateMBean.EVENT);
-	}
-
-	/**
-	 * Construct and OSGiServiceEvent
-	 * 
-	 * @param serviceId
-	 * @param bundleId
-	 * @param location
-	 * @param symbolicName
-	 * @param interfaces
-	 * @param eventType
-	 */
-	public OSGiServiceEvent(long serviceId, long bundleId, String location, String symbolicName, String[] interfaces, int eventType) {
-		this.serviceId = serviceId;
-		this.bundleId = bundleId;
-		this.location = location;
-		this.symbolicName = symbolicName;
-		this.interfaces = interfaces;
-		this.eventType = eventType;
-	}
+	private int eventType;
+	
+	private String[] interfaces;
+	
+	private String location;
+	
+	private String symbolicName;
+	
+	private long serviceId;
 
 	/**
 	 * 
@@ -109,13 +79,13 @@ public final class OSGiServiceEvent {
 	 * 
 	 * @param event
 	 */
-	@SuppressWarnings("boxing")
 	public OSGiServiceEvent(ServiceEvent event) {
-		this((Long) event.getServiceReference().getProperty(Constants.SERVICE_ID), 
-			 event.getServiceReference().getBundle().getBundleId(), 
-			 event.getServiceReference().getBundle().getLocation(), 
-			 event.getServiceReference().getBundle().getSymbolicName(), 
-			 (String[]) event.getServiceReference().getProperty(Constants.OBJECTCLASS), event.getType());
+		this.serviceId = (Long) event.getServiceReference().getProperty(Constants.SERVICE_ID);
+		this.bundleId = event.getServiceReference().getBundle().getBundleId();
+		this.location = event.getServiceReference().getBundle().getLocation();
+		this.symbolicName = event.getServiceReference().getBundle().getSymbolicName();
+		this.interfaces = (String[]) event.getServiceReference().getProperty(Constants.OBJECTCLASS);
+		this.eventType = event.getType();
 	}
 
 	/**
@@ -123,7 +93,6 @@ public final class OSGiServiceEvent {
 	 * 
 	 * @return the CompositeData encoding of the receiver.
 	 */
-	@SuppressWarnings("boxing")
 	public CompositeData asCompositeData() {
 		Map<String, Object> items = new HashMap<String, Object>();
 		items.put(ServiceStateMBean.IDENTIFIER, serviceId);
@@ -140,40 +109,40 @@ public final class OSGiServiceEvent {
 			throw new IllegalStateException("Cannot form service event open data", e);
 		}
 	}
-
-	/**
-	 * @return the identifier of the bundle the service belongs to
-	 */
-	public long getBundleId() {
-		return bundleId;
-	}
-
-	/**
-	 * @return the type of the event
-	 */
-	public int getEventType() {
-		return eventType;
-	}
-
-	/**
-	 * @return the interfaces the service implements
-	 */
-	public String[] getInterfaces() {
-		return interfaces;
-	}
-
-	/**
-	 * @return the location of the bundle the service belongs to
-	 */
-	public String getLocation() {
-		return location;
-	}
-
-	/**
-	 * @return the identifier of the service
-	 */
-	public long getServiceId() {
-		return serviceId;
-	}
+//
+//	/**
+//	 * @return the identifier of the bundle the service belongs to
+//	 */
+//	public long getBundleId() {
+//		return bundleId;
+//	}
+//
+//	/**
+//	 * @return the type of the event
+//	 */
+//	public int getEventType() {
+//		return eventType;
+//	}
+//
+//	/**
+//	 * @return the interfaces the service implements
+//	 */
+//	public String[] getInterfaces() {
+//		return interfaces;
+//	}
+//
+//	/**
+//	 * @return the location of the bundle the service belongs to
+//	 */
+//	public String getLocation() {
+//		return location;
+//	}
+//
+//	/**
+//	 * @return the identifier of the service
+//	 */
+//	public long getServiceId() {
+//		return serviceId;
+//	}
 
 }

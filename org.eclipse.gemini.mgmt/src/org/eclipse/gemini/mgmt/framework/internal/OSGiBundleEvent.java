@@ -13,7 +13,7 @@
  *     Hal Hildebrand - Initial JMX support 
  ******************************************************************************/
 
-package org.eclipse.gemini.mgmt.framework.codec;
+package org.eclipse.gemini.mgmt.framework.internal;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -70,36 +70,10 @@ public final class OSGiBundleEvent {
 	 *            - the event to represent
 	 */
 	public OSGiBundleEvent(BundleEvent event) {
-		this(event.getBundle().getBundleId(), event.getBundle().getLocation(), event.getBundle().getSymbolicName(), event.getType());
-	}
-
-	/**
-	 * Construct an OSGiBundleEvent from the CompositeData representing the
-	 * event
-	 * 
-	 * @param data
-	 *            - the CompositeData representing the event.
-	 */
-	public OSGiBundleEvent(CompositeData data) {
-		bundleId = (Long) data.get(BundleStateMBean.IDENTIFIER);
-		location = (String) data.get(BundleStateMBean.LOCATION);
-		symbolicName = (String) data.get(BundleStateMBean.SYMBOLIC_NAME);
-		eventType = (Integer) data.get(BundleStateMBean.EVENT);
-	}
-
-	/**
-	 * Construct the OSGiBundleEvent
-	 * 
-	 * @param bundleId
-	 * @param location
-	 * @param symbolicName
-	 * @param eventType
-	 */
-	public OSGiBundleEvent(long bundleId, String location, String symbolicName, int eventType) {
-		this.bundleId = bundleId;
-		this.location = location;
-		this.symbolicName = symbolicName;
-		this.eventType = eventType;
+		this.bundleId = event.getBundle().getBundleId();
+		this.location = event.getBundle().getLocation();
+		this.symbolicName = event.getBundle().getSymbolicName();
+		this.eventType =  event.getType();
 	}
 
 	/**
@@ -120,32 +94,32 @@ public final class OSGiBundleEvent {
 		}
 	}
 
-	/**
-	 * @return the identifier of the bundle for this event
-	 */
-	public long getBundleId() {
-		return bundleId;
-	}
-
-	/**
-	 * @return the type of the event
-	 */
-	public int getEventType() {
-		return eventType;
-	}
-
-	/**
-	 * @return the location of the bundle for this event
-	 */
-	public String getLocation() {
-		return location;
-	}
-
-	/**
-	 * @return the symbolic name of the bundle for this event
-	 */
-	public String getSymbolicName() {
-		return symbolicName;
-	}
+//	/**
+//	 * @return the identifier of the bundle for this event
+//	 */
+//	public long getBundleId() {
+//		return bundleId;
+//	}
+//
+//	/**
+//	 * @return the type of the event
+//	 */
+//	public int getEventType() {
+//		return eventType;
+//	}
+//
+//	/**
+//	 * @return the location of the bundle for this event
+//	 */
+//	public String getLocation() {
+//		return location;
+//	}
+//
+//	/**
+//	 * @return the symbolic name of the bundle for this event
+//	 */
+//	public String getSymbolicName() {
+//		return symbolicName;
+//	}
 
 }

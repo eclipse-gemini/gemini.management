@@ -13,7 +13,7 @@
  *     Hal Hildebrand - Initial JMX support 
  ******************************************************************************/
 
-package org.eclipse.gemini.mgmt.useradmin.codec;
+package org.eclipse.gemini.mgmt.useradmin.internal;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,57 +23,33 @@ import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.OpenDataException;
 
 import org.osgi.jmx.service.useradmin.UserAdminMBean;
-import org.osgi.service.useradmin.Authorization;
+import org.osgi.service.useradmin.User;
 
 /** 
  * 
  */
-public final class OSGiAuthorization {
-	
-	/**
-	 * The name of the authorization
-	 */
-	private String name;
-	
-	/**
-	 * The roles
-	 */
-	private String[] roles;
+public class OSGiUser extends OSGiRole {
 
 	/**
-	 * Construct the instance from the supplied composite data
+	 * Construct an instance from the supplied OSGi user
+	 * 
+	 * @param user
+	 */
+	public OSGiUser(User user) {
+		super(user);
+	}
+
+	/**
+	 * Construct an instance from the encoded composite data
 	 * 
 	 * @param data
 	 */
-	public OSGiAuthorization(CompositeData data) {
-		if (data != null) {
-			this.name = (String) data.get(UserAdminMBean.NAME);
-			this.roles = (String[]) data.get(UserAdminMBean.ROLES);
-		}
+	public OSGiUser(CompositeData data) {
+		super(data);
 	}
 
 	/**
-	 * Construct an instance from the OSGi authorization instance
-	 * 
-	 * @param authorization
-	 */
-	public OSGiAuthorization(Authorization authorization) {
-		this(authorization.getName(), authorization.getRoles());
-	}
-
-	/**
-	 * Construct and instance using the supplied name and role names
-	 * 
-	 * @param name
-	 * @param roles
-	 */
-	public OSGiAuthorization(String name, String[] roles) {
-		this.name = name;
-		this.roles = roles;
-	}
-
-	/**
-	 * Convert the receiver into the composite data it represents
+	 * Transform the receiver into its composite data representation
 	 * 
 	 * @return the composite data representation of the receiver
 	 * @throws OpenDataException
@@ -81,21 +57,8 @@ public final class OSGiAuthorization {
 	public CompositeData asCompositeData() throws OpenDataException {
 		Map<String, Object> items = new HashMap<String, Object>();
 		items.put(UserAdminMBean.NAME, name);
-		items.put(UserAdminMBean.ROLES, roles);
-		return new CompositeDataSupport(UserAdminMBean.AUTORIZATION_TYPE, items);
+		items.put(UserAdminMBean.TYPE, type);
+		return new CompositeDataSupport(UserAdminMBean.USER_TYPE, items);
 	}
 
-	/**
-	 * @return the name
-	 */
-	public String getName() {
-		return name;
-	}
-
-	/**
-	 * @return the roles
-	 */
-	public String[] getRoles() {
-		return roles;
-	}
 }

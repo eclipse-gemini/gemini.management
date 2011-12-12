@@ -34,6 +34,10 @@ public final class BundleWiringState implements CustomBundleWiringStateMBean {
 
 	private final BundleContext bundleContext;
 
+	/**
+	 * 
+	 * @param bundleContext
+	 */
 	public BundleWiringState(BundleContext bundleContext) {
 		this.bundleContext = bundleContext;
 	}

@@ -13,15 +13,7 @@
  *     Hal Hildebrand - Initial JMX support 
  ******************************************************************************/
 
-package org.eclipse.gemini.mgmt.framework.codec;
-
-import static org.eclipse.gemini.mgmt.codec.Util.LongArrayFrom;
-import static org.eclipse.gemini.mgmt.codec.Util.getBundleFragments;
-import static org.eclipse.gemini.mgmt.codec.Util.getBundleHeaders;
-import static org.eclipse.gemini.mgmt.codec.Util.getBundleState;
-import static org.eclipse.gemini.mgmt.codec.Util.isBundleFragment;
-import static org.eclipse.gemini.mgmt.codec.Util.isBundlePersistentlyStarted;
-import static org.eclipse.gemini.mgmt.codec.Util.serviceIds;
+package org.eclipse.gemini.mgmt.framework.internal;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -38,14 +30,11 @@ import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularDataSupport;
 
+import org.eclipse.gemini.mgmt.framework.CustomBundleStateMBean;
+import org.eclipse.gemini.mgmt.internal.Util;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-
 import org.osgi.jmx.Item;
 import org.osgi.jmx.framework.BundleStateMBean;
-
-import org.eclipse.gemini.mgmt.codec.Util;
-import org.eclipse.gemini.mgmt.framework.CustomBundleStateMBean;
 
 
 /**
@@ -138,30 +127,8 @@ import org.eclipse.gemini.mgmt.framework.CustomBundleStateMBean;
  */
 public final class OSGiBundle {
 	
-	private String[] exportedPackages;
-	private Boolean fragment;
-	private long[] fragments;
-	private Map<String, String> headers;
-	private long[] hosts;
-	private long identifier;
-	private String[] importedPackages;
-	private long lastModified;
-	private String location;
-	private Boolean persistentlyStarted;
-	private long[] registeredServices;
-	private Boolean removalPending;
-	private Boolean required;
-	private long[] requiredBundles;
-	private long[] requiringBundles;
-	private long[] servicesInUse;
-	private int startLevel;
-	private String state;
-	private String symbolicName;
-	private String version;
-	
 	private static final String[] HEADER_PROPERTY_ITEM_NAMES = new String[] {BundleStateMBean.KEY, BundleStateMBean.VALUE };
 	
-	private BundleContext bundleContext;
 	private Bundle bundle;
 
 	/**
@@ -176,8 +143,7 @@ public final class OSGiBundle {
 	 * @param b
 	 *            - the Bundle to represent
 	 */
-	public OSGiBundle(BundleContext bc, Bundle b) {
-		this.bundleContext = bc;
+	public OSGiBundle(Bundle b) {
 		this.bundle = b;
 	}
 
@@ -342,15 +308,15 @@ public final class OSGiBundle {
 		items.put(BundleStateMBean.REMOVAL_PENDING, isRemovalPending());
 		items.put(BundleStateMBean.REQUIRED, isRequired());
 		items.put(BundleStateMBean.FRAGMENT, isFragment());
-		items.put(BundleStateMBean.REGISTERED_SERVICES, LongArrayFrom(getRegisteredServices()));
-		items.put(BundleStateMBean.SERVICES_IN_USE, LongArrayFrom(getServicesInUse()));
+		items.put(BundleStateMBean.REGISTERED_SERVICES, Util.LongArrayFrom(getRegisteredServices()));
+		items.put(BundleStateMBean.SERVICES_IN_USE, Util.LongArrayFrom(getServicesInUse()));
 		items.put(BundleStateMBean.HEADERS, headerTable(getHeaders()));
 		items.put(BundleStateMBean.EXPORTED_PACKAGES, getExportedPackages());
 		items.put(BundleStateMBean.IMPORTED_PACKAGES, getImportedPackages());
-		items.put(BundleStateMBean.FRAGMENTS, LongArrayFrom(getFragments()));
-		items.put(BundleStateMBean.HOSTS, LongArrayFrom(getHosts()));
-		items.put(BundleStateMBean.REQUIRING_BUNDLES, LongArrayFrom(getRequiringBundles()));
-		items.put(BundleStateMBean.REQUIRED_BUNDLES, LongArrayFrom(getRequiredBundles()));
+		items.put(BundleStateMBean.FRAGMENTS, Util.LongArrayFrom(getFragments()));
+		items.put(BundleStateMBean.HOSTS, Util.LongArrayFrom(getHosts()));
+		items.put(BundleStateMBean.REQUIRING_BUNDLES, Util.LongArrayFrom(getRequiringBundles()));
+		items.put(BundleStateMBean.REQUIRED_BUNDLES, Util.LongArrayFrom(getRequiredBundles()));
 		try {
 			return new CompositeDataSupport(BundleStateMBean.BUNDLE_TYPE, items);
 		} catch (OpenDataException e) {
@@ -399,10 +365,10 @@ public final class OSGiBundle {
 			items.put(BundleStateMBean.FRAGMENT, isFragment());
 		}
 		if((mask | CustomBundleStateMBean.REGISTERED_SERVICES) == mask) {
-			items.put(BundleStateMBean.REGISTERED_SERVICES, LongArrayFrom(getRegisteredServices()));
+			items.put(BundleStateMBean.REGISTERED_SERVICES, Util.LongArrayFrom(getRegisteredServices()));
 		}
 		if((mask | CustomBundleStateMBean.SERVICES_IN_USE) == mask) {
-			items.put(BundleStateMBean.SERVICES_IN_USE, LongArrayFrom(getServicesInUse()));
+			items.put(BundleStateMBean.SERVICES_IN_USE, Util.LongArrayFrom(getServicesInUse()));
 		}
 		if((mask | CustomBundleStateMBean.HEADERS) == mask) {
 			items.put(BundleStateMBean.HEADERS, headerTable(getHeaders()));
@@ -414,16 +380,16 @@ public final class OSGiBundle {
 			items.put(BundleStateMBean.IMPORTED_PACKAGES, getImportedPackages());
 		}
 		if((mask | CustomBundleStateMBean.FRAGMENTS) == mask) {
-			items.put(BundleStateMBean.FRAGMENTS, LongArrayFrom(getFragments()));
+			items.put(BundleStateMBean.FRAGMENTS, Util.LongArrayFrom(getFragments()));
 		}
 		if((mask | CustomBundleStateMBean.HOSTS) == mask) {
-			items.put(BundleStateMBean.HOSTS, LongArrayFrom(getHosts()));
+			items.put(BundleStateMBean.HOSTS, Util.LongArrayFrom(getHosts()));
 		}
 		if((mask | CustomBundleStateMBean.REQUIRING_BUNDLES) == mask) {
-			items.put(BundleStateMBean.REQUIRING_BUNDLES, LongArrayFrom(getRequiringBundles()));
+			items.put(BundleStateMBean.REQUIRING_BUNDLES, Util.LongArrayFrom(getRequiringBundles()));
 		}
 		if((mask | CustomBundleStateMBean.REQUIRED_BUNDLES) == mask) {
-			items.put(BundleStateMBean.REQUIRED_BUNDLES, LongArrayFrom(getRequiredBundles()));
+			items.put(BundleStateMBean.REQUIRED_BUNDLES, Util.LongArrayFrom(getRequiredBundles()));
 		}
 
 		try {
@@ -438,205 +404,145 @@ public final class OSGiBundle {
 	 *         <packageName>;<version>
 	 * 
 	 */
-	public String[] getExportedPackages() {
-		if (exportedPackages == null) {
-			exportedPackages = Util.getBundleExportedPackages(bundle);			
-		}
-		return exportedPackages;
+	private String[] getExportedPackages() {
+		return Util.getBundleExportedPackages(bundle);
 	}
 
 	/**
 	 * @return the list of identifiers of the bundle fragments which use this
 	 *         bundle as a host
 	 */
-	public long[] getFragments() {
-		if (fragments == null) {
-			fragments = getBundleFragments(bundle);			
-		}
-		return fragments;
+	private long[] getFragments() {
+		return  Util.getBundleFragments(bundle);			
 	}
 
 	/**
 	 * @return the map of headers for this bundle
 	 */
-	public Map<String, String> getHeaders() {
-		if (headers == null) {
-			headers = getBundleHeaders(bundle);
-		}
-		return headers;
+	private Map<String, String> getHeaders() {
+		return Util.getBundleHeaders(bundle);
 	}
 
 	/**
 	 * @return list of identifiers of the bundles which host this fragment
 	 */
-	public long[] getHosts() {
-		if (hosts == null) {
-			hosts = Util.getBundleHosts(bundle);
-		}
-		return hosts;
+	private long[] getHosts() {
+		return Util.getBundleHosts(bundle);
 	}
 
 	/**
 	 * @return the identifier of this bundle
 	 */
-	public long getIdentifier() {
-		if (identifier == 0) {
-			identifier = bundle.getBundleId();
-		}
-		return identifier;
+	private long getIdentifier() {
+		return bundle.getBundleId();
 	}
 
 	/**
 	 * @return The list of imported packages by this bundle, in the form of
 	 *         <packageName>;<version>
 	 */
-	public String[] getImportedPackages() {
-		if (importedPackages == null) {
-			importedPackages = Util.getBundleImportedPackages(bundle);
-		}
-		return importedPackages;
+	private String[] getImportedPackages() {
+		return Util.getBundleImportedPackages(bundle);
 	}
 
 	/**
 	 * @return the last modified time of this bundle
 	 */
-	public long getLastModified() {
-		if (lastModified == 0) {
-			lastModified = bundle.getLastModified();
-		}
-		return lastModified;
+	private long getLastModified() {
+		return bundle.getLastModified();
 	}
 
 	/**
 	 * @return the name of this bundle
 	 */
-	public String getLocation() {
-		if (location == null) {
-			location = bundle.getLocation();
-		}
-		return location;
+	private String getLocation() {
+		return bundle.getLocation();
 	}
 
 	/**
 	 * @return the list of identifiers of the services registered by this bundle
 	 */
-	public long[] getRegisteredServices() {
-		if (registeredServices == null) {
-			registeredServices = serviceIds(bundle.getRegisteredServices());
-		}
-		return registeredServices;
+	private long[] getRegisteredServices() {
+		return Util.serviceIds(bundle.getRegisteredServices());
 	}
 
 	/**
 	 * @return the list of identifiers of bundles required by this bundle
 	 * @throws IOException 
 	 */
-	public long[] getRequiredBundles() throws IOException {
-		if (requiredBundles == null) {
-			requiredBundles = Util.getRequiredBundles(bundle);
-		}
-		return requiredBundles;
+	private long[] getRequiredBundles() throws IOException {
+		return Util.getRequiredBundles(bundle);
 	}
 
 	/**
 	 * @return the list of identifiers of bundles which require this bundle
 	 * @throws IOException 
 	 */
-	public long[] getRequiringBundles() throws IOException {
-		if (requiringBundles == null) {
-			requiringBundles = Util.getRequiringBundles(bundle);
-		}
-		return requiringBundles;
+	private long[] getRequiringBundles() throws IOException {
+		return Util.getRequiringBundles(bundle);
 	}
 
 	/**
 	 * @return the list of identifiers of services in use by this bundle
 	 */
-	public long[] getServicesInUse() {
-		if (servicesInUse == null) {
-			servicesInUse = serviceIds(bundle.getServicesInUse());
-		}
-		return servicesInUse;
+	private long[] getServicesInUse() {
+		return Util.serviceIds(bundle.getServicesInUse());
 	}
 
 	/**
 	 * @return the start level of this bundle
 	 */
-	public int getStartLevel() {
-		if (startLevel == 0) {
-			startLevel = Util.getBundleStartLevel(bundle);
-		}
-		return startLevel;
+	private int getStartLevel() {
+		return Util.getBundleStartLevel(bundle);
 	}
 
 	/**
 	 * @return the state of this bundle
 	 */
-	public String getState() {
-		if (state == null) {
-			state = getBundleState(bundle);
-		}
-		return state;
+	private String getState() {
+		return Util.getBundleState(bundle);
 	}
 
 	/**
 	 * @return the symbolic name of this bundle
 	 */
-	public String getSymbolicName() {
-		if (symbolicName == null) {
-			symbolicName = bundle.getSymbolicName();
-		}
-		return symbolicName;
+	private String getSymbolicName() {
+		return bundle.getSymbolicName();
 	}
 
 	/**
 	 * @return the version of this bundle
 	 */
-	public String getVersion() {
-		if (version == null) {
-			version = bundle.getVersion().toString();
-		}
-		return version;
+	private String getVersion() {
+		return bundle.getVersion().toString();
 	}
 
 	/**
 	 * @return true if this bundle represents a fragment
 	 */
-	public boolean isFragment() {
-		if (fragment == null) {
-			fragment = isBundleFragment(bundle);
-		}
-		return fragment;
+	private boolean isFragment() {
+		return Util.isBundleFragment(bundle);
 	}
 
 	/**
 	 * @return true if this bundle is persistently started
 	 */
-	public boolean isPersistentlyStarted() {
-		if (persistentlyStarted == null) {
-			persistentlyStarted = isBundlePersistentlyStarted(bundle);
-		}
-		return persistentlyStarted;
+	private boolean isPersistentlyStarted() {
+		return Util.isBundlePersistentlyStarted(bundle);
 	}
 
 	/**
 	 * @return true if this bundle is pending removal
 	 */
-	public boolean isRemovalPending() {
-		if (removalPending == null) {
-			removalPending = Util.isRemovalPending(bundle.getBundleId(), bundleContext);
-		}
-		return removalPending;
+	private boolean isRemovalPending() {
+		return Util.isRemovalPending(bundle);
 	}
 
 	/**
 	 * @return true if this bundle is required
 	 */
-	public boolean isRequired() {
-		if (required == null) {
-			required = Util.isRequired(bundle.getBundleId(), bundleContext);
-		}
-		return required;
+	private boolean isRequired() {
+		return Util.isRequired(bundle);
 	}
 	
 }

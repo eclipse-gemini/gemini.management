@@ -13,7 +13,7 @@
  *     Hal Hildebrand - Initial JMX support 
  ******************************************************************************/
 
-package org.eclipse.gemini.mgmt.useradmin.codec;
+package org.eclipse.gemini.mgmt.useradmin.internal;
 
 import java.util.HashMap;
 import java.util.Map;

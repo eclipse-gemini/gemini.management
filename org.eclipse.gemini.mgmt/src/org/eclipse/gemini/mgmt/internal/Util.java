@@ -13,7 +13,7 @@
  *     Hal Hildebrand - Initial JMX support 
  ******************************************************************************/
 
-package org.eclipse.gemini.mgmt.codec;
+package org.eclipse.gemini.mgmt.internal;
 
 import static org.osgi.framework.Constants.SERVICE_ID;
 
@@ -27,7 +27,6 @@ import java.util.Map;
 
 
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.wiring.BundleRevision;
@@ -246,8 +245,8 @@ public final class Util {
 	 * @param bc
 	 * @return true if the bundle is required
 	 */
-	public static boolean isRequired(long bundleId, BundleContext bc) {
-		BundleWiring wiring = bc.getBundle(bundleId).adapt(BundleWiring.class);
+	public static boolean isRequired(Bundle bundle) {
+		BundleWiring wiring = bundle.adapt(BundleWiring.class);
 		return wiring.getProvidedWires(BundleRevision.BUNDLE_NAMESPACE).size() > 0;
 	}
 
@@ -258,8 +257,8 @@ public final class Util {
 	 * @param bc
 	 * @return true if the bundle is pending removal
 	 */
-	public static boolean isRemovalPending(long bundleId, BundleContext bc) {
-        BundleWiring wiring = bc.getBundle(bundleId).adapt(BundleWiring.class);
+	public static boolean isRemovalPending(Bundle bundle) {
+        BundleWiring wiring = bundle.adapt(BundleWiring.class);
         return (!wiring.isCurrent()) && wiring.isInUse();
 	}
 

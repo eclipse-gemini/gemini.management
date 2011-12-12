@@ -13,7 +13,7 @@
  *     Hal Hildebrand - Initial JMX support 
  ******************************************************************************/
 
-package org.eclipse.gemini.mgmt.useradmin.codec;
+package org.eclipse.gemini.mgmt.useradmin.internal;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,42 +23,68 @@ import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.OpenDataException;
 
 import org.osgi.jmx.service.useradmin.UserAdminMBean;
-import org.osgi.service.useradmin.User;
+import org.osgi.service.useradmin.Role;
 
 /** 
  * 
  */
-public class OSGiUser extends OSGiRole {
+public class OSGiRole {
 
 	/**
-	 * Construct an instance from the supplied OSGi user
-	 * 
-	 * @param user
+	 * The role name
 	 */
-	public OSGiUser(User user) {
-		super(user);
-	}
+	protected String name;
+	
+	/**
+	 * The type of the role
+	 */
+	protected int type;
 
 	/**
-	 * Construct an instance from the encoded composite data
+	 * Construct and instance from the composite data representation
 	 * 
 	 * @param data
 	 */
-	public OSGiUser(CompositeData data) {
-		super(data);
+	@SuppressWarnings("boxing")
+	public OSGiRole(CompositeData data) {
+		name = (String) data.get(UserAdminMBean.NAME);
+		type = (Integer) data.get(UserAdminMBean.TYPE);
 	}
 
 	/**
-	 * Transform the receiver into its composite data representation
+	 * Construct and instance from the supplied OSGi role
 	 * 
-	 * @return the composite data representation of the receiver
+	 * @param role
+	 */
+	public OSGiRole(Role role) {
+		name = role.getName();
+		type = role.getType();
+	}
+
+	/**
+	 * Convert the receiver into the composite data that represents it
+	 * 
+	 * @return the
 	 * @throws OpenDataException
 	 */
 	public CompositeData asCompositeData() throws OpenDataException {
 		Map<String, Object> items = new HashMap<String, Object>();
 		items.put(UserAdminMBean.NAME, name);
 		items.put(UserAdminMBean.TYPE, type);
-		return new CompositeDataSupport(UserAdminMBean.USER_TYPE, items);
+		return new CompositeDataSupport(UserAdminMBean.ROLE_TYPE, items);
 	}
 
+	/**
+	 * @return the name
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * @return the type
+	 */
+	public int getType() {
+		return type;
+	}
 }

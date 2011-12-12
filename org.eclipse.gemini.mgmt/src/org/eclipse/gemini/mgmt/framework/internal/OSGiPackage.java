@@ -13,9 +13,9 @@
  *     Hal Hildebrand - Initial JMX support 
  ******************************************************************************/
 
-package org.eclipse.gemini.mgmt.framework.codec;
+package org.eclipse.gemini.mgmt.framework.internal;
 
-import static org.eclipse.gemini.mgmt.codec.Util.LongArrayFrom;
+import static org.eclipse.gemini.mgmt.internal.Util.LongArrayFrom;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -123,7 +123,7 @@ public final class OSGiPackage {
 	 * 
 	 * @return the CompositeData encoding of the receiver.
 	 */
-	public CompositeData asCompositeData() {
+	private CompositeData asCompositeData() {
 		Map<String, Object> items = new HashMap<String, Object>();
 		items.put(PackageStateMBean.NAME, name);
 		items.put(PackageStateMBean.VERSION, version);
@@ -137,40 +137,40 @@ public final class OSGiPackage {
 			throw new IllegalStateException("Cannot form package open data", e);
 		}
 	}
-
-	/**
-	 * @return the identifier of the exporting bundles
-	 */
-	public long[] getExportingBundles() {
-		return exportingBundles;
-	}
-
-	/**
-	 * @return the list of identifiers of the bundles importing this package
-	 */
-	public long[] getImportingBundles() {
-		return importingBundles;
-	}
-
-	/**
-	 * @return the name of the package
-	 */
-	public String getName() {
-		return name;
-	}
-
-	/**
-	 * @return the version of the package
-	 */
-	public String getVersion() {
-		return version;
-	}
-
-	/**
-	 * @return true if the package is pending removal
-	 */
-	public boolean isRemovalPending() {
-		return removalPending;
-	}
+//
+//	/**
+//	 * @return the identifier of the exporting bundles
+//	 */
+//	public long[] getExportingBundles() {
+//		return exportingBundles;
+//	}
+//
+//	/**
+//	 * @return the list of identifiers of the bundles importing this package
+//	 */
+//	public long[] getImportingBundles() {
+//		return importingBundles;
+//	}
+//
+//	/**
+//	 * @return the name of the package
+//	 */
+//	public String getName() {
+//		return name;
+//	}
+//
+//	/**
+//	 * @return the version of the package
+//	 */
+//	public String getVersion() {
+//		return version;
+//	}
+//
+//	/**
+//	 * @return true if the package is pending removal
+//	 */
+//	public boolean isRemovalPending() {
+//		return removalPending;
+//	}
 	
 }

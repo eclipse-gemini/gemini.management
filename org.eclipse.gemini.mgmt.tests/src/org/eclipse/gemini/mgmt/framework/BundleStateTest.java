@@ -36,9 +36,9 @@ import org.osgi.framework.startlevel.BundleStartLevel;
 import org.osgi.jmx.framework.BundleStateMBean;
 
 import org.eclipse.gemini.mgmt.Activator;
-import org.eclipse.gemini.mgmt.codec.Util;
-import org.eclipse.gemini.mgmt.framework.codec.OSGiBundle;
+import org.eclipse.gemini.mgmt.framework.internal.OSGiBundle;
 import org.eclipse.gemini.mgmt.framework.BundleState;
+import org.eclipse.gemini.mgmt.internal.Util;
 
 public class BundleStateTest {
 	
@@ -147,8 +147,8 @@ public class BundleStateTest {
 			assertEquals(state, stateToString(bundle.getState()));
 			assertEquals(lastModified, bundle.getLastModified());
 			assertEquals(persistenlyStarted, Util.isBundlePersistentlyStarted(bundle));
-			assertEquals(removalPending, Util.isRemovalPending(bundle.getBundleId(), bc));
-			assertEquals(required, Util.isRequired(bundle.getBundleId(), bc));
+			assertEquals(removalPending, Util.isRemovalPending(bundle));
+			assertEquals(required, Util.isRequired(bundle));
 			assertEquals(fragment, Util.isBundleFragment(bundle));
 
 			long[] rs = new long[registeredServices.length];
@@ -268,7 +268,7 @@ public class BundleStateTest {
 			assertEquals(state, stateToString(bundle.getState()));
 			assertEquals(lastModified, bundle.getLastModified());
 			assertEquals(persistenlyStarted, Util.isBundlePersistentlyStarted(bundle));
-			assertEquals(removalPending, Util.isRemovalPending(bundle.getBundleId(), bc));
+			assertEquals(removalPending, Util.isRemovalPending(bundle));
 
 			long[] rs = new long[registeredServices.length];
 			for (int i = 0; i < registeredServices.length; i++) {

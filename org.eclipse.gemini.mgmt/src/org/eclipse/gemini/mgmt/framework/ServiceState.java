@@ -26,10 +26,10 @@ import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.TabularData;
 
 import org.eclipse.gemini.mgmt.Monitor;
-import org.eclipse.gemini.mgmt.codec.OSGiProperties;
-import org.eclipse.gemini.mgmt.codec.Util;
-import org.eclipse.gemini.mgmt.framework.codec.OSGiService;
-import org.eclipse.gemini.mgmt.framework.codec.OSGiServiceEvent;
+import org.eclipse.gemini.mgmt.framework.internal.OSGiService;
+import org.eclipse.gemini.mgmt.framework.internal.OSGiServiceEvent;
+import org.eclipse.gemini.mgmt.internal.OSGiProperties;
+import org.eclipse.gemini.mgmt.internal.Util;
 import org.osgi.framework.AllServiceListener;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -56,29 +56,29 @@ public final class ServiceState extends Monitor implements CustomServiceStateMBe
 	 * 
 	 * @param bundleContext
 	 */
-	public ServiceState(BundleContext bc) {
-		this.bundleContext = bc;
+	public ServiceState(BundleContext bundleContext) {
+		this.bundleContext = bundleContext;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public long getBundleIdentifier(long serviceId) throws IOException {
-		return ref(serviceId).getBundle().getBundleId();
+		return getServiceReference(serviceId).getBundle().getBundleId();
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public TabularData getProperties(long serviceId) throws IOException {
-		return OSGiProperties.tableFrom(ref(serviceId));
+		return OSGiProperties.tableFrom(getServiceReference(serviceId));
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public String[] getObjectClass(long serviceId) throws IOException {
-		return (String[]) ref(serviceId).getProperty(OBJECTCLASS);
+		return (String[]) getServiceReference(serviceId).getProperty(OBJECTCLASS);
 	}
 
 	/**
@@ -101,7 +101,7 @@ public final class ServiceState extends Monitor implements CustomServiceStateMBe
 	 * {@inheritDoc}
 	 */
 	public long[] getUsingBundles(long serviceId) throws IOException {
-		return Util.getBundlesUsingBundles(ref(serviceId));
+		return Util.getBundlesUsingBundles(getServiceReference(serviceId));
 	}
 
 	/**
@@ -188,39 +188,7 @@ public final class ServiceState extends Monitor implements CustomServiceStateMBe
 		}
 	}
 	
-	//End methods for the MBean
-	
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void addListener() {
-		serviceListener = this.getServiceListener();
-		bundleContext.addServiceListener(serviceListener);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void removeListener() {
-		if (serviceListener != null) {
-			bundleContext.removeServiceListener(serviceListener);
-		}
-	}
-
-	protected ServiceListener getServiceListener() {
-		return new AllServiceListener() {
-			public void serviceChanged(ServiceEvent serviceEvent) {
-				Notification notification = new Notification(ServiceStateMBean.EVENT, objectName, sequenceNumber++);
-				notification.setUserData(new OSGiServiceEvent(serviceEvent).asCompositeData());
-				sendNotification(notification);
-			}
-		};
-	}
-	
-	protected ServiceReference<?> ref(long serviceId) throws IOException {
+	private ServiceReference<?> getServiceReference(long serviceId) throws IOException {
 		Filter filter;
 		try {
 			filter = bundleContext.createFilter("(" + Constants.SERVICE_ID + "=" + serviceId + ")");
@@ -235,6 +203,36 @@ public final class ServiceState extends Monitor implements CustomServiceStateMBe
 		}
 		tracker.close();
 		return serviceReference;
+	}
+	
+	//End methods for the MBean
+	
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected void addListener() {
+		serviceListener = this.getServiceListener();
+		bundleContext.addServiceListener(serviceListener);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected void removeListener() {
+		if (serviceListener != null) {
+			bundleContext.removeServiceListener(serviceListener);
+		}
+	}
+
+	private ServiceListener getServiceListener() {
+		return new AllServiceListener() {
+			public void serviceChanged(ServiceEvent serviceEvent) {
+				Notification notification = new Notification(ServiceStateMBean.EVENT, objectName, sequenceNumber++);
+				notification.setUserData(new OSGiServiceEvent(serviceEvent).asCompositeData());
+				sendNotification(notification);
+			}
+		};
 	}
 
 }

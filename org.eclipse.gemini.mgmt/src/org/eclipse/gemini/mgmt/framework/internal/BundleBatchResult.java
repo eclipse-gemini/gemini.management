@@ -13,7 +13,7 @@
  *     Hal Hildebrand - Initial JMX support 
  ******************************************************************************/
 
-package org.eclipse.gemini.mgmt.framework.codec;
+package org.eclipse.gemini.mgmt.framework.internal;
 
 /**
  * Abstract supertype to represent the result of an operation on multiple bundles. 

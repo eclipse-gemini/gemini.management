@@ -32,8 +32,8 @@ import org.osgi.framework.startlevel.BundleStartLevel;
 import org.osgi.framework.startlevel.FrameworkStartLevel;
 import org.osgi.framework.wiring.FrameworkWiring;
 
-import org.eclipse.gemini.mgmt.framework.codec.BundleBatchActionResult;
-import org.eclipse.gemini.mgmt.framework.codec.BundleBatchInstallResult;
+import org.eclipse.gemini.mgmt.framework.internal.BundleBatchActionResult;
+import org.eclipse.gemini.mgmt.framework.internal.BundleBatchInstallResult;
 
 import org.osgi.jmx.framework.FrameworkMBean;
 

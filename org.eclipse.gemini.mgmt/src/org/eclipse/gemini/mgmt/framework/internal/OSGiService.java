@@ -13,11 +13,11 @@
  *     Hal Hildebrand - Initial JMX support 
  ******************************************************************************/
 
-package org.eclipse.gemini.mgmt.framework.codec;
+package org.eclipse.gemini.mgmt.framework.internal;
 
 import static org.osgi.framework.Constants.OBJECTCLASS;
 import static org.osgi.framework.Constants.SERVICE_ID;
-import static org.eclipse.gemini.mgmt.codec.Util.LongArrayFrom;
+import static org.eclipse.gemini.mgmt.internal.Util.LongArrayFrom;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -34,7 +34,7 @@ import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularDataSupport;
 
 import org.osgi.framework.ServiceReference;
-import org.eclipse.gemini.mgmt.codec.Util;
+import org.eclipse.gemini.mgmt.internal.Util;
 import org.osgi.jmx.Item;
 import org.osgi.jmx.framework.ServiceStateMBean;
 
@@ -184,32 +184,32 @@ public final class OSGiService {
 		}
 	}
 
-	/**
-	 * @return the identifier of the bundle the service belongs to
-	 */
-	public long getBundle() {
-		return bundle;
-	}
-
-	/**
-	 * @return the identifier of the service
-	 */
-	public long getIdentifier() {
-		return identifier;
-	}
-
-	/**
-	 * @return the interfaces implemented by the service
-	 */
-	public String[] getInterfaces() {
-		return interfaces;
-	}
-
-	/**
-	 * @return the identifiers of the bundles which are using the service
-	 */
-	public long[] getUsingBundles() {
-		return usingBundles;
-	}
+//	/**
+//	 * @return the identifier of the bundle the service belongs to
+//	 */
+//	public long getBundle() {
+//		return bundle;
+//	}
+//
+//	/**
+//	 * @return the identifier of the service
+//	 */
+//	public long getIdentifier() {
+//		return identifier;
+//	}
+//
+//	/**
+//	 * @return the interfaces implemented by the service
+//	 */
+//	public String[] getInterfaces() {
+//		return interfaces;
+//	}
+//
+//	/**
+//	 * @return the identifiers of the bundles which are using the service
+//	 */
+//	public long[] getUsingBundles() {
+//		return usingBundles;
+//	}
 
 }

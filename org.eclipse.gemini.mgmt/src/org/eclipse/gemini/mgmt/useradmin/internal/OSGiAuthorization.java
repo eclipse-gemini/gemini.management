@@ -13,7 +13,7 @@
  *     Hal Hildebrand - Initial JMX support 
  ******************************************************************************/
 
-package org.eclipse.gemini.mgmt.useradmin.codec;
+package org.eclipse.gemini.mgmt.useradmin.internal;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,55 +23,66 @@ import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.OpenDataException;
 
 import org.osgi.jmx.service.useradmin.UserAdminMBean;
-import org.osgi.service.useradmin.Role;
+import org.osgi.service.useradmin.Authorization;
 
 /** 
  * 
  */
-public class OSGiRole {
-
-	/**
-	 * The role name
-	 */
-	protected String name;
+public final class OSGiAuthorization {
 	
 	/**
-	 * The type of the role
+	 * The name of the authorization
 	 */
-	protected int type;
+	private String name;
+	
+	/**
+	 * The roles
+	 */
+	private String[] roles;
 
 	/**
-	 * Construct and instance from the composite data representation
+	 * Construct the instance from the supplied composite data
 	 * 
 	 * @param data
 	 */
-	@SuppressWarnings("boxing")
-	public OSGiRole(CompositeData data) {
-		name = (String) data.get(UserAdminMBean.NAME);
-		type = (Integer) data.get(UserAdminMBean.TYPE);
+	public OSGiAuthorization(CompositeData data) {
+		if (data != null) {
+			this.name = (String) data.get(UserAdminMBean.NAME);
+			this.roles = (String[]) data.get(UserAdminMBean.ROLES);
+		}
 	}
 
 	/**
-	 * Construct and instance from the supplied OSGi role
+	 * Construct an instance from the OSGi authorization instance
 	 * 
-	 * @param role
+	 * @param authorization
 	 */
-	public OSGiRole(Role role) {
-		name = role.getName();
-		type = role.getType();
+	public OSGiAuthorization(Authorization authorization) {
+		this(authorization.getName(), authorization.getRoles());
 	}
 
 	/**
-	 * Convert the receiver into the composite data that represents it
+	 * Construct and instance using the supplied name and role names
 	 * 
-	 * @return the
+	 * @param name
+	 * @param roles
+	 */
+	public OSGiAuthorization(String name, String[] roles) {
+		this.name = name;
+		this.roles = roles;
+	}
+
+	/**
+	 * Convert the receiver into the composite data it represents
+	 * 
+	 * @return the composite data representation of the receiver
 	 * @throws OpenDataException
 	 */
 	public CompositeData asCompositeData() throws OpenDataException {
 		Map<String, Object> items = new HashMap<String, Object>();
 		items.put(UserAdminMBean.NAME, name);
-		items.put(UserAdminMBean.TYPE, type);
-		return new CompositeDataSupport(UserAdminMBean.ROLE_TYPE, items);
+		items.put(UserAdminMBean.ROLES, roles);
+		return new CompositeDataSupport(UserAdminMBean.AUTORIZATION_TYPE, items);
 	}
 
 	/**
@@ -82,9 +93,9 @@ public class OSGiRole {
 	}
 
 	/**
-	 * @return the type
+	 * @return the roles
 	 */
-	public int getType() {
-		return type;
+	public String[] getRoles() {
+		return roles;
 	}
 }

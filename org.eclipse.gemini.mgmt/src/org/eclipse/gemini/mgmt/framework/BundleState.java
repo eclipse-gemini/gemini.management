@@ -28,20 +28,25 @@ import org.osgi.framework.BundleListener;
 import org.osgi.jmx.framework.BundleStateMBean;
 
 import org.eclipse.gemini.mgmt.Monitor;
-import org.eclipse.gemini.mgmt.codec.Util;
-import org.eclipse.gemini.mgmt.framework.codec.OSGiBundle;
-import org.eclipse.gemini.mgmt.framework.codec.OSGiBundleEvent;
+import org.eclipse.gemini.mgmt.framework.internal.OSGiBundle;
+import org.eclipse.gemini.mgmt.framework.internal.OSGiBundleEvent;
+import org.eclipse.gemini.mgmt.internal.Util;
 
 /** 
  * 
  */
 public final class BundleState extends Monitor implements CustomBundleStateMBean {
 	
-	protected BundleListener bundleListener;
-	protected BundleContext bundleContext;
+	private BundleListener bundleListener;
 	
-	public BundleState(BundleContext bc) {
-		this.bundleContext = bc;
+	private BundleContext bundleContext;
+	
+	/**
+	 * 
+	 * @param bundleContext
+	 */
+	public BundleState(BundleContext bundleContext) {
+		this.bundleContext = bundleContext;
 	}
 
 	/**
@@ -51,7 +56,7 @@ public final class BundleState extends Monitor implements CustomBundleStateMBean
 		try {
 			ArrayList<OSGiBundle> bundles = new ArrayList<OSGiBundle>();
 			for (Bundle bundle : bundleContext.getBundles()) {
-				bundles.add(new OSGiBundle(bundleContext, bundle));
+				bundles.add(new OSGiBundle(bundle));
 			}
 			TabularData table = OSGiBundle.tableFrom(bundles);
 			return table;
@@ -70,7 +75,7 @@ public final class BundleState extends Monitor implements CustomBundleStateMBean
 		try {
 			ArrayList<OSGiBundle> bundles = new ArrayList<OSGiBundle>();
 			for (Bundle bundle : bundleContext.getBundles()) {
-				bundles.add(new OSGiBundle(bundleContext, bundle));
+				bundles.add(new OSGiBundle(bundle));
 			}
 			TabularData table = OSGiBundle.tableFrom(bundles, mask);
 			return table;
@@ -202,14 +207,14 @@ public final class BundleState extends Monitor implements CustomBundleStateMBean
 	 * {@inheritDoc}
 	 */
 	public boolean isRemovalPending(long bundleId) throws IOException {
-		return Util.isRemovalPending(bundleId, bundleContext);
+		return Util.isRemovalPending(getBundle(bundleId));
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public boolean isRequired(long bundleId) throws IOException {
-		return Util.isRequired(bundleId, bundleContext);
+		return Util.isRequired(getBundle(bundleId));
 	}
 
 	private Bundle getBundle(long bundleId) throws IOException {
@@ -228,7 +233,7 @@ public final class BundleState extends Monitor implements CustomBundleStateMBean
 		bundleContext.addBundleListener(bundleListener);
 	}
 
-	protected BundleListener getBundleListener() {
+	private BundleListener getBundleListener() {
 		return new BundleListener() {
 			public void bundleChanged(BundleEvent bundleEvent) {
 				Notification notification = new Notification(BundleStateMBean.EVENT, objectName, sequenceNumber++);

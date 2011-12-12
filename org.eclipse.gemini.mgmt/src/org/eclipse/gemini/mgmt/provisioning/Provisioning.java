@@ -15,9 +15,6 @@
 
 package org.eclipse.gemini.mgmt.provisioning;
 
-import static org.eclipse.gemini.mgmt.codec.OSGiProperties.propertiesFrom;
-import static org.eclipse.gemini.mgmt.codec.OSGiProperties.tableFrom;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -25,6 +22,7 @@ import java.util.zip.ZipInputStream;
 
 import javax.management.openmbean.TabularData;
 
+import org.eclipse.gemini.mgmt.internal.OSGiProperties;
 import org.osgi.jmx.service.provisioning.ProvisioningServiceMBean;
 import org.osgi.service.provisioning.ProvisioningService;
 
@@ -56,7 +54,7 @@ public final class Provisioning implements ProvisioningServiceMBean {
 	 * {@inheritDoc}
 	 */
 	public void addInformation(TabularData info) throws IOException {
-		provisioning.addInformation(propertiesFrom(info));
+		provisioning.addInformation(OSGiProperties.propertiesFrom(info));
 	}
 
 	/**
@@ -64,14 +62,14 @@ public final class Provisioning implements ProvisioningServiceMBean {
 	 */
 	@SuppressWarnings("unchecked")
 	public TabularData listInformation() throws IOException {
-		return tableFrom(provisioning.getInformation());
+		return OSGiProperties.tableFrom(provisioning.getInformation());
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public void setInformation(TabularData info) throws IOException {
-		provisioning.setInformation(propertiesFrom(info));
+		provisioning.setInformation(OSGiProperties.propertiesFrom(info));
 	}
 
 }

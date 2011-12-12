@@ -13,7 +13,7 @@
  *     Hal Hildebrand - Initial JMX support 
  ******************************************************************************/
 
-package org.eclipse.gemini.mgmt.codec;
+package org.eclipse.gemini.mgmt.internal;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;

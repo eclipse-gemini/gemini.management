@@ -30,16 +30,22 @@ import org.osgi.jmx.framework.PackageStateMBean;
 import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.PackageAdmin;
 
-import org.eclipse.gemini.mgmt.framework.codec.OSGiPackage;
+import org.eclipse.gemini.mgmt.framework.internal.OSGiPackage;
 
 /** 
  * 
  */
+@SuppressWarnings("deprecation")
 public final class PackageState implements PackageStateMBean {
 	
 	private BundleContext bundleContext;
+	
 	private PackageAdmin admin;
 	
+	/**
+	 * 
+	 * @param bundleContext
+	 */
 	public PackageState(BundleContext bundleContext) {
 		this.bundleContext = bundleContext;
 		this.admin = (PackageAdmin) bundleContext.getService(bundleContext.getServiceReference(PackageAdmin.class));
