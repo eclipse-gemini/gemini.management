@@ -101,7 +101,7 @@ public final class ServiceState extends Monitor implements CustomServiceStateMBe
 	 * {@inheritDoc}
 	 */
 	public long[] getUsingBundles(long serviceId) throws IOException {
-		return Util.getBundlesUsingBundles(getServiceReference(serviceId));
+		return Util.getBundlesUsing(getServiceReference(serviceId));
 	}
 
 	/**

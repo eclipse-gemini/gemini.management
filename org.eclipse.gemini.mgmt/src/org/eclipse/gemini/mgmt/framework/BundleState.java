@@ -20,6 +20,7 @@ import java.util.ArrayList;
 
 import javax.management.Notification;
 import javax.management.openmbean.TabularData;
+import javax.management.openmbean.TabularDataSupport;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -54,11 +55,10 @@ public final class BundleState extends Monitor implements CustomBundleStateMBean
 	 */
 	public TabularData listBundles() throws IOException {
 		try {
-			ArrayList<OSGiBundle> bundles = new ArrayList<OSGiBundle>();
+			TabularDataSupport table = new TabularDataSupport(BundleStateMBean.BUNDLES_TYPE);
 			for (Bundle bundle : bundleContext.getBundles()) {
-				bundles.add(new OSGiBundle(bundle));
+				table.put(new OSGiBundle(bundle).asCompositeData());
 			}
-			TabularData table = OSGiBundle.tableFrom(bundles);
 			return table;
 		} catch (Throwable e) {
 			throw new IOException(e);

@@ -11,20 +11,18 @@
 package org.eclipse.gemini.mgmt.framework;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import javax.management.openmbean.ArrayType;
 import javax.management.openmbean.CompositeData;
-import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.TabularData;
+import javax.management.openmbean.TabularDataSupport;
 
+import org.eclipse.gemini.mgmt.framework.internal.OSGiBundleRevision;
+import org.eclipse.gemini.mgmt.framework.internal.OSGiBundleWiring;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.wiring.BundleCapability;
-import org.osgi.framework.wiring.BundleRequirement;
+import org.osgi.framework.wiring.BundleRevision;
+import org.osgi.framework.wiring.BundleRevisions;
 import org.osgi.framework.wiring.BundleWiring;
 
 /**
@@ -42,83 +40,94 @@ public final class BundleWiringState implements CustomBundleWiringStateMBean {
 		this.bundleContext = bundleContext;
 	}
 
-	/**
+	/** DONE
 	 * {@inheritDoc}
 	 */
-	public CompositeData[] getCurrentRevisionDeclaredRequirements(long bundleId, String namespace) throws IOException {
-		BundleWiring wiring = bundleContext.getBundle(bundleId).adapt(BundleWiring.class);
-		List<BundleRequirement> requirements = wiring.getRequirements(null);
-		List<CompositeData> declaredRequirements = new ArrayList<CompositeData>();
-		
-		for (BundleRequirement bundleRequirement : requirements) {
-			Map<String, ?> requirementsValues = new HashMap<String, Object>();
-			
-			
-			
-			declaredRequirements.add(new CompositeDataSupport(CustomBundleWiringStateMBean.REQUIREMENT_TYPE_ARRAY, requirementsValues));
-		}
-		
-		return declaredRequirements.toArray(new CompositeData[declaredRequirements.size()]);
+	public CompositeData getCurrentRevisionDeclaredRequirements(long bundleId, String namespace) throws IOException {
+		BundleRevision bundleRevision = getBundle(bundleId).adapt(BundleRevision.class);
+		return new OSGiBundleRevision(bundleRevision).requirementsAsCompositeData(namespace);
 	}
 
-	/**
+	/** DONE
 	 * {@inheritDoc}
 	 */
-	public CompositeData[] getCurrentRevisionDeclaredCapabilities(long bundleId, String namespace) throws IOException {
-		BundleWiring wiring = bundleContext.getBundle(bundleId).adapt(BundleWiring.class);
-		List<BundleCapability> capabilities = wiring.getCapabilities(null);
-		List<CompositeData> declaredCapabilities = new ArrayList<CompositeData>();
-		for (BundleCapability bundleCapability : capabilities) {
-			
-		}
-		return declaredCapabilities.toArray(new CompositeData[declaredCapabilities.size()]);
+	public CompositeData getCurrentRevisionDeclaredCapabilities(long bundleId, String namespace) throws IOException {
+		BundleRevision bundleRevision = getBundle(bundleId).adapt(BundleRevision.class);
+		return new OSGiBundleRevision(bundleRevision).capabilitiesAsCompositeData(namespace);
 	}
-
-	/**
+	
+	/** DONE
 	 * {@inheritDoc}
 	 */
 	public CompositeData getCurrentWiring(long bundleId, String namespace) throws IOException {
-		BundleWiring wiring = bundleContext.getBundle(bundleId).adapt(BundleWiring.class);
-		return null;
+		BundleWiring wiring = getBundle(bundleId).adapt(BundleWiring.class);
+		return new OSGiBundleWiring(wiring).asCompositeData(namespace);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public TabularData getCurrentWiringClosure(long rootBundleId, String namespace) throws IOException {
-		BundleWiring wiring = bundleContext.getBundle(rootBundleId).adapt(BundleWiring.class);
+		BundleWiring wiring = getBundle(rootBundleId).adapt(BundleWiring.class);
+		OSGiBundleWiring osgiWiring = new OSGiBundleWiring(wiring);
+		
+		//Navigate the wires and check for cycles
+		
 		return null;
 	}
 
-	/**
+	/** DONE
 	 * {@inheritDoc}
 	 */
 	public TabularData getRevisionsDeclaredRequirements(long bundleId, String namespace) throws IOException {
-		BundleWiring wiring = bundleContext.getBundle(bundleId).adapt(BundleWiring.class);
-		return null;
+		List<BundleRevision> bundleRevisions = getBundle(bundleId).adapt(BundleRevisions.class).getRevisions();
+		TabularDataSupport table = new TabularDataSupport(CustomBundleWiringStateMBean.BUNDLE_REVISIONS_REQUIREMENTS_TYPE);
+		int revisionCounter = 0;
+		for (BundleRevision bundleRevision : bundleRevisions) {
+			table.put(new OSGiBundleRevision(bundleRevision).requirementsAsCompositeData(namespace, revisionCounter));
+			revisionCounter++;
+		}
+		return table;
 	}
 
-	/**
+	/** DONE
 	 * {@inheritDoc}
 	 */
 	public TabularData getRevisionsDeclaredCapabilities(long bundleId, String namespace) throws IOException {
-		BundleWiring wiring = bundleContext.getBundle(bundleId).adapt(BundleWiring.class);
-		return null;
+		List<BundleRevision> bundleRevisions = getBundle(bundleId).adapt(BundleRevisions.class).getRevisions();
+		TabularDataSupport table = new TabularDataSupport(CustomBundleWiringStateMBean.BUNDLE_REVISIONS_CAPABILITIES_TYPE);
+		int revisionCounter = 0;
+		for (BundleRevision bundleRevision : bundleRevisions) {
+			table.put(new OSGiBundleRevision(bundleRevision).capabilitiesAsCompositeData(namespace, revisionCounter));
+			revisionCounter++;
+		}
+		return table;
+	}
+	
+	/** DONE
+	 * {@inheritDoc}
+	 */
+	public TabularData getRevisionsWiring(long bundleId, String namespace) throws IOException {
+		List<BundleRevision> bundleRevisions = getBundle(bundleId).adapt(BundleRevisions.class).getRevisions();
+		TabularDataSupport table = new TabularDataSupport(CustomBundleWiringStateMBean.BUNDLE_REVISIONS_WIRINGS_TYPE);
+		int revisionCounter = 0;
+		for (BundleRevision bundleRevision : bundleRevisions) {
+			table.put(new OSGiBundleWiring(bundleRevision.getWiring()).asCompositeData(namespace, revisionCounter));
+			revisionCounter++;
+		}
+		return table;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public ArrayType getRevisionsWiring(long bundleId, String namespace) throws IOException {
-		BundleWiring wiring = bundleContext.getBundle(bundleId).adapt(BundleWiring.class);
-		return null;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public ArrayType getRevisionsWiringClosure(long rootBundleId, String namespace) throws IOException {
-		BundleWiring wiring = bundleContext.getBundle(rootBundleId).adapt(BundleWiring.class);
+	public TabularData getRevisionsWiringClosure(long rootBundleId, String namespace) throws IOException {
+		List<BundleRevision> bundleRevisions = getBundle(rootBundleId).adapt(BundleRevisions.class).getRevisions();
+		for (BundleRevision bundleRevision : bundleRevisions) {
+			OSGiBundleWiring osgiWiring = new OSGiBundleWiring(bundleRevision.getWiring());
+			
+			//Navigate the wires and check for cycles
+		}
 		return null;
 	}
 	

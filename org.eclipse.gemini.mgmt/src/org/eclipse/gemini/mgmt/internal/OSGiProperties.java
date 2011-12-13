@@ -21,23 +21,23 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.CompositeDataSupport;
-import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.OpenDataException;
-import javax.management.openmbean.OpenType;
-import javax.management.openmbean.SimpleType;
 import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularDataSupport;
-import javax.management.openmbean.TabularType;
 
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.Version;
+import org.osgi.jmx.JmxConstants;
 
 /**
  * <p>
@@ -88,38 +88,13 @@ import org.osgi.framework.ServiceReference;
 public final class OSGiProperties {
 
 	/**
-	 * The key of the entry
-	 */
-	public static final String KEY = "Key";
-	/**
-	 * The value of the entry
-	 */
-	public static final String VALUE = "Value";
-	/**
-	 * The type of the entry
-	 */
-	public static final String TYPE = "Type";
-	/**
-	 * The composite entries for the row
-	 */
-	public static final String[] PROPERTIES = new String[] { KEY, VALUE, TYPE };
-
-	/**
-	 * The property type
-	 */
-	public static final CompositeType PROPERTY = createPropertyType();
-	/**
-	 * The table type
-	 */
-	public static final TabularType PROPERTY_TABLE = createPropertyTableType();
-	/**
 	 * The scalar type
 	 */
-	protected static final Set<String> SCALAR_TYPES = new HashSet<String>();
+	private static final Set<String> SCALAR_TYPES = new HashSet<String>();
 	/**
 	 * The primitive types
 	 */
-	protected static final Set<String> PRIMITIVE_TYPES = new HashSet<String>();
+	private static final Set<String> PRIMITIVE_TYPES = new HashSet<String>();
 
 	static {
 		SCALAR_TYPES.add("String");
@@ -151,7 +126,7 @@ public final class OSGiProperties {
 	 * @return the tabular data representation of the properties
 	 */
 	public static TabularData tableFrom(Dictionary<String, Object> properties) {
-		TabularDataSupport table = new TabularDataSupport(PROPERTY_TABLE);
+		TabularDataSupport table = new TabularDataSupport(JmxConstants.PROPERTIES_TYPE);
 		if (properties != null) {
 			for (Enumeration<?> keys = properties.keys(); keys.hasMoreElements();) {
 				String key = (String) keys.nextElement();
@@ -207,7 +182,7 @@ public final class OSGiProperties {
 			return props;
 		}
 		for (CompositeData data : (Collection<CompositeData>) table.values()) {
-			props.put((String) data.get(KEY), parse((String) data.get(VALUE), (String) data.get(TYPE)));
+			props.put((String) data.get(JmxConstants.KEY), parse((String) data.get(JmxConstants.VALUE), (String) data.get(JmxConstants.TYPE)));
 		}
 
 		return props;
@@ -221,7 +196,7 @@ public final class OSGiProperties {
 	 * @param componentClazz
 	 * @return the composite data representation
 	 */
-	protected static CompositeData encodeArray(String key, Object value, Class<?> componentClazz) {
+	private static CompositeData encodeArray(String key, Object value, Class<?> componentClazz) {
 		String type = typeOf(componentClazz);
 		StringBuffer buf = new StringBuffer();
 		if (Integer.TYPE.equals(componentClazz)) {
@@ -299,7 +274,7 @@ public final class OSGiProperties {
 	 * @param value
 	 * @return the composite data representation
 	 */
-	protected static CompositeData encodeVector(String key, Vector<?> value) {
+	private static CompositeData encodeVector(String key, Vector<?> value) {
 		String type = "String";
 		if (value.size() > 0) {
 			type = typeOf(value.get(0).getClass());
@@ -320,8 +295,10 @@ public final class OSGiProperties {
 	 * @param clazz
 	 * @return the string type of the class
 	 */
-	protected static String typeOf(Class<?> clazz) {
-
+	private static String typeOf(Class<?> clazz) {
+		if (clazz.equals(Version.class)) {
+			return "Version";
+		}
 		if (clazz.equals(String.class)) {
 			return "String";
 		}
@@ -385,13 +362,12 @@ public final class OSGiProperties {
 	 * @return the composite data representation of the key/value pair
 	 */
 	private static CompositeData propertyData(String key, String value, String type) {
-		Object[] itemValues = new Object[PROPERTIES.length];
-		itemValues[0] = key;
-		itemValues[1] = value;
-		itemValues[2] = type;
-
+		Map<String, Object> items = new HashMap<String, Object>(); 
+		items.put(JmxConstants.KEY, key);
+		items.put(JmxConstants.VALUE, value);
+		items.put(JmxConstants.TYPE, type);
 		try {
-			return new CompositeDataSupport(PROPERTY, PROPERTIES, itemValues);
+			return new CompositeDataSupport(JmxConstants.PROPERTY_TYPE, items);
 		} catch (OpenDataException e) {
 			throw new IllegalStateException("Cannot form property open data", e);
 		}
@@ -404,7 +380,7 @@ public final class OSGiProperties {
 	 * @param type
 	 * @return the object represented by the String
 	 */
-	public static Object parse(String value, String type) {
+	private static Object parse(String value, String type) {
 		StringTokenizer tokens = new StringTokenizer(type);
 		if (!tokens.hasMoreElements()) {
 			throw new IllegalArgumentException("Type is empty");
@@ -429,7 +405,7 @@ public final class OSGiProperties {
 	 * @param tokens
 	 * @return the array represented by the string value
 	 */
-	protected static Object parseArray(String value, StringTokenizer tokens) {
+	private static Object parseArray(String value, StringTokenizer tokens) {
 		if (!tokens.hasMoreTokens()) {
 			throw new IllegalArgumentException("Expecting <of> token in Array type");
 		}
@@ -456,7 +432,7 @@ public final class OSGiProperties {
 	 * @param type
 	 * @return the array represented by the string value
 	 */
-	protected static Object parseScalarArray(String value, String type) {
+	private static Object parseScalarArray(String value, String type) {
 		ArrayList<Object> array = new ArrayList<Object>();
 		StringTokenizer values = new StringTokenizer(value, ",");
 		while (values.hasMoreTokens()) {
@@ -472,7 +448,7 @@ public final class OSGiProperties {
 	 * @param size
 	 * @return the scalar array from the supplied type
 	 */
-	protected static Object[] createScalarArray(String type, int size) {
+	private static Object[] createScalarArray(String type, int size) {
 		if ("String".equals(type)) {
 			return new String[size];
 		}
@@ -513,7 +489,7 @@ public final class OSGiProperties {
 	 * @param type
 	 * @return the array from the supplied values
 	 */
-	protected static Object parsePrimitiveArray(String value, String type) {
+	private static Object parsePrimitiveArray(String value, String type) {
 		StringTokenizer values = new StringTokenizer(value, ",");
 		if ("int".equals(type)) {
 			int[] array = new int[values.countTokens()];
@@ -575,13 +551,13 @@ public final class OSGiProperties {
 	}
 
 	/**
-	 * Parse the vector represented by teh supplied string value
+	 * Parse the vector represented by the supplied string value
 	 * 
 	 * @param value
 	 * @param tokens
-	 * @return the vector represented by teh supplied string value
+	 * @return the vector represented by the supplied string value
 	 */
-	protected static Object parseVector(String value, StringTokenizer tokens) {
+	private static Object parseVector(String value, StringTokenizer tokens) {
 		if (!tokens.hasMoreTokens()) {
 			throw new IllegalArgumentException("Expecting <of> token in Vector type");
 		}
@@ -610,8 +586,7 @@ public final class OSGiProperties {
 	 * @param type
 	 * @return the scalar value represented by the string
 	 */
-	@SuppressWarnings("boxing")
-	protected static Object parseScalar(String value, String type) {
+	private static Object parseScalar(String value, String type) {
 		if ("String".equals(type)) {
 			return value;
 		}
@@ -643,36 +618,6 @@ public final class OSGiProperties {
 			return new BigInteger(value);
 		}
 		throw new IllegalArgumentException("Unknown scalar type: " + type);
-	}
-
-	private static TabularType createPropertyTableType() {
-		try {
-			return new TabularType("Properties", "The table of credentials", PROPERTY, new String[] { KEY });
-		} catch (OpenDataException e) {
-			throw new IllegalStateException("Cannot form services table open data", e);
-		}
-	}
-
-	@SuppressWarnings("unchecked")
-	private static CompositeType createPropertyType() {
-		String description = "This type encapsulates a key/value pair";
-		String[] itemNames = PROPERTIES;
-		OpenType<String>[] itemTypes = new OpenType[itemNames.length];
-		String[] itemDescriptions = new String[itemNames.length];
-		itemTypes[0] = SimpleType.STRING;
-		itemTypes[1] = SimpleType.STRING;
-		itemTypes[2] = SimpleType.STRING;
-
-		itemDescriptions[0] = "The key of the property";
-		itemDescriptions[1] = "The value of the property";
-		itemDescriptions[2] = "The type of the value";
-
-		try {
-			return new CompositeType("Property", description, itemNames, itemDescriptions, itemTypes);
-		} catch (OpenDataException e) {
-			throw new IllegalStateException("Cannot form property open data", e);
-		}
-
 	}
 
 }

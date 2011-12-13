@@ -69,8 +69,11 @@ import org.osgi.jmx.framework.ServiceStateMBean;
 public final class OSGiService {
 
 	private long bundle;
+	
 	private long identifier;
+	
 	private String[] interfaces;
+	
 	private long[] usingBundles;
 
 	/**
@@ -85,7 +88,7 @@ public final class OSGiService {
 		this.identifier = (Long) reference.getProperty(SERVICE_ID);
 		this.interfaces = (String[]) reference.getProperty(OBJECTCLASS);
 		this.bundle = reference.getBundle().getBundleId();
-		this.usingBundles = Util.getBundlesUsingBundles(reference);
+		this.usingBundles = Util.getBundlesUsing(reference);
 	}
 
 	/**
@@ -114,7 +117,7 @@ public final class OSGiService {
 	 * @return the Tabular data which represents the list of bundles
 	 * @throws IOException 
 	 */
-	public static TabularData tableFrom(ArrayList<OSGiService> services, String... serviceTypeItems) throws IOException {
+	public static TabularData tableFrom(List<OSGiService> services, String... serviceTypeItems) throws IOException {
 		List<String> serviceTypes = Arrays.asList(serviceTypeItems);
 		TabularDataSupport table = new TabularDataSupport(Item.tabularType("SERVICES", "The table of all services", OSGiService.computeServiceType(serviceTypes), ServiceStateMBean.IDENTIFIER));
 		for (OSGiService service : services) {

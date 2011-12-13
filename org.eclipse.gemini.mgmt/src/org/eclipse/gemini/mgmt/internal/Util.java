@@ -46,7 +46,7 @@ public final class Util {
 	 * @return
 	 * @throws IOException
 	 */
-	public static long[] getBundlesUsingBundles(ServiceReference<?> serviceRef) {
+	public static long[] getBundlesUsing(ServiceReference<?> serviceRef) {
 		Bundle[] bundles = serviceRef.getUsingBundles();
 		long[] ids = new long[bundles.length];
 		for (int i = 0; i < bundles.length; i++) {

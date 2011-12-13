@@ -147,21 +147,7 @@ public final class OSGiBundle {
 		this.bundle = b;
 	}
 
-	/**
-	 * Answer the TabularData representing the list of OSGiBundle state
-	 * 
-	 * @param bundles - the list of bundles to represent
-	 * 
-	 * @return the Tabular data which represents the list of bundles
-	 * @throws IOException 
-	 */
-	public static TabularData tableFrom(ArrayList<OSGiBundle> bundles) throws IOException {
-		TabularDataSupport table = new TabularDataSupport(BundleStateMBean.BUNDLES_TYPE);
-		for (OSGiBundle bundle : bundles) {
-			table.put(bundle.asCompositeData());
-		}
-		return table;
-	}
+
 
 	/**
 	 * Answer the TabularData representing the list of OSGiBundle state
@@ -172,7 +158,7 @@ public final class OSGiBundle {
 	 * @return the Tabular data which represents the list of bundles
 	 * @throws IOException 
 	 */
-	public static TabularData tableFrom(ArrayList<OSGiBundle> bundles, int mask) throws IOException {
+	public static TabularData tableFrom(List<OSGiBundle> bundles, int mask) throws IOException {
 		CompositeType computeBundleType = OSGiBundle.computeBundleType(mask);
 		TabularDataSupport table = new TabularDataSupport(Item.tabularType("BUNDLES", "A list of bundles", computeBundleType, new String[] { BundleStateMBean.IDENTIFIER }));
 		for (OSGiBundle bundle : bundles) {
@@ -295,7 +281,7 @@ public final class OSGiBundle {
 	 * @return the CompositeData encoding of the receiver.
 	 * @throws IOException 
 	 */
-	private CompositeData asCompositeData() throws IOException {
+	public CompositeData asCompositeData() throws IOException {
 		Map<String, Object> items = new HashMap<String, Object>();
 		items.put(BundleStateMBean.IDENTIFIER, getIdentifier());
 		items.put(BundleStateMBean.LOCATION, getLocation());
