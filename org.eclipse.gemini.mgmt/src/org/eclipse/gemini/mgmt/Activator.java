@@ -69,29 +69,53 @@ public class Activator implements BundleActivator {
 
 	private static final String VIRGO_BUNDLE_ID = "org.eclipse.virgo.management.bundle";
 	
-	protected List<MBeanServer> mbeanServers = new CopyOnWriteArrayList<MBeanServer>();
-	protected BundleContext bundleContext = null;
-	protected StandardMBean bundleState;
-	protected StandardMBean bundleWiringState;
-	protected StandardMBean packageState;
-	protected StandardMBean serviceState;
-	protected ObjectName bundleStateName;
-	protected ObjectName bundleWiringStateName;
-	protected StandardMBean framework;
-	protected ObjectName frameworkName;
-	protected ServiceTracker<MBeanServer, ?> mbeanServiceTracker;
-	protected ObjectName packageStateName;
-	protected ObjectName serviceStateName;
-	protected ObjectName configAdminName;
-	protected ObjectName permissionAdminName;
-	protected ObjectName provisioningServiceName;
-	protected ObjectName userAdminName;
-	protected AtomicBoolean servicesRegistered = new AtomicBoolean(false);
-	protected ServiceTracker<ConfigurationAdmin, ?> configAdminTracker;
-	protected ServiceTracker<PermissionAdmin, ?> permissionAdminTracker;
-	protected ServiceTracker<ProvisioningService, ?> provisioningServiceTracker;
-	protected ServiceTracker<UserAdmin, ?> userAdminTracker;
+	private List<MBeanServer> mbeanServers = new CopyOnWriteArrayList<MBeanServer>();
+	
+	private BundleContext bundleContext = null;
+	
+	private StandardMBean bundleState;
+	
+	private StandardMBean bundleWiringState;
+	
+	private StandardMBean packageState;
+	
+	private StandardMBean serviceState;
+	
+	private ObjectName bundleStateName;
+	
+	private ObjectName bundleWiringStateName;
+	
+	private StandardMBean framework;
+	
+	private ObjectName frameworkName;
+	
+	private ServiceTracker<MBeanServer, ?> mbeanServiceTracker;
+	
+	private ObjectName packageStateName;
+	
+	private ObjectName serviceStateName;
+	
+	private ObjectName configAdminName;
+	
+	private ObjectName permissionAdminName;
+	
+	private ObjectName provisioningServiceName;
+	
+	private ObjectName userAdminName;
+	
+	private AtomicBoolean servicesRegistered = new AtomicBoolean(false);
+	
+	private ServiceTracker<ConfigurationAdmin, ?> configAdminTracker;
+	
+	private ServiceTracker<PermissionAdmin, ?> permissionAdminTracker;
+	
+	private ServiceTracker<ProvisioningService, ?> provisioningServiceTracker;
+	
+	private ServiceTracker<UserAdmin, ?> userAdminTracker;
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public void start(BundleContext bundleContext) throws Exception {
 		String bundleIdString = bundleContext.getProperty(VIRGO_BUNDLE_ID);
 		if(bundleIdString != null){
@@ -118,6 +142,9 @@ public class Activator implements BundleActivator {
 		mbeanServiceTracker.open();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public void stop(BundleContext arg0) throws Exception {
 		mbeanServiceTracker.close();
 		for (MBeanServer mbeanServer : mbeanServers) {
@@ -131,7 +158,7 @@ public class Activator implements BundleActivator {
 	 * 
 	 * @param mbeanServer MBean Server to unregister the MBeans from
      */
-	protected synchronized void deregisterServices(MBeanServer mbeanServer) {
+	private synchronized void deregisterServices(MBeanServer mbeanServer) {
 		if (!servicesRegistered.get()) {
 			return;
 		}
@@ -237,7 +264,7 @@ public class Activator implements BundleActivator {
 	 * 
 	 * @param mbeanServer MBean Server to register the MBeans in
      */
-	protected synchronized void registerServices(MBeanServer mbeanServer) {
+	private synchronized void registerServices(MBeanServer mbeanServer) {
 		try {
 			framework = new StandardMBean(new Framework(bundleContext), FrameworkMBean.class);
 		} catch (NotCompliantMBeanException e) {
@@ -335,7 +362,7 @@ public class Activator implements BundleActivator {
 		servicesRegistered.set(true);
 	}
 
-	class MBeanServiceTracker implements ServiceTrackerCustomizer<MBeanServer, Object> {
+	private class MBeanServiceTracker implements ServiceTrackerCustomizer<MBeanServer, Object> {
 
 		/**
 		 * Register all MBeans in a newly registered MBean server
@@ -394,7 +421,7 @@ public class Activator implements BundleActivator {
 		}
 	}
 
-	class ConfigAdminTracker implements ServiceTrackerCustomizer<ConfigurationAdmin, Object> {
+	private class ConfigAdminTracker implements ServiceTrackerCustomizer<ConfigurationAdmin, Object> {
 		
 		private StandardMBean manager;
 
@@ -459,7 +486,7 @@ public class Activator implements BundleActivator {
 		}
 	}
 
-	class PermissionAdminTracker implements ServiceTrackerCustomizer<PermissionAdmin, Object> {
+	private class PermissionAdminTracker implements ServiceTrackerCustomizer<PermissionAdmin, Object> {
 		
 		private StandardMBean manager;
 
@@ -520,7 +547,7 @@ public class Activator implements BundleActivator {
 		}
 	}
 
-	class ProvisioningServiceTracker implements ServiceTrackerCustomizer<ProvisioningService, Object> {
+	private class ProvisioningServiceTracker implements ServiceTrackerCustomizer<ProvisioningService, Object> {
 		
 		private StandardMBean provisioning;
 
@@ -584,7 +611,7 @@ public class Activator implements BundleActivator {
 		}
 	}
 
-	class UserAdminTracker implements ServiceTrackerCustomizer<UserAdmin, Object> {
+	private class UserAdminTracker implements ServiceTrackerCustomizer<UserAdmin, Object> {
 		
 		private StandardMBean manager;
 
