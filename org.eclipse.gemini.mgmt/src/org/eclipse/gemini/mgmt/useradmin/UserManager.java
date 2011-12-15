@@ -23,7 +23,6 @@ import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.TabularData;
 
 import org.osgi.framework.InvalidSyntaxException;
-import org.eclipse.gemini.mgmt.Monitor;
 import org.eclipse.gemini.mgmt.internal.OSGiProperties;
 import org.eclipse.gemini.mgmt.useradmin.internal.OSGiAuthorization;
 import org.eclipse.gemini.mgmt.useradmin.internal.OSGiGroup;
@@ -38,7 +37,7 @@ import org.osgi.service.useradmin.UserAdmin;
 /** 
  * 
  */
-public final class UserManager extends Monitor implements UserAdminMBean {
+public final class UserManager implements UserAdminMBean {
 
 	private UserAdmin admin;
 
@@ -578,22 +577,6 @@ public final class UserManager extends Monitor implements UserAdminMBean {
 			throw new IOException("Name must not be null");
 		}
 		return admin.removeRole(name);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void addListener() {
-		
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void removeListener() {
-		
 	}
 
 }
