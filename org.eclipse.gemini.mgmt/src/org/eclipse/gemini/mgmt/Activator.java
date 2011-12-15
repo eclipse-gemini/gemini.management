@@ -69,9 +69,33 @@ public class Activator implements BundleActivator {
 
 	private static final String VIRGO_BUNDLE_ID = "org.eclipse.virgo.management.bundle";
 	
-	private List<MBeanServer> mbeanServers = new CopyOnWriteArrayList<MBeanServer>();
+	private final List<MBeanServer> mbeanServers = new CopyOnWriteArrayList<MBeanServer>();
+	
+	private final AtomicBoolean servicesRegistered = new AtomicBoolean(false);
+	
+	private final ObjectName frameworkName;
+	
+	private final ObjectName bundleStateName;
+	
+	private final ObjectName bundleWiringStateName;
+	
+	private final ObjectName packageStateName;
+	
+	private final ObjectName serviceStateName;
+	
+	private final ObjectName configAdminName;
+	
+	private final ObjectName permissionAdminName;
+	
+	private final ObjectName provisioningServiceName;
+	
+	private final ObjectName userAdminName;
+	
+	private ServiceTracker<MBeanServer, ?> mbeanServiceTracker;
 	
 	private BundleContext bundleContext = null;
+	
+	private StandardMBean framework;
 	
 	private StandardMBean bundleState;
 	
@@ -81,30 +105,6 @@ public class Activator implements BundleActivator {
 	
 	private StandardMBean serviceState;
 	
-	private ObjectName bundleStateName;
-	
-	private ObjectName bundleWiringStateName;
-	
-	private StandardMBean framework;
-	
-	private ObjectName frameworkName;
-	
-	private ServiceTracker<MBeanServer, ?> mbeanServiceTracker;
-	
-	private ObjectName packageStateName;
-	
-	private ObjectName serviceStateName;
-	
-	private ObjectName configAdminName;
-	
-	private ObjectName permissionAdminName;
-	
-	private ObjectName provisioningServiceName;
-	
-	private ObjectName userAdminName;
-	
-	private AtomicBoolean servicesRegistered = new AtomicBoolean(false);
-	
 	private ServiceTracker<ConfigurationAdmin, ?> configAdminTracker;
 	
 	private ServiceTracker<PermissionAdmin, ?> permissionAdminTracker;
@@ -113,6 +113,22 @@ public class Activator implements BundleActivator {
 	
 	private ServiceTracker<UserAdmin, ?> userAdminTracker;
 
+	public Activator() {
+		try {
+			frameworkName = new ObjectName(FrameworkMBean.OBJECTNAME);
+			bundleStateName = new ObjectName(CustomBundleStateMBean.OBJECTNAME);
+			bundleWiringStateName = new ObjectName(CustomBundleWiringStateMBean.OBJECTNAME);
+			serviceStateName = new ObjectName(CustomServiceStateMBean.OBJECTNAME);
+			packageStateName = new ObjectName(PackageStateMBean.OBJECTNAME);
+			configAdminName = new ObjectName(ConfigurationAdminMBean.OBJECTNAME);
+			permissionAdminName = new ObjectName(PermissionAdminMBean.OBJECTNAME);
+			provisioningServiceName = new ObjectName(ProvisioningServiceMBean.OBJECTNAME);
+			userAdminName = new ObjectName(UserAdminMBean.OBJECTNAME);		
+		} catch (Exception e) {
+			throw new IllegalStateException("Unable to start Gemini Management, Object name creation failed.", e);
+		}
+	}
+	
 	/**
 	 * {@inheritDoc}
 	 */
@@ -127,16 +143,6 @@ public class Activator implements BundleActivator {
 			this.bundleContext = bundleContext;	
 			LOGGER.info("Starting OSGi JMX system");
 		}
-		frameworkName = new ObjectName(FrameworkMBean.OBJECTNAME);
-		bundleStateName = new ObjectName(CustomBundleStateMBean.OBJECTNAME);
-		bundleWiringStateName = new ObjectName(CustomBundleWiringStateMBean.OBJECTNAME);
-		serviceStateName = new ObjectName(CustomServiceStateMBean.OBJECTNAME);
-		packageStateName = new ObjectName(PackageStateMBean.OBJECTNAME);
-		configAdminName = new ObjectName(ConfigurationAdminMBean.OBJECTNAME);
-		permissionAdminName = new ObjectName(PermissionAdminMBean.OBJECTNAME);
-		provisioningServiceName = new ObjectName(ProvisioningServiceMBean.OBJECTNAME);
-		userAdminName = new ObjectName(UserAdminMBean.OBJECTNAME);
-
 		mbeanServiceTracker = new ServiceTracker<MBeanServer, Object>(this.bundleContext, MBeanServer.class, new MBeanServiceTracker());
 		LOGGER.fine("Awaiting MBeanServer service registration");
 		mbeanServiceTracker.open();
@@ -255,7 +261,6 @@ public class Activator implements BundleActivator {
 			LOGGER.log(Level.FINE, "OSGi UserAdminMBean deregistration problem", e);
 		}
 		userAdminTracker = null;
-
 		servicesRegistered.set(false);
 	}
 
