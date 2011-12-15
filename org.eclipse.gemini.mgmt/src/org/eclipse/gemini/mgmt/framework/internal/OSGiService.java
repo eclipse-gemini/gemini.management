@@ -15,9 +15,9 @@
 
 package org.eclipse.gemini.mgmt.framework.internal;
 
+import static org.eclipse.gemini.mgmt.internal.BundleUtil.LongArrayFrom;
 import static org.osgi.framework.Constants.OBJECTCLASS;
 import static org.osgi.framework.Constants.SERVICE_ID;
-import static org.eclipse.gemini.mgmt.internal.Util.LongArrayFrom;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -33,8 +33,8 @@ import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularDataSupport;
 
+import org.eclipse.gemini.mgmt.internal.ServiceUtil;
 import org.osgi.framework.ServiceReference;
-import org.eclipse.gemini.mgmt.internal.Util;
 import org.osgi.jmx.Item;
 import org.osgi.jmx.framework.ServiceStateMBean;
 
@@ -88,7 +88,7 @@ public final class OSGiService {
 		this.identifier = (Long) reference.getProperty(SERVICE_ID);
 		this.interfaces = (String[]) reference.getProperty(OBJECTCLASS);
 		this.bundle = reference.getBundle().getBundleId();
-		this.usingBundles = Util.getBundlesUsing(reference);
+		this.usingBundles = ServiceUtil.getBundlesUsing(reference);
 	}
 
 	/**

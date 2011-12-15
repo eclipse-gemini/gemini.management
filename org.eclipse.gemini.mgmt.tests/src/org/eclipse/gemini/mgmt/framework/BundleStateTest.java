@@ -38,7 +38,7 @@ import org.osgi.jmx.framework.BundleStateMBean;
 import org.eclipse.gemini.mgmt.Activator;
 import org.eclipse.gemini.mgmt.framework.internal.OSGiBundle;
 import org.eclipse.gemini.mgmt.framework.BundleState;
-import org.eclipse.gemini.mgmt.internal.Util;
+import org.eclipse.gemini.mgmt.internal.BundleUtil;
 
 public class BundleStateTest {
 	
@@ -146,16 +146,16 @@ public class BundleStateTest {
 			assertEquals(startLevel, bundle.adapt(BundleStartLevel.class).getStartLevel());
 			assertEquals(state, stateToString(bundle.getState()));
 			assertEquals(lastModified, bundle.getLastModified());
-			assertEquals(persistenlyStarted, Util.isBundlePersistentlyStarted(bundle));
-			assertEquals(removalPending, Util.isRemovalPending(bundle));
-			assertEquals(required, Util.isRequired(bundle));
-			assertEquals(fragment, Util.isBundleFragment(bundle));
+			assertEquals(persistenlyStarted, BundleUtil.isBundlePersistentlyStarted(bundle));
+			assertEquals(removalPending, BundleUtil.isRemovalPending(bundle));
+			assertEquals(required, BundleUtil.isRequired(bundle));
+			assertEquals(fragment, BundleUtil.isBundleFragment(bundle));
 
 			long[] rs = new long[registeredServices.length];
 			for (int i = 0; i < registeredServices.length; i++) {
 				rs[i] = registeredServices[i].longValue();
 			}
-			long[] rs2 = Util.serviceIds(bundle.getRegisteredServices());
+			long[] rs2 = BundleUtil.serviceIds(bundle.getRegisteredServices());
 			Arrays.sort(rs);
 			Arrays.sort(rs2);
 			assertTrue(Arrays.equals(rs, rs2));
@@ -165,18 +165,18 @@ public class BundleStateTest {
 				siu[i] = servicesInUse[i].longValue();
 			}
 			Arrays.sort(siu);
-			long[] siu2 = Util.serviceIds(bundle.getServicesInUse());
+			long[] siu2 = BundleUtil.serviceIds(bundle.getServicesInUse());
 			Arrays.sort(siu2);
 			assertTrue(Arrays.equals(siu, siu2));
 
-			assertEquals((TabularData) headers,	OSGiBundle.headerTable(Util.getBundleHeaders(bundle)));
+			assertEquals((TabularData) headers,	OSGiBundle.headerTable(BundleUtil.getBundleHeaders(bundle)));
 
-			String[] exportedPackages2 = Util.getBundleExportedPackages(bundle);
+			String[] exportedPackages2 = BundleUtil.getBundleExportedPackages(bundle);
 			Arrays.sort(exportedPackages);
 			Arrays.sort(exportedPackages2);
 			assertTrue(Arrays.equals(exportedPackages, exportedPackages2));
 
-			String[] importedPackages2 = Util.getBundleImportedPackages(bundle);
+			String[] importedPackages2 = BundleUtil.getBundleImportedPackages(bundle);
 			Arrays.sort(importedPackages);
 			Arrays.sort(importedPackages2);
 			assertTrue(Arrays.equals(importedPackages, importedPackages2));
@@ -186,7 +186,7 @@ public class BundleStateTest {
 				frags[i] = fragments[i].longValue();
 			}
 			Arrays.sort(frags);
-			long[] frags2 = Util.getBundleFragments(bundle);
+			long[] frags2 = BundleUtil.getBundleFragments(bundle);
 			Arrays.sort(frags2);
 			assertTrue(Arrays.equals(frags, frags2));
 
@@ -195,7 +195,7 @@ public class BundleStateTest {
 				hst[i] = hosts[i].longValue();
 			}
 			Arrays.sort(hst);
-			long[] hst2 = Util.getBundleHosts(bundle);
+			long[] hst2 = BundleUtil.getBundleHosts(bundle);
 			Arrays.sort(hst2);
 			assertTrue(Arrays.equals(hst, hst2));
 
@@ -204,7 +204,7 @@ public class BundleStateTest {
 				reqB[i] = requiringBundles[i].longValue();
 			}
 			Arrays.sort(reqB);
-			long[] reqB2 = Util.getRequiringBundles(bundle);
+			long[] reqB2 = BundleUtil.getRequiringBundles(bundle);
 			Arrays.sort(reqB2);
 			assertTrue(Arrays.equals(reqB, reqB2));
 
@@ -213,7 +213,7 @@ public class BundleStateTest {
 				requiredB[i] = requiredBundles[i].longValue();
 			}
 			Arrays.sort(requiredB);
-			long[] requiredB2 = Util.getRequiredBundles(bundle);
+			long[] requiredB2 = BundleUtil.getRequiredBundles(bundle);
 			Arrays.sort(requiredB2);
 			assertTrue(Arrays.equals(requiredB, requiredB2));
 		}
@@ -267,14 +267,14 @@ public class BundleStateTest {
 			assertEquals(version, bundle.getVersion().toString());
 			assertEquals(state, stateToString(bundle.getState()));
 			assertEquals(lastModified, bundle.getLastModified());
-			assertEquals(persistenlyStarted, Util.isBundlePersistentlyStarted(bundle));
-			assertEquals(removalPending, Util.isRemovalPending(bundle));
+			assertEquals(persistenlyStarted, BundleUtil.isBundlePersistentlyStarted(bundle));
+			assertEquals(removalPending, BundleUtil.isRemovalPending(bundle));
 
 			long[] rs = new long[registeredServices.length];
 			for (int i = 0; i < registeredServices.length; i++) {
 				rs[i] = registeredServices[i].longValue();
 			}
-			long[] rs2 = Util.serviceIds(bundle.getRegisteredServices());
+			long[] rs2 = BundleUtil.serviceIds(bundle.getRegisteredServices());
 			Arrays.sort(rs);
 			Arrays.sort(rs2);
 			assertTrue(Arrays.equals(rs, rs2));
@@ -284,16 +284,16 @@ public class BundleStateTest {
 				siu[i] = servicesInUse[i].longValue();
 			}
 			Arrays.sort(siu);
-			long[] siu2 = Util.serviceIds(bundle.getServicesInUse());
+			long[] siu2 = BundleUtil.serviceIds(bundle.getServicesInUse());
 			Arrays.sort(siu2);
 			assertTrue(Arrays.equals(siu, siu2));
 
-			String[] exportedPackages2 = Util.getBundleExportedPackages(bundle);
+			String[] exportedPackages2 = BundleUtil.getBundleExportedPackages(bundle);
 			Arrays.sort(exportedPackages);
 			Arrays.sort(exportedPackages2);
 			assertTrue(Arrays.equals(exportedPackages, exportedPackages2));
 
-			String[] importedPackages2 = Util.getBundleImportedPackages(bundle);
+			String[] importedPackages2 = BundleUtil.getBundleImportedPackages(bundle);
 			Arrays.sort(importedPackages);
 			Arrays.sort(importedPackages2);
 			assertTrue(Arrays.equals(importedPackages, importedPackages2));
@@ -303,7 +303,7 @@ public class BundleStateTest {
 				hst[i] = hosts[i].longValue();
 			}
 			Arrays.sort(hst);
-			long[] hst2 = Util.getBundleHosts(bundle);
+			long[] hst2 = BundleUtil.getBundleHosts(bundle);
 			Arrays.sort(hst2);
 			assertTrue(Arrays.equals(hst, hst2));
 
@@ -312,7 +312,7 @@ public class BundleStateTest {
 				reqB[i] = requiringBundles[i].longValue();
 			}
 			Arrays.sort(reqB);
-			long[] reqB2 = Util.getRequiringBundles(bundle);
+			long[] reqB2 = BundleUtil.getRequiringBundles(bundle);
 			Arrays.sort(reqB2);
 			assertTrue(Arrays.equals(reqB, reqB2));
 		}

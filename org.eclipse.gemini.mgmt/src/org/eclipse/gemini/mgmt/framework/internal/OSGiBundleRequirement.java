@@ -20,6 +20,7 @@ import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.TabularDataSupport;
 
 import org.eclipse.gemini.mgmt.framework.CustomBundleWiringStateMBean;
+import org.eclipse.gemini.mgmt.internal.BundleWiringUtil;
 import org.eclipse.gemini.mgmt.internal.OSGiProperties;
 import org.osgi.framework.wiring.BundleRequirement;
 
@@ -42,7 +43,7 @@ public class OSGiBundleRequirement {
 			TabularDataSupport tabularDirectives = new TabularDataSupport(CustomBundleWiringStateMBean.DIRECTIVES_TYPE);
 			Map<String, String> directives = bundleRequirement.getDirectives();
 			for (Entry<String, String> directive : directives.entrySet()) {
-				tabularDirectives.put(new CompositeDataSupport(CustomBundleWiringStateMBean.PROPERTY_TYPE, getItem(directive.getKey(), directive.getValue())));
+				tabularDirectives.put(new CompositeDataSupport(CustomBundleWiringStateMBean.PROPERTY_TYPE, BundleWiringUtil.getDirectiveKeyValueItem(directive.getKey(), directive.getValue())));
 			}
 			
 			Map<String, Object> items = new HashMap<String, Object>();
@@ -54,14 +55,6 @@ public class OSGiBundleRequirement {
 		} catch (OpenDataException e) {
 			throw new IllegalStateException("Cannot form bundle requirment open data", e);
 		}
-	}
-
-	//Move to OSGiProperties
-	private Map<String, ?> getItem(String key, Object value){
-		Map<String, Object> items = new HashMap<String, Object>();
-		items.put(CustomBundleWiringStateMBean.KEY, key);
-		items.put(CustomBundleWiringStateMBean.VALUE, value);
-		return items;
 	}
 	
 }

@@ -25,35 +25,19 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
-
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.startlevel.BundleStartLevel;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.BundleWire;
 import org.osgi.framework.wiring.BundleWiring;
-import org.osgi.framework.startlevel.BundleStartLevel;
 
 /**
  * Static utilities
  * 
  */
-public final class Util {
-	
-	/**
-	 * 
-	 * @param serviceRef
-	 * @return
-	 * @throws IOException
-	 */
-	public static long[] getBundlesUsing(ServiceReference<?> serviceRef) {
-		Bundle[] bundles = serviceRef.getUsingBundles();
-		long[] ids = new long[bundles.length];
-		for (int i = 0; i < bundles.length; i++) {
-			ids[i] = bundles[i].getBundleId();
-		}
-		return ids;
-	}
+public final class BundleUtil {
 
 	/**
 	 * 

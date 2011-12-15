@@ -31,7 +31,7 @@ import org.osgi.jmx.framework.BundleStateMBean;
 import org.eclipse.gemini.mgmt.Monitor;
 import org.eclipse.gemini.mgmt.framework.internal.OSGiBundle;
 import org.eclipse.gemini.mgmt.framework.internal.OSGiBundleEvent;
-import org.eclipse.gemini.mgmt.internal.Util;
+import org.eclipse.gemini.mgmt.internal.BundleUtil;
 
 /** 
  * 
@@ -88,14 +88,14 @@ public final class BundleState extends Monitor implements CustomBundleStateMBean
 	 * {@inheritDoc}
 	 */
 	public String[] getExportedPackages(long bundleId) throws IOException {
-		return Util.getBundleExportedPackages(getBundle(bundleId));
+		return BundleUtil.getBundleExportedPackages(getBundle(bundleId));
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public long[] getFragments(long bundleId) throws IOException {
-		return Util.getBundleFragments(getBundle(bundleId));
+		return BundleUtil.getBundleFragments(getBundle(bundleId));
 	}
 
 	/**
@@ -109,14 +109,14 @@ public final class BundleState extends Monitor implements CustomBundleStateMBean
 	 * {@inheritDoc}
 	 */
 	public long[] getHosts(long fragment) throws IOException {
-		return Util.getBundleHosts(getBundle(fragment));
+		return BundleUtil.getBundleHosts(getBundle(fragment));
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public String[] getImportedPackages(long bundleId) throws IOException {
-		return Util.getBundleImportedPackages(getBundle(bundleId));
+		return BundleUtil.getBundleImportedPackages(getBundle(bundleId));
 	}
 
 	/**
@@ -130,35 +130,35 @@ public final class BundleState extends Monitor implements CustomBundleStateMBean
 	 * {@inheritDoc}
 	 */
 	public long[] getRegisteredServices(long bundleId) throws IOException {
-		return Util.serviceIds(getBundle(bundleId).getRegisteredServices());
+		return BundleUtil.serviceIds(getBundle(bundleId).getRegisteredServices());
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public long[] getRequiringBundles(long bundleId) throws IOException {
-		return Util.getRequiringBundles(getBundle(bundleId));
+		return BundleUtil.getRequiringBundles(getBundle(bundleId));
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public long[] getServicesInUse(long bundleIdentifier) throws IOException {
-		return Util.serviceIds(getBundle(bundleIdentifier).getServicesInUse());
+		return BundleUtil.serviceIds(getBundle(bundleIdentifier).getServicesInUse());
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public int getStartLevel(long bundleId) throws IOException {
-		return Util.getBundleStartLevel(getBundle(bundleId));
+		return BundleUtil.getBundleStartLevel(getBundle(bundleId));
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public String getState(long bundleId) throws IOException {
-		return Util.getBundleState(getBundle(bundleId));
+		return BundleUtil.getBundleState(getBundle(bundleId));
 	}
 
 	/**
@@ -179,7 +179,7 @@ public final class BundleState extends Monitor implements CustomBundleStateMBean
 	 * {@inheritDoc}
 	 */
 	public long[] getRequiredBundles(long bundleIdentifier) throws IOException {
-		return Util.getRequiredBundles(getBundle(bundleIdentifier));
+		return BundleUtil.getRequiredBundles(getBundle(bundleIdentifier));
 	}
 
 	/**
@@ -193,28 +193,28 @@ public final class BundleState extends Monitor implements CustomBundleStateMBean
 	 * {@inheritDoc}
 	 */
 	public boolean isPersistentlyStarted(long bundleId) throws IOException {
-		return Util.isBundlePersistentlyStarted(getBundle(bundleId));
+		return BundleUtil.isBundlePersistentlyStarted(getBundle(bundleId));
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public boolean isFragment(long bundleId) throws IOException {
-		return Util.isBundleFragment(getBundle(bundleId));
+		return BundleUtil.isBundleFragment(getBundle(bundleId));
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public boolean isRemovalPending(long bundleId) throws IOException {
-		return Util.isRemovalPending(getBundle(bundleId));
+		return BundleUtil.isRemovalPending(getBundle(bundleId));
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public boolean isRequired(long bundleId) throws IOException {
-		return Util.isRequired(getBundle(bundleId));
+		return BundleUtil.isRequired(getBundle(bundleId));
 	}
 
 	private Bundle getBundle(long bundleId) throws IOException {

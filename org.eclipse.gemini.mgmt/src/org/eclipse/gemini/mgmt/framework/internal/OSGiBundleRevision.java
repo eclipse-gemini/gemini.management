@@ -27,7 +27,7 @@ import org.osgi.framework.wiring.BundleRevision;
  * Utility methods for retrieving JMX data from a {@link BundleRevision}
  * 
  */
-public class OSGiBundleRevision {
+public final class OSGiBundleRevision {
 
 	private final BundleRevision bundleRevision;
 
@@ -40,30 +40,18 @@ public class OSGiBundleRevision {
 	
 	/**
 	 * @param namespace - namespace to retrieve capabilities from
-	 * @return {@link CompositeData} representation of the capabilities
+	 * @return {@link CompositeData} array representation of the capabilities
 	 */
-	public CompositeData capabilitiesAsCompositeData(String namespace){
-		Map<String, Object> items = this.getBundleCapabilityItems(namespace);
-		try {
-			return new CompositeDataSupport(CustomBundleWiringStateMBean.BUNDLE_CAPABILITIES_TYPE, items);
-		} catch (OpenDataException e) {
-			e.printStackTrace(System.out);
-			throw new IllegalStateException("Cannot form bundle capabilities open data", e);
-		}
+	public CompositeData[] capabilitiesAsCompositeDataArray(String namespace){
+		return this.getBundleCapabilityItems(namespace);
 	}
 	
 	/**
 	 * @param namespace - namespace to retrieve requirements from
-	 * @return {@link CompositeData} representation of the requirements
+	 * @return {@link CompositeData} array representation of the requirements
 	 */
-	public CompositeData requirementsAsCompositeData(String namespace){
-		Map<String, Object> items = this.getBundleRequirementItems(namespace);
-		try {
-			return new CompositeDataSupport(CustomBundleWiringStateMBean.BUNDLE_REQUIREMENTS_TYPE, items);
-		} catch (OpenDataException e) {
-			e.printStackTrace(System.out);
-			throw new IllegalStateException("Cannot form bundle requirements open data", e);
-		}
+	public CompositeData[] requirementsAsCompositeDataArray(String namespace){
+		return this.getBundleRequirementItems(namespace);
 	}
 
 	/**
@@ -72,12 +60,12 @@ public class OSGiBundleRevision {
 	 * @return {@link CompositeData} representation of the capabilities
 	 */
 	public CompositeData capabilitiesAsCompositeData(String namespace, int revisionCounter){
-		Map<String, Object> items = this.getBundleCapabilityItems(namespace);
+		Map<String, Object> items = new HashMap<String, Object>();
+		items.put(CustomBundleWiringStateMBean.CAPABILITIES, this.getBundleCapabilityItems(namespace));
 		items.put(CustomBundleWiringStateMBean.BUNDLE_REVISION_ID, revisionCounter);
 		try {
 			return new CompositeDataSupport(CustomBundleWiringStateMBean.BUNDLE_REVISION_CAPABILITIES_TYPE, items);
 		} catch (OpenDataException e) {
-			e.printStackTrace(System.out);
 			throw new IllegalStateException("Cannot form bundle revision capabilities open data", e);
 		}
 	}
@@ -88,45 +76,32 @@ public class OSGiBundleRevision {
 	 * @return {@link CompositeData} representation of the requirements
 	 */
 	public CompositeData requirementsAsCompositeData(String namespace, int revisionCounter){
-		Map<String, Object> items = this.getBundleRequirementItems(namespace);
+		Map<String, Object> items = new HashMap<String, Object>();
+		items.put(CustomBundleWiringStateMBean.REQUIREMENTS, this.getBundleRequirementItems(namespace));
 		items.put(CustomBundleWiringStateMBean.BUNDLE_REVISION_ID, revisionCounter);
 		try {
 			return new CompositeDataSupport(CustomBundleWiringStateMBean.BUNDLE_REVISION_REQUIREMENTS_TYPE, items);
 		} catch (OpenDataException e) {
-			e.printStackTrace(System.out);
 			throw new IllegalStateException("Cannot form bundle revision requirements open data", e);
 		}
 	}
 	
-	private Map<String, Object> getBundleCapabilityItems(String namespace){
-		Map<String, Object> items = new HashMap<String, Object>();
+	private CompositeData[] getBundleCapabilityItems(String namespace){
 		List<BundleCapability> declaredCapabilities = bundleRevision.getDeclaredCapabilities(namespace);
-		
 		CompositeData[] requirementsCompositeDatas = new CompositeData[declaredCapabilities.size()];
-		int i = 0;
-		for (BundleCapability bundleCapability : declaredCapabilities) {
-			requirementsCompositeDatas[i] = new OSGiBundleCapability(bundleCapability).asCompositeData();
-			i++;
+		for (int i = 0; i < declaredCapabilities.size(); i++) {
+			requirementsCompositeDatas[i] = new OSGiBundleCapability(declaredCapabilities.get(i)).asCompositeData();
 		}
-		items.put(CustomBundleWiringStateMBean.BUNDLE_ID, this.bundleRevision.getBundle().getBundleId());
-		items.put(CustomBundleWiringStateMBean.CAPABILITIES, requirementsCompositeDatas);
-		return items;
+		return requirementsCompositeDatas;
 	}
 	
-	private Map<String, Object> getBundleRequirementItems(String namespace){
-		Map<String, Object> items = new HashMap<String, Object>();
+	private CompositeData[] getBundleRequirementItems(String namespace){
 		List<BundleRequirement> declaredRequirements = bundleRevision.getDeclaredRequirements(namespace);
-		
 		CompositeData[] requirementsCompositeDatas = new CompositeData[declaredRequirements.size()];
-		int i = 0;
-		for (BundleRequirement bundleRequirement : declaredRequirements) {
-			requirementsCompositeDatas[i] = new OSGiBundleRequirement(bundleRequirement).asCompositeData();
-			i++;
+		for (int i = 0; i < declaredRequirements.size(); i++) {
+			requirementsCompositeDatas[i] = new OSGiBundleRequirement(declaredRequirements.get(i)).asCompositeData();
 		}
-		
-		items.put(CustomBundleWiringStateMBean.BUNDLE_ID, this.bundleRevision.getBundle().getBundleId());
-		items.put(CustomBundleWiringStateMBean.REQUIREMENTS, requirementsCompositeDatas);
-		return items;
+		return requirementsCompositeDatas;
 	}
 
 }

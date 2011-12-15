@@ -15,7 +15,7 @@
 
 package org.eclipse.gemini.mgmt.framework.internal;
 
-import static org.eclipse.gemini.mgmt.internal.Util.LongArrayFrom;
+import static org.eclipse.gemini.mgmt.internal.BundleUtil.LongArrayFrom;
 
 import java.util.HashMap;
 import java.util.Map;
