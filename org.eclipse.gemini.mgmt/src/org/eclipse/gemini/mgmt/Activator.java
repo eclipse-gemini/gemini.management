@@ -66,8 +66,6 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 public class Activator implements BundleActivator {
 
 	private static final Logger LOGGER = Logger.getLogger(Activator.class.getCanonicalName());
-
-	private static final String VIRGO_BUNDLE_ID = "org.eclipse.virgo.management.bundle";
 	
 	private final List<MBeanServer> mbeanServers = new CopyOnWriteArrayList<MBeanServer>();
 	
@@ -133,19 +131,10 @@ public class Activator implements BundleActivator {
 	 * {@inheritDoc}
 	 */
 	public void start(BundleContext bundleContext) throws Exception {
-		String bundleIdString = bundleContext.getProperty(VIRGO_BUNDLE_ID);
-		if(bundleIdString != null){
-			int bundleId = Integer.valueOf(bundleIdString);
-			this.bundleContext = bundleContext.getBundle(bundleId).getBundleContext();
-			LOGGER.info("Starting OSGi JMX system using bundle " + bundleId);
-		}
-		if(this.bundleContext == null){
-			this.bundleContext = bundleContext;	
-			LOGGER.info("Starting OSGi JMX system");
-		}
-		mbeanServiceTracker = new ServiceTracker<MBeanServer, Object>(this.bundleContext, MBeanServer.class, new MBeanServiceTracker());
-		LOGGER.fine("Awaiting MBeanServer service registration");
-		mbeanServiceTracker.open();
+		this.bundleContext = bundleContext;	
+		this.mbeanServiceTracker = new ServiceTracker<MBeanServer, Object>(this.bundleContext, MBeanServer.class, new MBeanServiceTracker());
+		LOGGER.fine("Awaiting initial MBeanServer service registration");
+		this.mbeanServiceTracker.open();
 	}
 
 	/**
