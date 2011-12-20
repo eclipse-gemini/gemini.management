@@ -38,6 +38,20 @@ public interface ObjectNameTranslator {
     /**
      * Translates the given {@link ObjectName}. The translation must be injective, which means that translations of
      * distinct object names must be distinct.
+     * <p />
+     * Example implementation:
+     * 
+     * <pre>
+     * String domain = objectName.getDomain();
+     * Hashtable&lt;String, String&gt; keyPropertyList = objectName.getKeyPropertyList();
+     * Hashtable&lt;String, String&gt; translatedKeyPropertyList = new Hashtable&lt;String, String&gt;(keyPropertyList);
+     * translatedKeyPropertyList.put(&quot;X&quot;, &quot;Y&quot;);
+     * try {
+     *     return new ObjectName(domain, translatedKeyPropertyList);
+     * } catch (MalformedObjectNameException e) {
+     *     throw new RuntimeException(&quot;Unexpected exception&quot;, e);
+     * }
+     * </pre>
      * 
      * @param objectName the {@link ObjectName} to be translated
      * @return the translated {@link ObjectName}

@@ -13,6 +13,7 @@ package org.eclipse.gemini.mgmt;
 
 import javax.management.ObjectName;
 
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -45,16 +46,14 @@ final class DefaultObjectNameTranslator implements ObjectNameTranslator {
      */
     static ObjectNameTranslator initialiseObjectNameTranslator(BundleContext bundleContext) throws ClassNotFoundException, InstantiationException,
         IllegalAccessException {
-        String ontClassName = bundleContext.getBundle().getHeaders().get(ObjectNameTranslator.HEADER_NAME);
+        Bundle bundle = bundleContext.getBundle();
+        String ontClassName = bundle.getHeaders().get(ObjectNameTranslator.HEADER_NAME);
         if (ontClassName == null) {
             return new DefaultObjectNameTranslator();
         }
-        /*
-         * Attempt to load and instantiate the specified class, allowing exceptions to percolate and fail the bundle
-         * start.
-         */
+        // Attempt to load and instantiate the specified class, allowing exceptions to percolate.
         @SuppressWarnings("unchecked")
-        Class<ObjectNameTranslator> ontClass = (Class<ObjectNameTranslator>) bundleContext.getBundle().loadClass(ontClassName);
+        Class<ObjectNameTranslator> ontClass = (Class<ObjectNameTranslator>) bundle.loadClass(ontClassName);
         return ontClass.newInstance();
     }
 
