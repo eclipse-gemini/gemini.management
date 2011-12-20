@@ -28,6 +28,9 @@
 							<autoStart>true</autoStart>
 						</bundle>
 					</bundleStartLevel>
+                    <includes>
+					    <include>**/*Test.class</include>
+		            </includes>
 				</configuration>
 			</plugin>
 			<!-- <plugin>
