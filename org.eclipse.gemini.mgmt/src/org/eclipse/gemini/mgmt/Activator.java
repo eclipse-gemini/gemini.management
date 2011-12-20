@@ -25,6 +25,7 @@ import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanRegistrationException;
 import javax.management.MBeanServer;
+import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 import javax.management.StandardMBean;
@@ -58,9 +59,8 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 /**
- * The bundle activator which starts and stops the system, as well as providing
- * the service tracker which listens for the MBeanServer. When the MBeanServer
- * is found, the MBeans representing the OSGi services will be installed.
+ * The bundle activator which starts and stops the system, as well as providing the service tracker which listens for
+ * the MBeanServer. When the MBeanServer is found, the MBeans representing the OSGi services will be installed.
  * 
  */
 public class Activator implements BundleActivator {
@@ -71,23 +71,25 @@ public class Activator implements BundleActivator {
 	
 	private final AtomicBoolean servicesRegistered = new AtomicBoolean(false);
 	
-	private final ObjectName frameworkName;
+    private ObjectNameTranslator objectNameTranslator;
 	
-	private final ObjectName bundleStateName;
+	private ObjectName frameworkName;
 	
-	private final ObjectName bundleWiringStateName;
+	private ObjectName bundleStateName;
 	
-	private final ObjectName packageStateName;
+	private ObjectName bundleWiringStateName;
 	
-	private final ObjectName serviceStateName;
+	private ObjectName packageStateName;
 	
-	private final ObjectName configAdminName;
+	private ObjectName serviceStateName;
 	
-	private final ObjectName permissionAdminName;
+	private ObjectName configAdminName;
 	
-	private final ObjectName provisioningServiceName;
+	private ObjectName permissionAdminName;
 	
-	private final ObjectName userAdminName;
+	private ObjectName provisioningServiceName;
+	
+	private ObjectName userAdminName;
 	
 	private ServiceTracker<MBeanServer, ?> mbeanServiceTracker;
 	
@@ -111,17 +113,17 @@ public class Activator implements BundleActivator {
 	
 	private ServiceTracker<UserAdmin, ?> userAdminTracker;
 
-	public Activator() {
+	private void createObjectNames() {
 		try {
-			frameworkName = new ObjectName(FrameworkMBean.OBJECTNAME);
-			bundleStateName = new ObjectName(CustomBundleStateMBean.OBJECTNAME);
-			bundleWiringStateName = new ObjectName(CustomBundleWiringStateMBean.OBJECTNAME);
-			serviceStateName = new ObjectName(CustomServiceStateMBean.OBJECTNAME);
-			packageStateName = new ObjectName(PackageStateMBean.OBJECTNAME);
-			configAdminName = new ObjectName(ConfigurationAdminMBean.OBJECTNAME);
-			permissionAdminName = new ObjectName(PermissionAdminMBean.OBJECTNAME);
-			provisioningServiceName = new ObjectName(ProvisioningServiceMBean.OBJECTNAME);
-			userAdminName = new ObjectName(UserAdminMBean.OBJECTNAME);		
+			frameworkName = translateObjectName(FrameworkMBean.OBJECTNAME);
+			bundleStateName = translateObjectName(CustomBundleStateMBean.OBJECTNAME);
+			bundleWiringStateName = translateObjectName(CustomBundleWiringStateMBean.OBJECTNAME);
+			serviceStateName = translateObjectName(CustomServiceStateMBean.OBJECTNAME);
+			packageStateName = translateObjectName(PackageStateMBean.OBJECTNAME);
+			configAdminName = translateObjectName(ConfigurationAdminMBean.OBJECTNAME);
+			permissionAdminName = translateObjectName(PermissionAdminMBean.OBJECTNAME);
+			provisioningServiceName = translateObjectName(ProvisioningServiceMBean.OBJECTNAME);
+			userAdminName = translateObjectName(UserAdminMBean.OBJECTNAME);		
 		} catch (Exception e) {
 			throw new IllegalStateException("Unable to start Gemini Management, Object name creation failed.", e);
 		}
@@ -131,11 +133,18 @@ public class Activator implements BundleActivator {
 	 * {@inheritDoc}
 	 */
 	public void start(BundleContext bundleContext) throws Exception {
+        objectNameTranslator = DefaultObjectNameTranslator.initialiseObjectNameTranslator(bundleContext);
+        createObjectNames();
 		this.bundleContext = bundleContext;	
 		this.mbeanServiceTracker = new ServiceTracker<MBeanServer, Object>(this.bundleContext, MBeanServer.class, new MBeanServiceTracker());
 		LOGGER.fine("Awaiting initial MBeanServer service registration");
 		this.mbeanServiceTracker.open();
 	}
+	
+    private ObjectName translateObjectName(String objectName) throws MalformedObjectNameException {
+        return this.objectNameTranslator.translate(new ObjectName(objectName));
+    }
+
 
 	/**
 	 * {@inheritDoc}
@@ -345,16 +354,19 @@ public class Activator implements BundleActivator {
 			LOGGER.log(Level.SEVERE, "Cannot register OSGi PackageStateMBean", e);
 		}
 
-		configAdminTracker = new ServiceTracker<ConfigurationAdmin, Object>(bundleContext, "org.osgi.service.cm.ConfigurationAdmin", new ConfigAdminTracker());
-		permissionAdminTracker = new ServiceTracker<PermissionAdmin, Object>(bundleContext, "org.osgi.service.permissionadmin.PermissionAdmin", new PermissionAdminTracker());
-		provisioningServiceTracker = new ServiceTracker<ProvisioningService, Object>(bundleContext, "org.osgi.service.provisioning.ProvisioningService", new ProvisioningServiceTracker());
-		userAdminTracker = new ServiceTracker<UserAdmin, Object>(bundleContext, "org.osgi.service.useradmin.UserAdmin", new UserAdminTracker());
-		configAdminTracker.open();
-		permissionAdminTracker.open();
-		provisioningServiceTracker.open();
-		userAdminTracker.open();
-		servicesRegistered.set(true);
-	}
+        configAdminTracker = new ServiceTracker<ConfigurationAdmin, Object>(bundleContext, "org.osgi.service.cm.ConfigurationAdmin",
+            new ConfigAdminTracker());
+        permissionAdminTracker = new ServiceTracker<PermissionAdmin, Object>(bundleContext, "org.osgi.service.permissionadmin.PermissionAdmin",
+            new PermissionAdminTracker());
+        provisioningServiceTracker = new ServiceTracker<ProvisioningService, Object>(bundleContext,
+            "org.osgi.service.provisioning.ProvisioningService", new ProvisioningServiceTracker());
+        userAdminTracker = new ServiceTracker<UserAdmin, Object>(bundleContext, "org.osgi.service.useradmin.UserAdmin", new UserAdminTracker());
+        configAdminTracker.open();
+        permissionAdminTracker.open();
+        provisioningServiceTracker.open();
+        userAdminTracker.open();
+        servicesRegistered.set(true);
+    }
 
 	private class MBeanServiceTracker implements ServiceTrackerCustomizer<MBeanServer, Object> {
 

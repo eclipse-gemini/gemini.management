@@ -33,6 +33,8 @@ import javax.management.ObjectName;
  */
 public interface ObjectNameTranslator {
 
+    public static final String HEADER_NAME = "GeminiManagement-ObjectNameTranslator";
+    
     /**
      * Translates the given {@link ObjectName}. The translation must be injective, which means that translations of
      * distinct object names must be distinct.
