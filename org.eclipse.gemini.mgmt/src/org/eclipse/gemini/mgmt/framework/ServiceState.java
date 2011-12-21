@@ -104,6 +104,8 @@ public final class ServiceState extends Monitor implements CustomServiceStateMBe
 		return ServiceUtil.getBundlesUsing(getServiceReference(serviceId));
 	}
 
+	//New methods from the JMX Update RFC 169
+	
 	/**
 	 * {@inheritDoc}
 	 */
@@ -207,7 +209,6 @@ public final class ServiceState extends Monitor implements CustomServiceStateMBe
 	
 	//End methods for the MBean
 	
-
 	/**
 	 * {@inheritDoc}
 	 */

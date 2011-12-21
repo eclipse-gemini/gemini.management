@@ -16,8 +16,11 @@ package org.eclipse.gemini.mgmt.framework;
 
 import java.io.IOException;
 
+import javax.management.openmbean.CompositeData;
+import javax.management.openmbean.SimpleType;
 import javax.management.openmbean.TabularData;
 
+import org.osgi.jmx.Item;
 import org.osgi.jmx.framework.BundleStateMBean;
 
 public interface CustomBundleStateMBean extends BundleStateMBean{
@@ -144,6 +147,12 @@ public interface CustomBundleStateMBean extends BundleStateMBean{
 	public final static int REQUIRED_BUNDLES = 2 << 18;
 	
 	/**
+	 * Mask for listBundles method, that requires bundle "activation policy used" attribute to be 
+	 * included in the returned data.
+	 */
+	public final static int ACTIVATION_POLICY = 2 << 19;
+	
+	/**
 	 * Mask for listBundles method, that returns all available data. Equivalent to listBundles()
 	 */
 	public final static int DEFAULT = LOCATION + IDENTIFIER
@@ -163,4 +172,68 @@ public interface CustomBundleStateMBean extends BundleStateMBean{
 	 * @throws IOException
 	 */
 	TabularData listBundles(int mask) throws IOException;
+	
+	/**
+	 * The key PERSISTENTLY_STARTED, used in {@link #PERSISTENTLY_STARTED_ITEM}.
+	 */
+	String ACTIVATION_POLICY_USED = "ActivationPolicyUsed";
+
+	/**
+	 * The item containing the indication of persistently started in
+	 * {@link #BUNDLE_TYPE}. The key is {@link #PERSISTENTLY_STARTED} and the
+	 * the type is {@link SimpleType#BOOLEAN}.
+	 */
+	Item ACTIVATION_POLICY_ITEM = new Item(ACTIVATION_POLICY_USED,	"Whether the bundle is using an activation policy", SimpleType.BOOLEAN);
+	
+	//New methods from the JMX Update RFC 169
+	
+	/**
+	 * 
+	 * @param bundleId
+	 * @return
+	 * @throws IOException
+	 */
+	CompositeData getBundle(long bundleId) throws IOException;
+
+	/**
+	 * 
+	 * @param bundleTypeItems
+	 * @return
+	 * @throws IOException
+	 */
+	TabularData listBundles(String... bundleTypeItems) throws IOException;
+	
+	/**
+	 * 
+	 * @return
+	 */
+	boolean isActivationPolicyUsed(long bundleId) throws IOException;
+	
+	/**
+	 * 
+	 * @param bundleId
+	 * @param key
+	 * @return
+	 * @throws IOException
+	 */
+	String getHeader(long bundleId, String key) throws IOException;
+	
+	/**
+	 * 
+	 * @param bundleId
+	 * @param locale
+	 * @return
+	 * @throws IOException
+	 */
+	TabularData getHeaders(long bundleId, String locale) throws IOException;
+	
+	/**
+	 * 
+	 * @param bundleId
+	 * @param key
+	 * @param locale
+	 * @return
+	 * @throws IOException
+	 */
+	CompositeData getHeaders(long bundleId, String key, String locale) throws IOException;
 }

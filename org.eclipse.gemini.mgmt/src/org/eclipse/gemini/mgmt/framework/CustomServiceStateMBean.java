@@ -26,6 +26,7 @@ import org.osgi.jmx.framework.ServiceStateMBean;
  */
 public interface CustomServiceStateMBean extends ServiceStateMBean {
 
+	//New methods from the JMX Update RFC 169
 
 	/**
 	 * 
@@ -36,6 +37,7 @@ public interface CustomServiceStateMBean extends ServiceStateMBean {
 	public CompositeData getService(long serviceId) throws IOException;
 
 	/**
+	 * Get a single property by it's key and 
 	 * 
 	 * @param serviceId
 	 * @param key

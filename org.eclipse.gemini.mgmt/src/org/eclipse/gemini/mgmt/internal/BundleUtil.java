@@ -19,11 +19,7 @@ import static org.osgi.framework.Constants.SERVICE_ID;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Dictionary;
-import java.util.Enumeration;
-import java.util.Hashtable;
 import java.util.List;
-import java.util.Map;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
@@ -130,22 +126,6 @@ public final class BundleUtil {
         }
         return providerWires;
 	}
-	
-	/**
-	 * Answer the map of bundle headers
-	 * 
-	 * @param b
-	 * @return the map of bundle headers
-	 */
-	public static Map<String, String> getBundleHeaders(Bundle b) {
-		Map<String, String> headers = new Hashtable<String, String>();
-		Dictionary<?, ?> h = b.getHeaders();
-		for (Enumeration<?> keys = h.keys(); keys.hasMoreElements();) {
-			String key = (String) keys.nextElement();
-			headers.put(key, (String) h.get(key));
-		}
-		return headers;
-	}
 
 	/**
 	 * Answer the string representation of the packages imported by a bundle
@@ -220,6 +200,18 @@ public final class BundleUtil {
 	public static boolean isBundlePersistentlyStarted(Bundle bundle) {
 		BundleStartLevel startLevel = bundle.adapt(BundleStartLevel.class);
 		return startLevel.isPersistentlyStarted();
+	}
+	
+	/**
+	 * Answer true if the bundle has been persitently started
+	 * 
+	 * @param bundle
+	 * @param sl
+	 * @return true if the bundle has been persitently started
+	 */
+	public static boolean isBundleActivationPolicyUsed(Bundle bundle) {
+		BundleStartLevel startLevel = bundle.adapt(BundleStartLevel.class);
+		return startLevel.isActivationPolicyUsed();
 	}
 
 	/**

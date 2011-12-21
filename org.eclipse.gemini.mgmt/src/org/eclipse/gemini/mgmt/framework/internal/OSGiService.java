@@ -186,33 +186,4 @@ public final class OSGiService {
 			throw new IllegalStateException("Cannot form service open data", e);
 		}
 	}
-
-//	/**
-//	 * @return the identifier of the bundle the service belongs to
-//	 */
-//	public long getBundle() {
-//		return bundle;
-//	}
-//
-//	/**
-//	 * @return the identifier of the service
-//	 */
-//	public long getIdentifier() {
-//		return identifier;
-//	}
-//
-//	/**
-//	 * @return the interfaces implemented by the service
-//	 */
-//	public String[] getInterfaces() {
-//		return interfaces;
-//	}
-//
-//	/**
-//	 * @return the identifiers of the bundles which are using the service
-//	 */
-//	public long[] getUsingBundles() {
-//		return usingBundles;
-//	}
-
 }

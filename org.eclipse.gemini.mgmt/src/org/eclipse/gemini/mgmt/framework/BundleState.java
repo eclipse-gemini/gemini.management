@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.management.Notification;
+import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularDataSupport;
 
@@ -88,136 +89,195 @@ public final class BundleState extends Monitor implements CustomBundleStateMBean
 	 * {@inheritDoc}
 	 */
 	public String[] getExportedPackages(long bundleId) throws IOException {
-		return BundleUtil.getBundleExportedPackages(getBundle(bundleId));
+		return BundleUtil.getBundleExportedPackages(retrieveBundle(bundleId));
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public long[] getFragments(long bundleId) throws IOException {
-		return BundleUtil.getBundleFragments(getBundle(bundleId));
+		return BundleUtil.getBundleFragments(retrieveBundle(bundleId));
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public TabularData getHeaders(long bundleId) throws IOException {
-		return OSGiBundle.headerTable(getBundle(bundleId));
+		return OSGiBundle.headerTable(retrieveBundle(bundleId).getHeaders());
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public long[] getHosts(long fragment) throws IOException {
-		return BundleUtil.getBundleHosts(getBundle(fragment));
+		return BundleUtil.getBundleHosts(retrieveBundle(fragment));
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public String[] getImportedPackages(long bundleId) throws IOException {
-		return BundleUtil.getBundleImportedPackages(getBundle(bundleId));
+		return BundleUtil.getBundleImportedPackages(retrieveBundle(bundleId));
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public long getLastModified(long bundleId) throws IOException {
-		return getBundle(bundleId).getLastModified();
+		return retrieveBundle(bundleId).getLastModified();
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public long[] getRegisteredServices(long bundleId) throws IOException {
-		return BundleUtil.serviceIds(getBundle(bundleId).getRegisteredServices());
+		return BundleUtil.serviceIds(retrieveBundle(bundleId).getRegisteredServices());
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public long[] getRequiringBundles(long bundleId) throws IOException {
-		return BundleUtil.getRequiringBundles(getBundle(bundleId));
+		return BundleUtil.getRequiringBundles(retrieveBundle(bundleId));
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public long[] getServicesInUse(long bundleIdentifier) throws IOException {
-		return BundleUtil.serviceIds(getBundle(bundleIdentifier).getServicesInUse());
+		return BundleUtil.serviceIds(retrieveBundle(bundleIdentifier).getServicesInUse());
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public int getStartLevel(long bundleId) throws IOException {
-		return BundleUtil.getBundleStartLevel(getBundle(bundleId));
+		return BundleUtil.getBundleStartLevel(retrieveBundle(bundleId));
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public String getState(long bundleId) throws IOException {
-		return BundleUtil.getBundleState(getBundle(bundleId));
+		return BundleUtil.getBundleState(retrieveBundle(bundleId));
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public String getSymbolicName(long bundleId) throws IOException {
-		return getBundle(bundleId).getSymbolicName();
+		return retrieveBundle(bundleId).getSymbolicName();
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public String getLocation(long bundleId) throws IOException {
-		return getBundle(bundleId).getLocation();
+		return retrieveBundle(bundleId).getLocation();
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public long[] getRequiredBundles(long bundleIdentifier) throws IOException {
-		return BundleUtil.getRequiredBundles(getBundle(bundleIdentifier));
+		return BundleUtil.getRequiredBundles(retrieveBundle(bundleIdentifier));
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public String getVersion(long bundleId) throws IOException {
-		return getBundle(bundleId).getVersion().toString();
+		return retrieveBundle(bundleId).getVersion().toString();
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public boolean isPersistentlyStarted(long bundleId) throws IOException {
-		return BundleUtil.isBundlePersistentlyStarted(getBundle(bundleId));
+		return BundleUtil.isBundlePersistentlyStarted(retrieveBundle(bundleId));
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public boolean isFragment(long bundleId) throws IOException {
-		return BundleUtil.isBundleFragment(getBundle(bundleId));
+		return BundleUtil.isBundleFragment(retrieveBundle(bundleId));
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public boolean isRemovalPending(long bundleId) throws IOException {
-		return BundleUtil.isRemovalPending(getBundle(bundleId));
+		return BundleUtil.isRemovalPending(retrieveBundle(bundleId));
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public boolean isRequired(long bundleId) throws IOException {
-		return BundleUtil.isRequired(getBundle(bundleId));
+		return BundleUtil.isRequired(retrieveBundle(bundleId));
 	}
 
-	private Bundle getBundle(long bundleId) throws IOException {
+	//New methods from the JMX Update RFC 169
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public CompositeData getBundle(long bundleId) throws IOException {
+		return new OSGiBundle(retrieveBundle(bundleId)).asCompositeData();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public TabularData listBundles(String... bundleTypeItems) throws IOException {
+		try {
+			ArrayList<OSGiBundle> bundles = new ArrayList<OSGiBundle>();
+			for (Bundle bundle : bundleContext.getBundles()) {
+				bundles.add(new OSGiBundle(bundle));
+			}
+			TabularData table = OSGiBundle.tableFrom(bundles, bundleTypeItems);
+			return table;
+		} catch (Throwable e) {
+			throw new IOException(e);
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean isActivationPolicyUsed(long bundleId) throws IOException {
+		return BundleUtil.isBundleActivationPolicyUsed(retrieveBundle(bundleId));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getHeader(long bundleId, String key) throws IOException {
+		return retrieveBundle(bundleId).getHeaders().get(key);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public TabularData getHeaders(long bundleId, String locale) throws IOException {
+		return OSGiBundle.headerTable(retrieveBundle(bundleId).getHeaders(locale));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public CompositeData getHeaders(long bundleId, String key, String locale) throws IOException {
+		String value = retrieveBundle(bundleId).getHeaders(locale).get(key);
+		if(value == null){
+			return null;
+		}
+		return OSGiBundle.getHeaderCompositeData(key, value);
+	}
+
+	//End methods for the MBean
+	
+	private Bundle retrieveBundle(long bundleId) throws IOException {
 		Bundle b = bundleContext.getBundle(bundleId);
 		if (b == null) {
 			throw new IOException("Bundle with id: " + bundleId + " does not exist");

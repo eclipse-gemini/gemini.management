@@ -17,6 +17,7 @@ package org.eclipse.gemini.mgmt.framework.internal;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -48,8 +49,6 @@ import org.osgi.jmx.framework.BundleStateMBean;
  */
 public final class OSGiBundle {
 	
-	private static final String[] HEADER_PROPERTY_ITEM_NAMES = new String[] {BundleStateMBean.KEY, BundleStateMBean.VALUE };
-	
 	private Bundle bundle;
 
 	/**
@@ -61,6 +60,153 @@ public final class OSGiBundle {
 		this.bundle = b;
 	}
 
+	public static TabularData tableFrom(List<OSGiBundle> bundles, String... bundleTypeItems) throws IOException {
+		List<String> bundleTypes = Arrays.asList(bundleTypeItems);
+		CompositeType computeBundleType = OSGiBundle.computeBundleType(bundleTypes);
+		TabularDataSupport table = new TabularDataSupport(Item.tabularType("BUNDLES", "A list of bundles", computeBundleType, new String[] { BundleStateMBean.IDENTIFIER }));
+		for (OSGiBundle bundle : bundles) {
+			table.put(bundle.asCompositeData(computeBundleType, bundleTypes));
+		}
+		return table;
+	}
+	
+	private static CompositeType computeBundleType(List<String> bundleTypes) {
+		List<Item> bundleTypeItems = new ArrayList<Item>();
+		bundleTypeItems.add(BundleStateMBean.IDENTIFIER_ITEM);
+		if(bundleTypes.contains(BundleStateMBean.LOCATION)) {
+			bundleTypeItems.add(BundleStateMBean.LOCATION_ITEM);
+		}
+		if(bundleTypes.contains(BundleStateMBean.SYMBOLIC_NAME)) {
+			bundleTypeItems.add(BundleStateMBean.SYMBOLIC_NAME_ITEM);
+		}
+		if(bundleTypes.contains(BundleStateMBean.VERSION)) {
+			bundleTypeItems.add(BundleStateMBean.VERSION_ITEM);
+		}
+		if(bundleTypes.contains(BundleStateMBean.START_LEVEL)) {
+			bundleTypeItems.add(BundleStateMBean.START_LEVEL_ITEM);
+		}
+		if(bundleTypes.contains(BundleStateMBean.STATE)) {
+			bundleTypeItems.add(BundleStateMBean.STATE_ITEM);
+		}
+		if(bundleTypes.contains(BundleStateMBean.LAST_MODIFIED)) {
+			bundleTypeItems.add(BundleStateMBean.LAST_MODIFIED_ITEM);
+		}
+		if(bundleTypes.contains(BundleStateMBean.PERSISTENTLY_STARTED)) {
+			bundleTypeItems.add(BundleStateMBean.PERSISTENTLY_STARTED_ITEM);
+		}
+		if(bundleTypes.contains(CustomBundleStateMBean.ACTIVATION_POLICY)) {
+			bundleTypeItems.add(CustomBundleStateMBean.ACTIVATION_POLICY_ITEM);
+		}
+		if(bundleTypes.contains(BundleStateMBean.REMOVAL_PENDING)) {
+			bundleTypeItems.add(BundleStateMBean.REMOVAL_PENDING_ITEM);
+		}
+		if(bundleTypes.contains(BundleStateMBean.REQUIRED)) {
+			bundleTypeItems.add(BundleStateMBean.REQUIRED_ITEM);
+		}
+		if(bundleTypes.contains(BundleStateMBean.FRAGMENT)) {
+			bundleTypeItems.add(BundleStateMBean.FRAGMENT_ITEM);
+		}
+		if(bundleTypes.contains(BundleStateMBean.REGISTERED_SERVICES)) {
+			bundleTypeItems.add(BundleStateMBean.REGISTERED_SERVICES_ITEM);
+		}
+		if(bundleTypes.contains(BundleStateMBean.SERVICES_IN_USE)) {
+			bundleTypeItems.add(BundleStateMBean.SERVICES_IN_USE_ITEM);
+		}
+		if(bundleTypes.contains(BundleStateMBean.HEADERS)) {
+			bundleTypeItems.add(BundleStateMBean.HEADERS_ITEM);
+		}
+		if(bundleTypes.contains(BundleStateMBean.EXPORTED_PACKAGES)) {
+			bundleTypeItems.add(BundleStateMBean.EXPORTED_PACKAGES_ITEM);
+		}
+		if(bundleTypes.contains(BundleStateMBean.IMPORTED_PACKAGES)) {
+			bundleTypeItems.add(BundleStateMBean.IMPORTED_PACKAGES_ITEM);
+		}
+		if(bundleTypes.contains(BundleStateMBean.FRAGMENTS)) {
+			bundleTypeItems.add(BundleStateMBean.FRAGMENTS_ITEM);
+		}
+		if(bundleTypes.contains(BundleStateMBean.HOSTS)) {
+			bundleTypeItems.add(BundleStateMBean.HOSTS_ITEM);
+		}
+		if(bundleTypes.contains(BundleStateMBean.REQUIRING_BUNDLES)) {
+			bundleTypeItems.add(BundleStateMBean.REQUIRING_BUNDLES_ITEM);
+		}
+		if(bundleTypes.contains(BundleStateMBean.REQUIRED_BUNDLES)) {
+			bundleTypeItems.add(BundleStateMBean.REQUIRED_BUNDLES_ITEM);
+		}
+		CompositeType currentCompositeType = Item.compositeType("BUNDLE", "This type encapsulates OSGi bundles", bundleTypeItems.toArray(new Item[]{}));
+		return currentCompositeType;
+	}
+	
+	private CompositeData asCompositeData(CompositeType computeBundleType, List<String> bundleTypes) throws IOException {
+		Map<String, Object> items = new HashMap<String, Object>();
+		items.put(BundleStateMBean.IDENTIFIER, getIdentifier());
+		if(bundleTypes.contains(BundleStateMBean.LOCATION)) {
+			items.put(BundleStateMBean.LOCATION, getLocation());
+		}
+		if(bundleTypes.contains(BundleStateMBean.SYMBOLIC_NAME)) {
+			items.put(BundleStateMBean.SYMBOLIC_NAME, getSymbolicName());
+		}
+		if(bundleTypes.contains(BundleStateMBean.VERSION)) {
+			items.put(BundleStateMBean.VERSION, getVersion());
+		}
+		if(bundleTypes.contains(BundleStateMBean.START_LEVEL)) {
+			items.put(BundleStateMBean.START_LEVEL, getStartLevel());
+		}
+		if(bundleTypes.contains(BundleStateMBean.STATE)) {
+			items.put(BundleStateMBean.STATE, getState());
+		}
+		if(bundleTypes.contains(BundleStateMBean.LAST_MODIFIED)) {
+			items.put(BundleStateMBean.LAST_MODIFIED, getLastModified());
+		}
+		if(bundleTypes.contains(BundleStateMBean.PERSISTENTLY_STARTED)) {
+			items.put(BundleStateMBean.PERSISTENTLY_STARTED, isPersistentlyStarted());
+		}
+		if(bundleTypes.contains(CustomBundleStateMBean.ACTIVATION_POLICY)) {
+			items.put(CustomBundleStateMBean.ACTIVATION_POLICY_USED, isActivationPolicyUsed());
+		}
+		if(bundleTypes.contains(BundleStateMBean.REMOVAL_PENDING)) {
+			items.put(BundleStateMBean.REMOVAL_PENDING, isRemovalPending());
+		}
+		if(bundleTypes.contains(BundleStateMBean.REQUIRED)) {
+			items.put(BundleStateMBean.REQUIRED, isRequired());
+		}
+		if(bundleTypes.contains(BundleStateMBean.FRAGMENT)) {
+			items.put(BundleStateMBean.FRAGMENT, isFragment());
+		}
+		if(bundleTypes.contains(BundleStateMBean.REGISTERED_SERVICES)) {
+			items.put(BundleStateMBean.REGISTERED_SERVICES, BundleUtil.LongArrayFrom(getRegisteredServices()));
+		}
+		if(bundleTypes.contains(BundleStateMBean.SERVICES_IN_USE)) {
+			items.put(BundleStateMBean.SERVICES_IN_USE, BundleUtil.LongArrayFrom(getServicesInUse()));
+		}
+		if(bundleTypes.contains(BundleStateMBean.HEADERS)) {
+			items.put(BundleStateMBean.HEADERS, headerTable(getHeaders()));
+		}
+		if(bundleTypes.contains(BundleStateMBean.EXPORTED_PACKAGES)) {
+			items.put(BundleStateMBean.EXPORTED_PACKAGES, getExportedPackages());
+		}
+		if(bundleTypes.contains(BundleStateMBean.IMPORTED_PACKAGES)) {
+			items.put(BundleStateMBean.IMPORTED_PACKAGES, getImportedPackages());
+		}
+		if(bundleTypes.contains(BundleStateMBean.FRAGMENTS)) {
+			items.put(BundleStateMBean.FRAGMENTS, BundleUtil.LongArrayFrom(getFragments()));
+		}
+		if(bundleTypes.contains(BundleStateMBean.HOSTS)) {
+			items.put(BundleStateMBean.HOSTS, BundleUtil.LongArrayFrom(getHosts()));
+		}
+		if(bundleTypes.contains(BundleStateMBean.REQUIRING_BUNDLES)) {
+			items.put(BundleStateMBean.REQUIRING_BUNDLES, BundleUtil.LongArrayFrom(getRequiringBundles()));
+		}
+		if(bundleTypes.contains(BundleStateMBean.REQUIRED_BUNDLES)) {
+			items.put(BundleStateMBean.REQUIRED_BUNDLES, BundleUtil.LongArrayFrom(getRequiredBundles()));
+		}
+		try {
+			return new CompositeDataSupport(computeBundleType, items);
+		} catch (OpenDataException e) {
+			throw new IllegalStateException("Cannot form bundle open data", e);
+		}
+	}
+	
 	/**
 	 * Answer the TabularData representing the list of OSGiBundle state
 	 * 
@@ -80,146 +226,70 @@ public final class OSGiBundle {
 	}
 	
 	private static CompositeType computeBundleType(int mask) {
-		List<Item> bundleTypes = new ArrayList<Item>();
-		bundleTypes.add(BundleStateMBean.IDENTIFIER_ITEM);
+		List<Item> bundleTypeItems = new ArrayList<Item>();
+		bundleTypeItems.add(BundleStateMBean.IDENTIFIER_ITEM);
 		if((mask | CustomBundleStateMBean.LOCATION) == mask) {
-			bundleTypes.add(BundleStateMBean.LOCATION_ITEM);
+			bundleTypeItems.add(BundleStateMBean.LOCATION_ITEM);
 		}
 		if((mask | CustomBundleStateMBean.SYMBOLIC_NAME) == mask) {
-			bundleTypes.add(BundleStateMBean.SYMBOLIC_NAME_ITEM);
+			bundleTypeItems.add(BundleStateMBean.SYMBOLIC_NAME_ITEM);
 		}
 		if((mask | CustomBundleStateMBean.VERSION) == mask) {
-			bundleTypes.add(BundleStateMBean.VERSION_ITEM);
+			bundleTypeItems.add(BundleStateMBean.VERSION_ITEM);
 		}
 		if((mask | CustomBundleStateMBean.START_LEVEL) == mask) {
-			bundleTypes.add(BundleStateMBean.START_LEVEL_ITEM);
+			bundleTypeItems.add(BundleStateMBean.START_LEVEL_ITEM);
 		}
 		if((mask | CustomBundleStateMBean.STATE) == mask) {
-			bundleTypes.add(BundleStateMBean.STATE_ITEM);
+			bundleTypeItems.add(BundleStateMBean.STATE_ITEM);
 		}
 		if((mask | CustomBundleStateMBean.LAST_MODIFIED) == mask) {
-			bundleTypes.add(BundleStateMBean.LAST_MODIFIED_ITEM);
+			bundleTypeItems.add(BundleStateMBean.LAST_MODIFIED_ITEM);
 		}
 		if((mask | CustomBundleStateMBean.PERSISTENTLY_STARTED) == mask) {
-			bundleTypes.add(BundleStateMBean.PERSISTENTLY_STARTED_ITEM);
+			bundleTypeItems.add(BundleStateMBean.PERSISTENTLY_STARTED_ITEM);
+		}
+		if((mask | CustomBundleStateMBean.ACTIVATION_POLICY) == mask) {
+			bundleTypeItems.add(CustomBundleStateMBean.ACTIVATION_POLICY_ITEM);
 		}
 		if((mask | CustomBundleStateMBean.REMOVAL_PENDING) == mask) {
-			bundleTypes.add(BundleStateMBean.REMOVAL_PENDING_ITEM);
+			bundleTypeItems.add(BundleStateMBean.REMOVAL_PENDING_ITEM);
 		}
 		if((mask | CustomBundleStateMBean.REQUIRED) == mask) {
-			bundleTypes.add(BundleStateMBean.REQUIRED_ITEM);
+			bundleTypeItems.add(BundleStateMBean.REQUIRED_ITEM);
 		}
 		if((mask | CustomBundleStateMBean.FRAGMENT) == mask) {
-			bundleTypes.add(BundleStateMBean.FRAGMENT_ITEM);
+			bundleTypeItems.add(BundleStateMBean.FRAGMENT_ITEM);
 		}
 		if((mask | CustomBundleStateMBean.REGISTERED_SERVICES) == mask) {
-			bundleTypes.add(BundleStateMBean.REGISTERED_SERVICES_ITEM);
+			bundleTypeItems.add(BundleStateMBean.REGISTERED_SERVICES_ITEM);
 		}
 		if((mask | CustomBundleStateMBean.SERVICES_IN_USE) == mask) {
-			bundleTypes.add(BundleStateMBean.SERVICES_IN_USE_ITEM);
+			bundleTypeItems.add(BundleStateMBean.SERVICES_IN_USE_ITEM);
 		}
 		if((mask | CustomBundleStateMBean.HEADERS) == mask) {
-			bundleTypes.add(BundleStateMBean.HEADERS_ITEM);
+			bundleTypeItems.add(BundleStateMBean.HEADERS_ITEM);
 		}
 		if((mask | CustomBundleStateMBean.EXPORTED_PACKAGES) == mask) {
-			bundleTypes.add(BundleStateMBean.EXPORTED_PACKAGES_ITEM);
+			bundleTypeItems.add(BundleStateMBean.EXPORTED_PACKAGES_ITEM);
 		}
 		if((mask | CustomBundleStateMBean.IMPORTED_PACKAGES) == mask) {
-			bundleTypes.add(BundleStateMBean.IMPORTED_PACKAGES_ITEM);
+			bundleTypeItems.add(BundleStateMBean.IMPORTED_PACKAGES_ITEM);
 		}
 		if((mask | CustomBundleStateMBean.FRAGMENTS) == mask) {
-			bundleTypes.add(BundleStateMBean.FRAGMENTS_ITEM);
+			bundleTypeItems.add(BundleStateMBean.FRAGMENTS_ITEM);
 		}
 		if((mask | CustomBundleStateMBean.HOSTS) == mask) {
-			bundleTypes.add(BundleStateMBean.HOSTS_ITEM);
+			bundleTypeItems.add(BundleStateMBean.HOSTS_ITEM);
 		}
 		if((mask | CustomBundleStateMBean.REQUIRING_BUNDLES) == mask) {
-			bundleTypes.add(BundleStateMBean.REQUIRING_BUNDLES_ITEM);
+			bundleTypeItems.add(BundleStateMBean.REQUIRING_BUNDLES_ITEM);
 		}
 		if((mask | CustomBundleStateMBean.REQUIRED_BUNDLES) == mask) {
-			bundleTypes.add(BundleStateMBean.REQUIRED_BUNDLES_ITEM);
+			bundleTypeItems.add(BundleStateMBean.REQUIRED_BUNDLES_ITEM);
 		}
-		CompositeType currentCompositeType = Item.compositeType("BUNDLE", "This type encapsulates OSGi bundles", bundleTypes.toArray(new Item[]{}));
+		CompositeType currentCompositeType = Item.compositeType("BUNDLE", "This type encapsulates OSGi bundles", bundleTypeItems.toArray(new Item[]{}));
 		return currentCompositeType;
-	}
-
-	/**
-	 * Answer the TabularData representing the list of bundle headers for a
-	 * bundle
-	 * 
-	 * @param b
-	 * @return the bundle headers
-	 */
-	public static TabularData headerTable(Bundle b) {
-		TabularDataSupport table = new TabularDataSupport(BundleStateMBean.HEADERS_TYPE);
-		Dictionary<String, String> map = b.getHeaders();
-		for (Enumeration<String> headers = map.keys(); headers.hasMoreElements();) {
-			String key = (String) headers.nextElement();
-			table.put(headerData(key, (String) map.get(key)));
-		}
-		return table;
-	}
-
-	/**
-	 * Answer the TabularData representing the supplied map of bundle headers
-	 * 
-	 * @param headers
-	 * @return the bundle headers
-	 */
-	public static TabularData headerTable(Map<String, String> headers) {
-		TabularDataSupport table = new TabularDataSupport(BundleStateMBean.HEADERS_TYPE);
-		for (Map.Entry<String, String> entry : headers.entrySet()) {
-			table.put(headerData(entry.getKey(), entry.getValue()));
-		}
-		return table;
-	}
-
-	private static CompositeData headerData(String key, String value) {
-		Object[] itemValues = new Object[HEADER_PROPERTY_ITEM_NAMES.length];
-		itemValues[0] = key;
-		itemValues[1] = value;
-
-		try {
-			return new CompositeDataSupport(BundleStateMBean.HEADER_TYPE, HEADER_PROPERTY_ITEM_NAMES, itemValues);
-		} catch (OpenDataException e) {
-			throw new IllegalStateException("Cannot form bundle header open data", e);
-		}
-	}
-
-	/**
-	 * Answer the receiver encoded as CompositeData
-	 * @param mask 
-	 * 
-	 * @return the CompositeData encoding of the receiver.
-	 * @throws IOException 
-	 */
-	public CompositeData asCompositeData() throws IOException {
-		Map<String, Object> items = new HashMap<String, Object>();
-		items.put(BundleStateMBean.IDENTIFIER, getIdentifier());
-		items.put(BundleStateMBean.LOCATION, getLocation());
-		items.put(BundleStateMBean.SYMBOLIC_NAME, getSymbolicName());
-		items.put(BundleStateMBean.VERSION, getVersion());
-		items.put(BundleStateMBean.START_LEVEL, getStartLevel());
-		items.put(BundleStateMBean.STATE, getState());
-		items.put(BundleStateMBean.LAST_MODIFIED, getLastModified());
-		items.put(BundleStateMBean.PERSISTENTLY_STARTED, isPersistentlyStarted());
-		items.put(BundleStateMBean.REMOVAL_PENDING, isRemovalPending());
-		items.put(BundleStateMBean.REQUIRED, isRequired());
-		items.put(BundleStateMBean.FRAGMENT, isFragment());
-		items.put(BundleStateMBean.REGISTERED_SERVICES, BundleUtil.LongArrayFrom(getRegisteredServices()));
-		items.put(BundleStateMBean.SERVICES_IN_USE, BundleUtil.LongArrayFrom(getServicesInUse()));
-		items.put(BundleStateMBean.HEADERS, headerTable(getHeaders()));
-		items.put(BundleStateMBean.EXPORTED_PACKAGES, getExportedPackages());
-		items.put(BundleStateMBean.IMPORTED_PACKAGES, getImportedPackages());
-		items.put(BundleStateMBean.FRAGMENTS, BundleUtil.LongArrayFrom(getFragments()));
-		items.put(BundleStateMBean.HOSTS, BundleUtil.LongArrayFrom(getHosts()));
-		items.put(BundleStateMBean.REQUIRING_BUNDLES, BundleUtil.LongArrayFrom(getRequiringBundles()));
-		items.put(BundleStateMBean.REQUIRED_BUNDLES, BundleUtil.LongArrayFrom(getRequiredBundles()));
-		try {
-			return new CompositeDataSupport(BundleStateMBean.BUNDLE_TYPE, items);
-		} catch (OpenDataException e) {
-			throw new IllegalStateException("Cannot form bundle open data", e);
-		}
 	}
 	
 	/**
@@ -252,6 +322,9 @@ public final class OSGiBundle {
 		}
 		if((mask | CustomBundleStateMBean.PERSISTENTLY_STARTED) == mask) {
 			items.put(BundleStateMBean.PERSISTENTLY_STARTED, isPersistentlyStarted());
+		}
+		if((mask | CustomBundleStateMBean.ACTIVATION_POLICY) == mask) {
+			items.put(CustomBundleStateMBean.ACTIVATION_POLICY_USED, isActivationPolicyUsed());
 		}
 		if((mask | CustomBundleStateMBean.REMOVAL_PENDING) == mask) {
 			items.put(BundleStateMBean.REMOVAL_PENDING, isRemovalPending());
@@ -298,6 +371,69 @@ public final class OSGiBundle {
 	}
 
 	/**
+	 * Answer the receiver encoded as CompositeData
+	 * @param mask 
+	 * 
+	 * @return the CompositeData encoding of the receiver.
+	 * @throws IOException 
+	 */
+	public CompositeData asCompositeData() throws IOException {
+		Map<String, Object> items = new HashMap<String, Object>();
+		items.put(BundleStateMBean.IDENTIFIER, getIdentifier());
+		items.put(BundleStateMBean.LOCATION, getLocation());
+		items.put(BundleStateMBean.SYMBOLIC_NAME, getSymbolicName());
+		items.put(BundleStateMBean.VERSION, getVersion());
+		items.put(BundleStateMBean.START_LEVEL, getStartLevel());
+		items.put(BundleStateMBean.STATE, getState());
+		items.put(BundleStateMBean.LAST_MODIFIED, getLastModified());
+		items.put(BundleStateMBean.PERSISTENTLY_STARTED, isPersistentlyStarted());
+		items.put(CustomBundleStateMBean.ACTIVATION_POLICY_USED, isActivationPolicyUsed());
+		items.put(BundleStateMBean.REMOVAL_PENDING, isRemovalPending());
+		items.put(BundleStateMBean.REQUIRED, isRequired());
+		items.put(BundleStateMBean.FRAGMENT, isFragment());
+		items.put(BundleStateMBean.REGISTERED_SERVICES, BundleUtil.LongArrayFrom(getRegisteredServices()));
+		items.put(BundleStateMBean.SERVICES_IN_USE, BundleUtil.LongArrayFrom(getServicesInUse()));
+		items.put(BundleStateMBean.HEADERS, headerTable(getHeaders()));
+		items.put(BundleStateMBean.EXPORTED_PACKAGES, getExportedPackages());
+		items.put(BundleStateMBean.IMPORTED_PACKAGES, getImportedPackages());
+		items.put(BundleStateMBean.FRAGMENTS, BundleUtil.LongArrayFrom(getFragments()));
+		items.put(BundleStateMBean.HOSTS, BundleUtil.LongArrayFrom(getHosts()));
+		items.put(BundleStateMBean.REQUIRING_BUNDLES, BundleUtil.LongArrayFrom(getRequiringBundles()));
+		items.put(BundleStateMBean.REQUIRED_BUNDLES, BundleUtil.LongArrayFrom(getRequiredBundles()));
+		try {
+			return new CompositeDataSupport(BundleStateMBean.BUNDLE_TYPE, items);
+		} catch (OpenDataException e) {
+			throw new IllegalStateException("Cannot form bundle open data", e);
+		}
+	}
+	
+	/**
+	 * Answer the TabularData representing the supplied map of bundle headers
+	 * 
+	 * @param headers
+	 * @return the bundle headers
+	 */
+	public static TabularData headerTable(Dictionary<String, String> headersDictionary) {
+		TabularDataSupport table = new TabularDataSupport(BundleStateMBean.HEADERS_TYPE);
+		for(Enumeration<String> headers = headersDictionary.keys(); headers.hasMoreElements();) {
+			String key = (String) headers.nextElement();
+			table.put(getHeaderCompositeData(key, (String) headersDictionary.get(key)));
+		}
+		return table;
+	}
+
+	public static CompositeData getHeaderCompositeData(String key, String value) {
+		Map<String, Object> items = new HashMap<String, Object>();
+		items.put(BundleStateMBean.KEY, key);
+		items.put(BundleStateMBean.VALUE, value);		
+		try {
+			return new CompositeDataSupport(BundleStateMBean.HEADER_TYPE, items);
+		} catch (OpenDataException e) {
+			throw new IllegalStateException("Cannot form bundle header open data", e);
+		}
+	}
+
+	/**
 	 * @return The list of exported packages by this bundle, in the form of
 	 *         <packageName>;<version>
 	 * 
@@ -317,8 +453,8 @@ public final class OSGiBundle {
 	/**
 	 * @return the map of headers for this bundle
 	 */
-	private Map<String, String> getHeaders() {
-		return BundleUtil.getBundleHeaders(bundle);
+	private Dictionary<String, String> getHeaders() {
+		return bundle.getHeaders();
 	}
 
 	/**
@@ -427,6 +563,13 @@ public final class OSGiBundle {
 	 */
 	private boolean isPersistentlyStarted() {
 		return BundleUtil.isBundlePersistentlyStarted(bundle);
+	}
+
+	/**
+	 * @return true if this bundle is persistently started
+	 */
+	private boolean isActivationPolicyUsed() {
+		return BundleUtil.isBundleActivationPolicyUsed(bundle);
 	}
 
 	/**
