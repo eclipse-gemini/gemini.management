@@ -15,6 +15,8 @@
 
 package org.eclipse.gemini.mgmt.framework.internal;
 
+import static org.osgi.framework.Constants.SERVICE_ID;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,6 +36,10 @@ import javax.management.openmbean.TabularDataSupport;
 import org.eclipse.gemini.mgmt.framework.CustomBundleStateMBean;
 import org.eclipse.gemini.mgmt.internal.BundleUtil;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.wiring.BundleRevision;
+import org.osgi.framework.wiring.BundleWire;
+import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.jmx.Item;
 import org.osgi.jmx.framework.BundleStateMBean;
 
@@ -174,10 +180,10 @@ public final class OSGiBundle {
 			items.put(BundleStateMBean.FRAGMENT, isFragment());
 		}
 		if(bundleTypes.contains(BundleStateMBean.REGISTERED_SERVICES)) {
-			items.put(BundleStateMBean.REGISTERED_SERVICES, BundleUtil.LongArrayFrom(getRegisteredServices()));
+			items.put(BundleStateMBean.REGISTERED_SERVICES, getRegisteredServices());
 		}
 		if(bundleTypes.contains(BundleStateMBean.SERVICES_IN_USE)) {
-			items.put(BundleStateMBean.SERVICES_IN_USE, BundleUtil.LongArrayFrom(getServicesInUse()));
+			items.put(BundleStateMBean.SERVICES_IN_USE, getServicesInUse());
 		}
 		if(bundleTypes.contains(BundleStateMBean.HEADERS)) {
 			items.put(BundleStateMBean.HEADERS, headerTable(getHeaders()));
@@ -189,16 +195,16 @@ public final class OSGiBundle {
 			items.put(BundleStateMBean.IMPORTED_PACKAGES, getImportedPackages());
 		}
 		if(bundleTypes.contains(BundleStateMBean.FRAGMENTS)) {
-			items.put(BundleStateMBean.FRAGMENTS, BundleUtil.LongArrayFrom(getFragments()));
+			items.put(BundleStateMBean.FRAGMENTS, getFragments());
 		}
 		if(bundleTypes.contains(BundleStateMBean.HOSTS)) {
-			items.put(BundleStateMBean.HOSTS, BundleUtil.LongArrayFrom(getHosts()));
+			items.put(BundleStateMBean.HOSTS, getHosts());
 		}
 		if(bundleTypes.contains(BundleStateMBean.REQUIRING_BUNDLES)) {
-			items.put(BundleStateMBean.REQUIRING_BUNDLES, BundleUtil.LongArrayFrom(getRequiringBundles()));
+			items.put(BundleStateMBean.REQUIRING_BUNDLES, getRequiringBundles());
 		}
 		if(bundleTypes.contains(BundleStateMBean.REQUIRED_BUNDLES)) {
-			items.put(BundleStateMBean.REQUIRED_BUNDLES, BundleUtil.LongArrayFrom(getRequiredBundles()));
+			items.put(BundleStateMBean.REQUIRED_BUNDLES, getRequiredBundles());
 		}
 		try {
 			return new CompositeDataSupport(computeBundleType, items);
@@ -336,10 +342,10 @@ public final class OSGiBundle {
 			items.put(BundleStateMBean.FRAGMENT, isFragment());
 		}
 		if((mask | CustomBundleStateMBean.REGISTERED_SERVICES) == mask) {
-			items.put(BundleStateMBean.REGISTERED_SERVICES, BundleUtil.LongArrayFrom(getRegisteredServices()));
+			items.put(BundleStateMBean.REGISTERED_SERVICES, getRegisteredServices());
 		}
 		if((mask | CustomBundleStateMBean.SERVICES_IN_USE) == mask) {
-			items.put(BundleStateMBean.SERVICES_IN_USE, BundleUtil.LongArrayFrom(getServicesInUse()));
+			items.put(BundleStateMBean.SERVICES_IN_USE, getServicesInUse());
 		}
 		if((mask | CustomBundleStateMBean.HEADERS) == mask) {
 			items.put(BundleStateMBean.HEADERS, headerTable(getHeaders()));
@@ -351,16 +357,16 @@ public final class OSGiBundle {
 			items.put(BundleStateMBean.IMPORTED_PACKAGES, getImportedPackages());
 		}
 		if((mask | CustomBundleStateMBean.FRAGMENTS) == mask) {
-			items.put(BundleStateMBean.FRAGMENTS, BundleUtil.LongArrayFrom(getFragments()));
+			items.put(BundleStateMBean.FRAGMENTS, getFragments());
 		}
 		if((mask | CustomBundleStateMBean.HOSTS) == mask) {
-			items.put(BundleStateMBean.HOSTS, BundleUtil.LongArrayFrom(getHosts()));
+			items.put(BundleStateMBean.HOSTS, getHosts());
 		}
 		if((mask | CustomBundleStateMBean.REQUIRING_BUNDLES) == mask) {
-			items.put(BundleStateMBean.REQUIRING_BUNDLES, BundleUtil.LongArrayFrom(getRequiringBundles()));
+			items.put(BundleStateMBean.REQUIRING_BUNDLES, getRequiringBundles());
 		}
 		if((mask | CustomBundleStateMBean.REQUIRED_BUNDLES) == mask) {
-			items.put(BundleStateMBean.REQUIRED_BUNDLES, BundleUtil.LongArrayFrom(getRequiredBundles()));
+			items.put(BundleStateMBean.REQUIRED_BUNDLES, getRequiredBundles());
 		}
 
 		try {
@@ -391,17 +397,17 @@ public final class OSGiBundle {
 		items.put(BundleStateMBean.REMOVAL_PENDING, isRemovalPending());
 		items.put(BundleStateMBean.REQUIRED, isRequired());
 		items.put(BundleStateMBean.FRAGMENT, isFragment());
-		items.put(BundleStateMBean.REGISTERED_SERVICES, BundleUtil.LongArrayFrom(getRegisteredServices()));
-		items.put(BundleStateMBean.SERVICES_IN_USE, BundleUtil.LongArrayFrom(getServicesInUse()));
+		items.put(BundleStateMBean.REGISTERED_SERVICES, getRegisteredServices());
+		items.put(BundleStateMBean.SERVICES_IN_USE, getServicesInUse());
 		items.put(BundleStateMBean.HEADERS, headerTable(getHeaders()));
 		items.put(BundleStateMBean.EXPORTED_PACKAGES, getExportedPackages());
 		items.put(BundleStateMBean.IMPORTED_PACKAGES, getImportedPackages());
-		items.put(BundleStateMBean.FRAGMENTS, BundleUtil.LongArrayFrom(getFragments()));
-		items.put(BundleStateMBean.HOSTS, BundleUtil.LongArrayFrom(getHosts()));
-		items.put(BundleStateMBean.REQUIRING_BUNDLES, BundleUtil.LongArrayFrom(getRequiringBundles()));
-		items.put(BundleStateMBean.REQUIRED_BUNDLES, BundleUtil.LongArrayFrom(getRequiredBundles()));
+		items.put(BundleStateMBean.FRAGMENTS, getFragments());
+		items.put(BundleStateMBean.HOSTS, getHosts());
+		items.put(BundleStateMBean.REQUIRING_BUNDLES, getRequiringBundles());
+		items.put(BundleStateMBean.REQUIRED_BUNDLES, getRequiredBundles());
 		try {
-			return new CompositeDataSupport(BundleStateMBean.BUNDLE_TYPE, items);
+			return new CompositeDataSupport(CustomBundleStateMBean.CUSTOM_BUNDLE_TYPE, items);
 		} catch (OpenDataException e) {
 			throw new IllegalStateException("Cannot form bundle open data", e);
 		}
@@ -443,14 +449,6 @@ public final class OSGiBundle {
 	}
 
 	/**
-	 * @return the list of identifiers of the bundle fragments which use this
-	 *         bundle as a host
-	 */
-	private long[] getFragments() {
-		return  BundleUtil.getBundleFragments(bundle);			
-	}
-
-	/**
 	 * @return the map of headers for this bundle
 	 */
 	private Dictionary<String, String> getHeaders() {
@@ -458,10 +456,22 @@ public final class OSGiBundle {
 	}
 
 	/**
+	 * @return the list of identifiers of the bundle fragments which use this
+	 *         bundle as a host
+	 */
+	private Long[] getFragments() {
+		BundleWiring wiring = bundle.adapt(BundleWiring.class);
+		List<BundleWire> requiredWires = wiring.getRequiredWires(BundleRevision.HOST_NAMESPACE);
+        return bundleWiresToIds(requiredWires);
+	}
+
+	/**
 	 * @return list of identifiers of the bundles which host this fragment
 	 */
-	private long[] getHosts() {
-		return BundleUtil.getBundleHosts(bundle);
+	private Long[] getHosts() {
+		BundleWiring wiring = bundle.adapt(BundleWiring.class);
+		List<BundleWire> providedWires = wiring.getProvidedWires(BundleRevision.HOST_NAMESPACE);
+        return bundleWiresToIds(providedWires);
 	}
 
 	/**
@@ -496,31 +506,35 @@ public final class OSGiBundle {
 	/**
 	 * @return the list of identifiers of the services registered by this bundle
 	 */
-	private long[] getRegisteredServices() {
-		return BundleUtil.serviceIds(bundle.getRegisteredServices());
+	private Long[] getRegisteredServices() {
+		return serviceIds(bundle.getRegisteredServices());
 	}
-
+	
 	/**
 	 * @return the list of identifiers of bundles required by this bundle
 	 * @throws IOException 
 	 */
-	private long[] getRequiredBundles() throws IOException {
-		return BundleUtil.getRequiredBundles(bundle);
+	private Long[] getRequiredBundles() throws IOException {
+        BundleWiring wiring = bundle.adapt(BundleWiring.class);
+        List<BundleWire> requiredWires = wiring.getRequiredWires(BundleRevision.BUNDLE_NAMESPACE);
+        return bundleWiresToIds(requiredWires);
 	}
 
 	/**
 	 * @return the list of identifiers of bundles which require this bundle
 	 * @throws IOException 
 	 */
-	private long[] getRequiringBundles() throws IOException {
-		return BundleUtil.getRequiringBundles(bundle);
+	private Long[] getRequiringBundles() throws IOException {
+        BundleWiring wiring = bundle.adapt(BundleWiring.class);
+        List<BundleWire> providedWires = wiring.getProvidedWires(BundleRevision.BUNDLE_NAMESPACE);
+        return bundleWiresToIds(providedWires);
 	}
 
 	/**
 	 * @return the list of identifiers of services in use by this bundle
 	 */
-	private long[] getServicesInUse() {
-		return BundleUtil.serviceIds(bundle.getServicesInUse());
+	private Long[] getServicesInUse() {
+		return serviceIds(bundle.getServicesInUse());
 	}
 
 	/**
@@ -584,6 +598,27 @@ public final class OSGiBundle {
 	 */
 	private boolean isRequired() {
 		return BundleUtil.isRequired(bundle);
+	}
+
+	private Long[] bundleWiresToIds(List<BundleWire> wires){
+        Long[] consumerWirings = new Long[wires.size()];
+        int i = 0;
+        for (BundleWire bundleWire : wires) {
+            consumerWirings[i] = bundleWire.getRequirerWiring().getBundle().getBundleId();
+            i++;
+        }
+        return consumerWirings;
+	}
+	
+	private Long[] serviceIds(ServiceReference<?>[] refs) {
+		if (refs == null) {
+			return new Long[0];
+		}
+		Long[] ids = new Long[refs.length];
+		for (int i = 0; i < refs.length; i++) {
+			ids[i] = (Long) refs[i].getProperty(SERVICE_ID);
+		}
+		return ids;
 	}
 	
 }

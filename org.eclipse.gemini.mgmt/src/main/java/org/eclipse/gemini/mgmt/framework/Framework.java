@@ -104,12 +104,12 @@ public final class Framework implements FrameworkMBean {
 		if (locations == null) {
 			throw new IOException("locations must not be null");
 		}
-		long ids[] = new long[locations.length];
+		Long ids[] = new Long[locations.length];
 		for (int i = 0; i < locations.length; i++) {
 			try {
 				ids[i] = bundleContext.installBundle(locations[i]).getBundleId();
 			} catch (Throwable e) {
-				long[] completed = new long[i];
+				Long[] completed = new Long[i];
 				System.arraycopy(ids, 0, completed, 0, completed.length);
 				String[] remaining = new String[locations.length - i - 1];
 				System.arraycopy(locations, i + 1, remaining, 0, remaining.length);
@@ -129,14 +129,14 @@ public final class Framework implements FrameworkMBean {
 		if (urls == null) {
 			throw new IOException("urls must not be null");
 		}
-		long ids[] = new long[locations.length];
+		Long ids[] = new Long[locations.length];
 		for (int i = 0; i < locations.length; i++) {
 			InputStream is = null;
 			try {
 				is = new URL(urls[i]).openStream();
 				ids[i] = bundleContext.installBundle(locations[i], is).getBundleId();
 			} catch (Throwable e) {
-				long[] completed = new long[i];
+				Long[] completed = new Long[i];
 				System.arraycopy(ids, 0, completed, 0, completed.length);
 				String[] remaining = new String[locations.length - i - 1];
 				System.arraycopy(locations, i + 1, remaining, 0, remaining.length);
@@ -245,9 +245,9 @@ public final class Framework implements FrameworkMBean {
 			try {
 				bundle(bundleIdentifiers[i]).adapt(BundleStartLevel.class).setStartLevel(newlevels[i]);
 			} catch (Throwable e) {
-				long[] completed = new long[i];
+				Long[] completed = new Long[i];
 				System.arraycopy(bundleIdentifiers, 0, completed, 0, completed.length);
-				long[] remaining = new long[bundleIdentifiers.length - i - 1];
+				Long[] remaining = new Long[bundleIdentifiers.length - i - 1];
 				System.arraycopy(bundleIdentifiers, i + 1, remaining, 0, remaining.length);
 				return new BundleBatchActionResult(e.toString(), completed, bundleIdentifiers[i], remaining).asCompositeData();
 			}
@@ -314,9 +314,9 @@ public final class Framework implements FrameworkMBean {
 			try {
 				bundle(bundleIdentifiers[i]).start();
 			} catch (Throwable e) {
-				long[] completed = new long[i];
+				Long[] completed = new Long[i];
 				System.arraycopy(bundleIdentifiers, 0, completed, 0, completed.length);
-				long[] remaining = new long[bundleIdentifiers.length - i - 1];
+				Long[] remaining = new Long[bundleIdentifiers.length - i - 1];
 				System.arraycopy(bundleIdentifiers, i + 1, remaining, 0, remaining.length);
 				return new BundleBatchActionResult(e.toString(), completed, bundleIdentifiers[i], remaining).asCompositeData();
 			}
@@ -346,9 +346,9 @@ public final class Framework implements FrameworkMBean {
 			try {
 				bundle(bundleIdentifiers[i]).stop();
 			} catch (Throwable e) {
-				long[] completed = new long[i];
+				Long[] completed = new Long[i];
 				System.arraycopy(bundleIdentifiers, 0, completed, 0, completed.length);
-				long[] remaining = new long[bundleIdentifiers.length - i - 1];
+				Long[] remaining = new Long[bundleIdentifiers.length - i - 1];
 				System.arraycopy(bundleIdentifiers, i + 1, remaining, 0, remaining.length);
 				return new BundleBatchActionResult(e.toString(), completed, bundleIdentifiers[i], remaining).asCompositeData();
 			}
@@ -378,9 +378,9 @@ public final class Framework implements FrameworkMBean {
 			try {
 				bundle(bundleIdentifiers[i]).uninstall();
 			} catch (Throwable e) {
-				long[] completed = new long[i];
+				Long[] completed = new Long[i];
 				System.arraycopy(bundleIdentifiers, 0, completed, 0, completed.length);
-				long[] remaining = new long[bundleIdentifiers.length - i - 1];
+				Long[] remaining = new Long[bundleIdentifiers.length - i - 1];
 				System.arraycopy(bundleIdentifiers, i + 1, remaining, 0, remaining.length);
 				return new BundleBatchActionResult(e.toString(), completed, bundleIdentifiers[i], remaining).asCompositeData();
 			}
@@ -430,9 +430,9 @@ public final class Framework implements FrameworkMBean {
 			try {
 				bundle(bundleIdentifiers[i]).update();
 			} catch (Throwable e) {
-				long[] completed = new long[i];
+				Long[] completed = new Long[i];
 				System.arraycopy(bundleIdentifiers, 0, completed, 0, completed.length);
-				long[] remaining = new long[bundleIdentifiers.length - i - 1];
+				Long[] remaining = new Long[bundleIdentifiers.length - i - 1];
 				System.arraycopy(bundleIdentifiers, i + 1, remaining, 0, remaining.length);
 				return new BundleBatchActionResult(e.toString(), completed, bundleIdentifiers[i], remaining).asCompositeData();
 			}
@@ -453,9 +453,9 @@ public final class Framework implements FrameworkMBean {
 				is = new URL(urls[i]).openStream();
 				bundle(bundleIdentifiers[i]).update(is);
 			} catch (Throwable e) {
-				long[] completed = new long[i];
+				Long[] completed = new Long[i];
 				System.arraycopy(bundleIdentifiers, 0, completed, 0, completed.length);
-				long[] remaining = new long[bundleIdentifiers.length - i - 1];
+				Long[] remaining = new Long[bundleIdentifiers.length - i - 1];
 				System.arraycopy(bundleIdentifiers, i + 1, remaining, 0, remaining.length);
 				return new BundleBatchActionResult(e.toString(), completed, bundleIdentifiers[i], remaining).asCompositeData();
 			} finally {

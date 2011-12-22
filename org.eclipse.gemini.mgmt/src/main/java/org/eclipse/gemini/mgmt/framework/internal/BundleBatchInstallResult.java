@@ -15,8 +15,6 @@
 
 package org.eclipse.gemini.mgmt.framework.internal;
 
-import static org.eclipse.gemini.mgmt.internal.BundleUtil.LongArrayFrom;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -58,36 +56,32 @@ import org.osgi.jmx.framework.FrameworkMBean;
  * </tr>
  * </table>
  */
-public final class BundleBatchInstallResult extends BundleBatchResult {
+public final class BundleBatchInstallResult {
 
-	private String bundleInError;
-
-	private String[] remaining;
+	/**
+	 * The list of bundles successfully completed
+	 */
+	private Long[] completed;
 	
 	/**
-	 * Construct a result representing the contents of the supplied
-	 * CompositeData returned from a batch operation.
-	 * 
-	 * @param compositeData
-	 *            - the CompositeData representing the result of a batch
-	 *            operation.
+	 * The error message of a failed result
 	 */
-	@SuppressWarnings("boxing")
-	public BundleBatchInstallResult(CompositeData compositeData) {
-		success = ((Boolean) compositeData.get(FrameworkMBean.SUCCESS)).booleanValue();
-		errorMessage = (String) compositeData.get(FrameworkMBean.ERROR);
-		Long[] c = (Long[]) compositeData.get(FrameworkMBean.COMPLETED);
-		if (c != null) {
-			completed = new long[c.length];
-			for (int i = 0; i < c.length; i++) {
-				completed[i] = c[i];
-			}
-		} else {
-			completed = new long[0];
-		}
-		bundleInError = (String) compositeData.get(FrameworkMBean.BUNDLE_IN_ERROR);
-		remaining = (String[]) compositeData.get(FrameworkMBean.REMAINING);
-	}
+	private String errorMessage;
+	
+	/**
+	 * True if the action completed without error
+	 */
+	private boolean success = true;
+	
+	/**
+	 * The bundle in error or -1L if no bundle is in error
+	 */
+	private String bundleInError;
+
+	/**
+	 * The locations of the bundles remaining to be processed
+	 */
+	private String[] remaining;
 
 	/**
 	 * Construct a result signifying the successful completion of the batch
@@ -96,7 +90,7 @@ public final class BundleBatchInstallResult extends BundleBatchResult {
 	 * @param completed
 	 *            - the resulting bundle identifiers of the installed bundles
 	 */
-	public BundleBatchInstallResult(long[] completed) {
+	public BundleBatchInstallResult(Long[] completed) {
 		success = true;
 		this.completed = completed;
 	}
@@ -114,7 +108,7 @@ public final class BundleBatchInstallResult extends BundleBatchResult {
 	 * @param remaining
 	 *            - the list of bundle identifiers which remain unprocessed
 	 */
-	public BundleBatchInstallResult(String errorMessage, long[] completed, String bundleInError, String[] remaining) {
+	public BundleBatchInstallResult(String errorMessage, Long[] completed, String bundleInError, String[] remaining) {
 		success = false;
 		this.errorMessage = errorMessage;
 		this.completed = completed;
@@ -128,12 +122,11 @@ public final class BundleBatchInstallResult extends BundleBatchResult {
 	 * @return the CompositeData encoding of the receiver.
 	 * @throws IOException
 	 */
-	@SuppressWarnings("boxing")
 	public CompositeData asCompositeData() throws IOException {
 		Map<String, Object> items = new HashMap<String, Object>();
 		items.put(FrameworkMBean.SUCCESS, success);
 		items.put(FrameworkMBean.ERROR, errorMessage);
-		items.put(FrameworkMBean.COMPLETED, LongArrayFrom(completed));
+		items.put(FrameworkMBean.COMPLETED, completed);
 		items.put(FrameworkMBean.BUNDLE_IN_ERROR, bundleInError);
 		items.put(FrameworkMBean.REMAINING, remaining);
 
@@ -144,28 +137,6 @@ public final class BundleBatchInstallResult extends BundleBatchResult {
 			iox.initCause(e);
 			throw iox;
 		}
-	}
-
-	/**
-	 * Answer the bundle location which indicates the bundle that produced an
-	 * error during the batch operation.
-	 * 
-	 * @return the bundle location of the bundle in error, or null if no error
-	 *         occurred
-	 */
-	public String getBundleInError() {
-		return bundleInError;
-	}
-
-	/**
-	 * Answer the list of locations of the bundles that were not processed
-	 * during the batch operation, or null if the operation was successsful
-	 * 
-	 * @return the remaining bundle locations if the operation was successful,
-	 *         or null if the operation was unsuccsesful.
-	 */
-	public String[] getRemaining() {
-		return remaining;
 	}
 
 }

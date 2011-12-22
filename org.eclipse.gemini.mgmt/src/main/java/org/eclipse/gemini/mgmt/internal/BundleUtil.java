@@ -15,15 +15,11 @@
 
 package org.eclipse.gemini.mgmt.internal;
 
-import static org.osgi.framework.Constants.SERVICE_ID;
-
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
-import org.osgi.framework.ServiceReference;
 import org.osgi.framework.startlevel.BundleStartLevel;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.BundleWire;
@@ -34,42 +30,6 @@ import org.osgi.framework.wiring.BundleWiring;
  * 
  */
 public final class BundleUtil {
-
-	/**
-	 * 
-	 * @param bundleId
-	 * @param bundleContext
-	 * @return
-	 * @throws IOException
-	 */
-    public static long[] getRequiredBundles(Bundle bundle) {
-        BundleWiring wiring = bundle.adapt(BundleWiring.class);
-        List<BundleWire> consumedWires = wiring.getRequiredWires(BundleRevision.BUNDLE_NAMESPACE);
-        long[] providerWires = new long[consumedWires.size()];
-        int i = 0;
-        for (BundleWire bundleWire : consumedWires) {
-            providerWires[i] = bundleWire.getProviderWiring().getBundle().getBundleId();
-        }
-        return providerWires;
-    }
-
-    /**
-     * 
-     * @param bundleId
-     * @param bundleContext
-     * @return
-     * @throws IOException
-     */
-    public static long[] getRequiringBundles(Bundle bundle) {
-        BundleWiring wiring = bundle.adapt(BundleWiring.class);
-        List<BundleWire> providedWirings = wiring.getProvidedWires(BundleRevision.BUNDLE_NAMESPACE);
-        long[] consumerWirings = new long[providedWirings.size()];
-        int i = 0;
-        for (BundleWire bundleWire : providedWirings) {
-            consumerWirings[i] = bundleWire.getRequirerWiring().getBundle().getBundleId();
-        }
-        return consumerWirings;
-    }
 	
 	/**
 	 * Answer the string representation of the exported packages of the bundle
@@ -89,42 +49,6 @@ public final class BundleUtil {
         	}
         }
         return packages.toArray(new String[packages.size()]);
-	}
-
-	/**
-	 * Answer the ids of the fragments hosted by the bundle
-	 * 
-	 * @param bundle
-	 * @param admin
-	 * @return the ids of the fragments hosted by the bundle
-	 */
-	public static long[] getBundleFragments(Bundle bundle) {
-		BundleWiring wiring = bundle.adapt(BundleWiring.class);
-		List<BundleWire> consumedWires = wiring.getRequiredWires(BundleRevision.HOST_NAMESPACE);
-        long[] providerWires = new long[consumedWires.size()];
-        int i = 0;
-        for (BundleWire bundleWire : consumedWires) {
-            providerWires[i] = bundleWire.getProviderWiring().getBundle().getBundleId();
-        }
-        return providerWires;
-	}
-
-	/**
-	 * Answer the ids of the hosts this fragment is attached to
-	 * 
-	 * @param bundle
-	 * @param admin
-	 * @return the ids of the hosts this fragment is attached to
-	 */
-	public static long[] getBundleHosts(Bundle bundle) {
-		BundleWiring wiring = bundle.adapt(BundleWiring.class);
-		List<BundleWire> consumedWires = wiring.getProvidedWires(BundleRevision.HOST_NAMESPACE);
-        long[] providerWires = new long[consumedWires.size()];
-        int i = 0;
-        for (BundleWire bundleWire : consumedWires) {
-            providerWires[i] = bundleWire.getRequirerWiring().getBundle().getBundleId();
-        }
-        return providerWires;
 	}
 
 	/**
@@ -156,20 +80,20 @@ public final class BundleUtil {
 	 */
 	public static String getBundleState(Bundle b) {
 		switch (b.getState()) {
-		case Bundle.ACTIVE:
-			return "ACTIVE";
-		case Bundle.INSTALLED:
-			return "INSTALLED";
-		case Bundle.RESOLVED:
-			return "RESOLVED";
-		case Bundle.STARTING:
-			return "STARTING";
-		case Bundle.STOPPING:
-			return "STOPPING";
-		case Bundle.UNINSTALLED:
-			return "UNINSTALLED";
-		default:
-			return "UNKNOWN";
+			case Bundle.ACTIVE:
+				return "ACTIVE";
+			case Bundle.INSTALLED:
+				return "INSTALLED";
+			case Bundle.RESOLVED:
+				return "RESOLVED";
+			case Bundle.STARTING:
+				return "STARTING";
+			case Bundle.STOPPING:
+				return "STOPPING";
+			case Bundle.UNINSTALLED:
+				return "UNINSTALLED";
+			default:
+				return "UNKNOWN";
 		}
 	}
 
@@ -185,6 +109,12 @@ public final class BundleUtil {
 		return 0 != (wiring.getRevision().getTypes() & BundleRevision.TYPE_FRAGMENT);
 	}
 
+	/**
+	 * Return the start level for the given bundle
+	 * 
+	 * @param bundle
+	 * @return
+	 */
 	public static int getBundleStartLevel(Bundle bundle) {
 		BundleStartLevel startLevel = bundle.adapt(BundleStartLevel.class);
 		return startLevel.getStartLevel();
@@ -236,40 +166,6 @@ public final class BundleUtil {
 	public static boolean isRemovalPending(Bundle bundle) {
         BundleWiring wiring = bundle.adapt(BundleWiring.class);
         return (!wiring.isCurrent()) && wiring.isInUse();
-	}
-
-	/**
-	 * Answer the ids of the service references
-	 * 
-	 * @param refs
-	 * @return the ids of the service references
-	 */
-	public static long[] serviceIds(ServiceReference<?>[] refs) {
-		if (refs == null) {
-			return new long[0];
-		}
-		long[] ids = new long[refs.length];
-		for (int i = 0; i < refs.length; i++) {
-			ids[i] = (Long) refs[i].getProperty(SERVICE_ID);
-		}
-		return ids;
-	}
-
-	/**
-	 * Answer a Long array from the supplied array of longs
-	 * 
-	 * @param array
-	 * @return a Long array from the supplied array of longs
-	 */
-	public static Long[] LongArrayFrom(long[] array) {
-		if (array == null) {
-			return new Long[0];
-		}
-		Long[] result = new Long[array.length];
-		for (int i = 0; i < array.length; i++) {
-			result[i] = array[i];
-		}
-		return result;
 	}
 
 }

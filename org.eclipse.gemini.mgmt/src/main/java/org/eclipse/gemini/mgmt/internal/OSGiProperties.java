@@ -11,6 +11,7 @@
  *
  * Contributors:
  *     Hal Hildebrand - Initial JMX support 
+ *     Christopher Frost - Refactoring for Spec updates
  ******************************************************************************/
 
 package org.eclipse.gemini.mgmt.internal;
@@ -18,14 +19,15 @@ package org.eclipse.gemini.mgmt.internal;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
@@ -35,6 +37,7 @@ import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularDataSupport;
 
+import org.eclipse.gemini.mgmt.framework.CustomBundleWiringStateMBean;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.Version;
 import org.osgi.jmx.JmxConstants;
@@ -86,38 +89,36 @@ import org.osgi.jmx.JmxConstants;
  * The
  */
 public final class OSGiProperties {
-
+	
+	private static final String VERSION = "Version";
+	
 	/**
 	 * The scalar type
 	 */
-	private static final Set<String> SCALAR_TYPES = new HashSet<String>();
+	private static final List<String> SCALAR_TYPES = Collections.unmodifiableList(Arrays.asList(
+		JmxConstants.STRING,
+		JmxConstants.INTEGER,
+		JmxConstants.LONG,
+		JmxConstants.FLOAT,
+		JmxConstants.DOUBLE,
+		JmxConstants.BYTE,
+		JmxConstants.SHORT,
+		JmxConstants.CHARACTER,
+		JmxConstants.BOOLEAN,
+		JmxConstants.BIGDECIMAL,
+		JmxConstants.BIGINTEGER));
+	
 	/**
 	 * The primitive types
 	 */
-	private static final Set<String> PRIMITIVE_TYPES = new HashSet<String>();
-
-	static {
-		SCALAR_TYPES.add("String");
-		SCALAR_TYPES.add("Integer");
-		SCALAR_TYPES.add("Long");
-		SCALAR_TYPES.add("Float");
-		SCALAR_TYPES.add("Double");
-		SCALAR_TYPES.add("Byte");
-		SCALAR_TYPES.add("Short");
-		SCALAR_TYPES.add("Character");
-		SCALAR_TYPES.add("Boolean");
-		SCALAR_TYPES.add("BigDecimal");
-		SCALAR_TYPES.add("BigInteger");
-
-		PRIMITIVE_TYPES.add("int");
-		PRIMITIVE_TYPES.add("long");
-		PRIMITIVE_TYPES.add("float");
-		PRIMITIVE_TYPES.add("double");
-		PRIMITIVE_TYPES.add("byte");
-		PRIMITIVE_TYPES.add("short");
-		PRIMITIVE_TYPES.add("char");
-		PRIMITIVE_TYPES.add("boolean");
-	}
+	private static final List<String> PRIMITIVE_TYPES = Collections.unmodifiableList(Arrays.asList(
+		JmxConstants.P_BYTE,
+		JmxConstants.P_CHAR,
+		JmxConstants.P_SHORT,
+		JmxConstants.P_INT,
+		JmxConstants.P_LONG,
+		JmxConstants.P_DOUBLE,
+		JmxConstants.P_FLOAT));
 	
 	/**
 	 * Answer the tabular data representation of the properties dictionary
@@ -160,7 +161,6 @@ public final class OSGiProperties {
 	 */
 	public static CompositeData encode(String key, Object value) {
 		Class<?> clazz = value.getClass();
-
 		if (clazz.isArray()) {
 			return encodeArray(key, value, clazz.getComponentType());
 		} else if (clazz.equals(Vector.class)) {
@@ -176,7 +176,7 @@ public final class OSGiProperties {
 	 * @return the hashtable represented by the tabular data
 	 */
 	@SuppressWarnings("unchecked")
-	public static Hashtable<String, Object> propertiesFrom(TabularData table) {
+	public static Dictionary<String, Object> propertiesFrom(TabularData table) {
 		Hashtable<String, Object> props = new Hashtable<String, Object>();
 		if (table == null) {
 			return props;
@@ -184,10 +184,23 @@ public final class OSGiProperties {
 		for (CompositeData data : (Collection<CompositeData>) table.values()) {
 			props.put((String) data.get(JmxConstants.KEY), parse((String) data.get(JmxConstants.VALUE), (String) data.get(JmxConstants.TYPE)));
 		}
-
 		return props;
 	}
-
+	
+	/**
+	 * Convert a key-value directive in to the required format for representation over JMX
+	 * 
+	 * @param key
+	 * @param value
+	 * @return a map of key to the key and value to the value
+	 */
+	public static Map<String, ?> getDirectiveKeyValueItem(String key, Object value){
+		Map<String, Object> items = new HashMap<String, Object>();
+		items.put(CustomBundleWiringStateMBean.KEY, key);
+		items.put(CustomBundleWiringStateMBean.VALUE, value);
+		return items;
+	}
+	
 	/**
 	 * Encode the array as composite data
 	 * 
@@ -197,7 +210,6 @@ public final class OSGiProperties {
 	 * @return the composite data representation
 	 */
 	private static CompositeData encodeArray(String key, Object value, Class<?> componentClazz) {
-		String type = typeOf(componentClazz);
 		StringBuffer buf = new StringBuffer();
 		if (Integer.TYPE.equals(componentClazz)) {
 			int[] array = (int[]) value;
@@ -217,6 +229,14 @@ public final class OSGiProperties {
 			}
 		} else if (Double.TYPE.equals(componentClazz)) {
 			double[] array = (double[]) value;
+			for (int i = 0; i < array.length; i++) {
+				buf.append(array[i]);
+				if (i < array.length - 1) {
+					buf.append(',');
+				}
+			}
+		} else if (Float.TYPE.equals(componentClazz)) {
+			float[] array = (float[]) value;
 			for (int i = 0; i < array.length; i++) {
 				buf.append(array[i]);
 				if (i < array.length - 1) {
@@ -264,6 +284,7 @@ public final class OSGiProperties {
 				}
 			}
 		}
+		String type = typeOf(componentClazz);
 		return propertyData(key, buf.toString(), "Array of " + type);
 	}
 
@@ -275,7 +296,7 @@ public final class OSGiProperties {
 	 * @return the composite data representation
 	 */
 	private static CompositeData encodeVector(String key, Vector<?> value) {
-		String type = "String";
+		String type = JmxConstants.STRING;
 		if (value.size() > 0) {
 			type = typeOf(value.get(0).getClass());
 		}
@@ -288,7 +309,7 @@ public final class OSGiProperties {
 		}
 		return propertyData(key, buf.toString(), "Vector of " + type);
 	}
-
+	
 	/**
 	 * Answer the string type of the class
 	 * 
@@ -296,59 +317,65 @@ public final class OSGiProperties {
 	 * @return the string type of the class
 	 */
 	private static String typeOf(Class<?> clazz) {
-		if (clazz.equals(Version.class)) {
-			return "Version";
-		}
 		if (clazz.equals(String.class)) {
-			return "String";
+			return JmxConstants.STRING;
+		}
+		if (clazz.equals(Version.class)) {
+			return VERSION;
 		}
 		if (clazz.equals(Integer.class)) {
-			return "Integer";
+			return JmxConstants.INTEGER;
 		}
 		if (clazz.equals(Long.class)) {
-			return "Long";
+			return JmxConstants.LONG;
 		}
 		if (clazz.equals(Double.class)) {
-			return "Double";
+			return JmxConstants.DOUBLE;
+		}
+		if (clazz.equals(Double.class)) {
+			return JmxConstants.FLOAT;
 		}
 		if (clazz.equals(Byte.class)) {
-			return "Byte";
+			return JmxConstants.BYTE;
 		}
 		if (clazz.equals(Short.class)) {
-			return "Short";
+			return JmxConstants.SHORT;
 		}
 		if (clazz.equals(Character.class)) {
-			return "Character";
+			return JmxConstants.CHARACTER;
 		}
 		if (clazz.equals(Boolean.class)) {
-			return "Boolean";
+			return JmxConstants.BOOLEAN;
 		}
 		if (clazz.equals(BigDecimal.class)) {
-			return "BigDecimal";
+			return JmxConstants.BIGDECIMAL;
 		}
 		if (clazz.equals(BigInteger.class)) {
-			return "BigInteger";
+			return JmxConstants.BIGINTEGER;
 		}
 		if (clazz.equals(Integer.TYPE)) {
-			return "int";
+			return JmxConstants.P_INT;
 		}
 		if (clazz.equals(Long.TYPE)) {
-			return "long";
+			return JmxConstants.P_LONG;
 		}
 		if (clazz.equals(Double.TYPE)) {
-			return "double";
+			return JmxConstants.P_DOUBLE;
+		}
+		if (clazz.equals(Double.TYPE)) {
+			return JmxConstants.P_FLOAT;
 		}
 		if (clazz.equals(Byte.TYPE)) {
-			return "byte";
+			return JmxConstants.P_BYTE;
 		}
 		if (clazz.equals(Short.TYPE)) {
-			return "short";
+			return JmxConstants.P_SHORT;
 		}
 		if (clazz.equals(Character.TYPE)) {
-			return "char";
+			return JmxConstants.P_CHAR;
 		}
 		if (clazz.equals(Boolean.TYPE)) {
-			return "boolean";
+			return JmxConstants.P_BOOLEAN;
 		}
 		throw new IllegalArgumentException("Illegal type: " + clazz);
 	}
@@ -392,8 +419,8 @@ public final class OSGiProperties {
 		if ("Vector".equals(token)) {
 			return parseVector(value, tokens);
 		}
-		if (SCALAR_TYPES.contains(token)) {
-			return parseScalar(value, token);
+		if (SCALAR_TYPES.contains(token) || PRIMITIVE_TYPES.contains(token)) {
+			return parseValue(value, token);
 		}
 		throw new IllegalArgumentException("Unknown type: " + type);
 	}
@@ -426,131 +453,6 @@ public final class OSGiProperties {
 	}
 
 	/**
-	 * Parse the array represented by the string value
-	 * 
-	 * @param value
-	 * @param type
-	 * @return the array represented by the string value
-	 */
-	private static Object parseScalarArray(String value, String type) {
-		ArrayList<Object> array = new ArrayList<Object>();
-		StringTokenizer values = new StringTokenizer(value, ",");
-		while (values.hasMoreTokens()) {
-			array.add(parseScalar(values.nextToken().trim(), type));
-		}
-		return array.toArray(createScalarArray(type, array.size()));
-	}
-
-	/**
-	 * Create the scalar array from the supplied type
-	 * 
-	 * @param type
-	 * @param size
-	 * @return the scalar array from the supplied type
-	 */
-	private static Object[] createScalarArray(String type, int size) {
-		if ("String".equals(type)) {
-			return new String[size];
-		}
-		if ("Integer".equals(type)) {
-			return new Integer[size];
-		}
-		if ("Long".equals(type)) {
-			return new Long[size];
-		}
-		if ("Double".equals(type)) {
-			return new Double[size];
-		}
-		if ("Byte".equals(type)) {
-			return new Byte[size];
-		}
-		if ("Short".equals(type)) {
-			return new Short[size];
-		}
-		if ("Character".equals(type)) {
-			return new Character[size];
-		}
-		if ("Boolean".equals(type)) {
-			return new Boolean[size];
-		}
-		if ("BigDecimal".equals(type)) {
-			return new BigDecimal[size];
-		}
-		if ("BigInteger".equals(type)) {
-			return new BigInteger[size];
-		}
-		throw new IllegalArgumentException("Unknown scalar type: " + type);
-	}
-
-	/**
-	 * Parse the array from the supplied values
-	 * 
-	 * @param value
-	 * @param type
-	 * @return the array from the supplied values
-	 */
-	private static Object parsePrimitiveArray(String value, String type) {
-		StringTokenizer values = new StringTokenizer(value, ",");
-		if ("int".equals(type)) {
-			int[] array = new int[values.countTokens()];
-			int i = 0;
-			while (values.hasMoreTokens()) {
-				array[i++] = Integer.parseInt(values.nextToken().trim());
-			}
-			return array;
-		}
-		if ("long".equals(type)) {
-			long[] array = new long[values.countTokens()];
-			int i = 0;
-			while (values.hasMoreTokens()) {
-				array[i++] = Long.parseLong(values.nextToken().trim());
-			}
-			return array;
-		}
-		if ("double".equals(type)) {
-			double[] array = new double[values.countTokens()];
-			int i = 0;
-			while (values.hasMoreTokens()) {
-				array[i++] = Double.parseDouble(values.nextToken().trim());
-			}
-			return array;
-		}
-		if ("byte".equals(type)) {
-			byte[] array = new byte[values.countTokens()];
-			int i = 0;
-			while (values.hasMoreTokens()) {
-				array[i++] = Byte.parseByte(values.nextToken().trim());
-			}
-			return array;
-		}
-		if ("short".equals(type)) {
-			short[] array = new short[values.countTokens()];
-			int i = 0;
-			while (values.hasMoreTokens()) {
-				array[i++] = Short.parseShort(values.nextToken().trim());
-			}
-			return array;
-		}
-		if ("char".equals(type)) {
-			char[] array = new char[values.countTokens()];
-			int i = 0;
-			while (values.hasMoreTokens()) {
-				array[i++] = values.nextToken().trim().charAt(0);
-			}
-			return array;
-		}
-		if ("boolean".equals(type)) {
-			boolean[] array = new boolean[values.countTokens()];
-			int i = 0;
-			while (values.hasMoreTokens()) {
-				array[i++] = Boolean.parseBoolean(values.nextToken().trim());
-			}
-			return array;
-		}
-		throw new IllegalArgumentException("Unknown primitive type: " + type);
-	}
-
-	/**
 	 * Parse the vector represented by the supplied string value
 	 * 
 	 * @param value
@@ -580,6 +482,145 @@ public final class OSGiProperties {
 	}
 
 	/**
+	 * Parse the array represented by the string value
+	 * 
+	 * @param value
+	 * @param type
+	 * @return the array represented by the string value
+	 */
+	private static Object[] parseScalarArray(String value, String type) {
+		ArrayList<Object> array = new ArrayList<Object>();
+		StringTokenizer values = new StringTokenizer(value, ",");
+		while (values.hasMoreTokens()) {
+			array.add(parseScalar(values.nextToken().trim(), type));
+		}
+		return array.toArray(createScalarArray(type, array.size()));
+	}
+
+	/**
+	 * Parse the array from the supplied values
+	 * 
+	 * @param value
+	 * @param type
+	 * @return the array from the supplied values
+	 */
+	private static Object parsePrimitiveArray(String value, String type) {
+		StringTokenizer values = new StringTokenizer(value, ",");
+		if (JmxConstants.P_INT.equals(type)) {
+			int[] array = new int[values.countTokens()];
+			int i = 0;
+			while (values.hasMoreTokens()) {
+				array[i++] = Integer.parseInt(values.nextToken().trim());
+			}
+			return array;
+		}
+		if (JmxConstants.P_LONG.equals(type)) {
+			long[] array = new long[values.countTokens()];
+			int i = 0;
+			while (values.hasMoreTokens()) {
+				array[i++] = Long.parseLong(values.nextToken().trim());
+			}
+			return array;
+		}
+		if (JmxConstants.P_DOUBLE.equals(type)) {
+			double[] array = new double[values.countTokens()];
+			int i = 0;
+			while (values.hasMoreTokens()) {
+				array[i++] = Double.parseDouble(values.nextToken().trim());
+			}
+			return array;
+		}
+		if (JmxConstants.P_FLOAT.equals(type)) {
+			float[] array = new float[values.countTokens()];
+			int i = 0;
+			while (values.hasMoreTokens()) {
+				array[i++] = Float.parseFloat(values.nextToken().trim());
+			}
+			return array;
+		}
+		if (JmxConstants.P_BYTE.equals(type)) {
+			byte[] array = new byte[values.countTokens()];
+			int i = 0;
+			while (values.hasMoreTokens()) {
+				array[i++] = Byte.parseByte(values.nextToken().trim());
+			}
+			return array;
+		}
+		if (JmxConstants.P_SHORT.equals(type)) {
+			short[] array = new short[values.countTokens()];
+			int i = 0;
+			while (values.hasMoreTokens()) {
+				array[i++] = Short.parseShort(values.nextToken().trim());
+			}
+			return array;
+		}
+		if (JmxConstants.P_CHAR.equals(type)) {
+			char[] array = new char[values.countTokens()];
+			int i = 0;
+			while (values.hasMoreTokens()) {
+				array[i++] = values.nextToken().trim().charAt(0);
+			}
+			return array;
+		}
+		if (JmxConstants.P_BOOLEAN.equals(type)) {
+			boolean[] array = new boolean[values.countTokens()];
+			int i = 0;
+			while (values.hasMoreTokens()) {
+				array[i++] = Boolean.parseBoolean(values.nextToken().trim());
+			}
+			return array;
+		}
+		throw new IllegalArgumentException("Unknown primitive type: " + type);
+	}
+	
+	/**
+	 * Create the scalar array from the supplied type
+	 * 
+	 * @param type
+	 * @param size
+	 * @return the scalar array from the supplied type
+	 */
+	private static Object[] createScalarArray(String type, int size) {
+		if (JmxConstants.STRING.equals(type)) {
+			return new String[size];
+		}
+		if (VERSION.equals(type)) {
+			return new Version[size];
+		}
+		if (JmxConstants.INTEGER.equals(type)) {
+			return new Integer[size];
+		}
+		if (JmxConstants.LONG.equals(type)) {
+			return new Long[size];
+		}
+		if (JmxConstants.DOUBLE.equals(type)) {
+			return new Double[size];
+		}
+		if (JmxConstants.FLOAT.equals(type)) {
+			return new Float[size];
+		}
+		if (JmxConstants.BYTE.equals(type)) {
+			return new Byte[size];
+		}
+		if (JmxConstants.SHORT.equals(type)) {
+			return new Short[size];
+		}
+		if (JmxConstants.CHARACTER.equals(type)) {
+			return new Character[size];
+		}
+		if (JmxConstants.BOOLEAN.equals(type)) {
+			return new Boolean[size];
+		}
+		if (JmxConstants.BIGDECIMAL.equals(type)) {
+			return new BigDecimal[size];
+		}
+		if (JmxConstants.BIGINTEGER.equals(type)) {
+			return new BigInteger[size];
+		}
+		throw new IllegalArgumentException("Unknown scalar type: " + type);
+	}
+
+	/**
 	 * Construct the scalar value represented by the string
 	 * 
 	 * @param value
@@ -587,37 +628,82 @@ public final class OSGiProperties {
 	 * @return the scalar value represented by the string
 	 */
 	private static Object parseScalar(String value, String type) {
-		if ("String".equals(type)) {
+		if (JmxConstants.STRING.equals(type)) {
 			return value;
 		}
-		if ("Integer".equals(type)) {
+		if (VERSION.equals(type)) {
+			return Version.parseVersion(value);
+		}
+		if (JmxConstants.INTEGER.equals(type)) {
 			return Integer.parseInt(value);
 		}
-		if ("Long".equals(type)) {
+		if (JmxConstants.LONG.equals(type)) {
 			return Long.parseLong(value);
 		}
-		if ("Double".equals(type)) {
+		if (JmxConstants.DOUBLE.equals(type)) {
 			return Double.parseDouble(value);
 		}
-		if ("Byte".equals(type)) {
+		if (JmxConstants.FLOAT.equals(type)) {
+			return Float.parseFloat(value);
+		}
+		if (JmxConstants.BYTE.equals(type)) {
 			return Byte.parseByte(value);
 		}
-		if ("Short".equals(type)) {
+		if (JmxConstants.SHORT.equals(type)) {
 			return Short.parseShort(value);
 		}
-		if ("Character".equals(type)) {
+		if (JmxConstants.CHARACTER.equals(type)) {
 			return value.charAt(0);
 		}
-		if ("Boolean".equals(type)) {
+		if (JmxConstants.BOOLEAN.equals(type)) {
 			return Boolean.parseBoolean(value);
 		}
-		if ("BigDecimal".equals(type)) {
+		if (JmxConstants.BIGDECIMAL.equals(type)) {
 			return new BigDecimal(value);
 		}
-		if ("BigInteger".equals(type)) {
+		if (JmxConstants.BIGINTEGER.equals(type)) {
 			return new BigInteger(value);
 		}
 		throw new IllegalArgumentException("Unknown scalar type: " + type);
 	}
 
+	/**
+	 * Construct the scalar value represented by the string
+	 * 
+	 * @param value
+	 * @param type
+	 * @return the scalar value represented by the string
+	 */
+	private static Object parseValue(String value, String type) {
+		try{
+			return parseScalar(value, type);
+		}catch (IllegalArgumentException e) {
+			if (JmxConstants.P_INT.equals(type)) {
+				return Integer.parseInt(value);
+			}
+			if (JmxConstants.P_LONG.equals(type)) {
+				return Long.parseLong(value);
+			}
+			if (JmxConstants.P_DOUBLE.equals(type)) {
+				return Double.parseDouble(value);
+			}
+			if (JmxConstants.P_FLOAT.equals(type)) {
+				return Float.parseFloat(value);
+			}
+			if (JmxConstants.P_BYTE.equals(type)) {
+				return Byte.parseByte(value);
+			}
+			if (JmxConstants.P_SHORT.equals(type)) {
+				return Short.parseShort(value);
+			}
+			if (JmxConstants.P_CHAR.equals(type)) {
+				return value.charAt(0);
+			}
+			if (JmxConstants.P_BOOLEAN.equals(type)) {
+				return Boolean.parseBoolean(value);
+			}
+			throw new IllegalArgumentException("Unknown scalar type: " + type);
+		}
+	}
+	
 }

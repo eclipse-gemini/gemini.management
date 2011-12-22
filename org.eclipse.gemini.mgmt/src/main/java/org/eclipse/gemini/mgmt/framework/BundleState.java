@@ -17,6 +17,7 @@ package org.eclipse.gemini.mgmt.framework;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.management.Notification;
 import javax.management.openmbean.CompositeData;
@@ -27,6 +28,11 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
+import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.wiring.BundleRevision;
+import org.osgi.framework.wiring.BundleWire;
+import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.jmx.framework.BundleStateMBean;
 
 import org.eclipse.gemini.mgmt.Monitor;
@@ -56,7 +62,7 @@ public final class BundleState extends Monitor implements CustomBundleStateMBean
 	 */
 	public TabularData listBundles() throws IOException {
 		try {
-			TabularDataSupport table = new TabularDataSupport(BundleStateMBean.BUNDLES_TYPE);
+			TabularDataSupport table = new TabularDataSupport(CustomBundleStateMBean.CUSTOM_BUNDLES_TYPE);
 			for (Bundle bundle : bundleContext.getBundles()) {
 				table.put(new OSGiBundle(bundle).asCompositeData());
 			}
@@ -70,7 +76,7 @@ public final class BundleState extends Monitor implements CustomBundleStateMBean
 	 * {@inheritDoc}
 	 */
 	public TabularData listBundles(int mask) throws IOException {
-		if (mask < 1 || mask > 1048575) {
+		if (mask < 1 || mask > 2097151) {
 			throw new IllegalArgumentException("Mask out of range!");
 		}
 		try {
@@ -96,7 +102,9 @@ public final class BundleState extends Monitor implements CustomBundleStateMBean
 	 * {@inheritDoc}
 	 */
 	public long[] getFragments(long bundleId) throws IOException {
-		return BundleUtil.getBundleFragments(retrieveBundle(bundleId));
+		BundleWiring wiring = retrieveBundle(bundleId).adapt(BundleWiring.class);
+		List<BundleWire> requiredWires = wiring.getRequiredWires(BundleRevision.HOST_NAMESPACE);
+        return bundleWiresToIds(requiredWires);
 	}
 
 	/**
@@ -110,9 +118,11 @@ public final class BundleState extends Monitor implements CustomBundleStateMBean
 	 * {@inheritDoc}
 	 */
 	public long[] getHosts(long fragment) throws IOException {
-		return BundleUtil.getBundleHosts(retrieveBundle(fragment));
+		BundleWiring wiring = retrieveBundle(fragment).adapt(BundleWiring.class);
+		List<BundleWire> providedWires = wiring.getProvidedWires(BundleRevision.HOST_NAMESPACE);
+        return bundleWiresToIds(providedWires);
 	}
-
+	
 	/**
 	 * {@inheritDoc}
 	 */
@@ -131,21 +141,22 @@ public final class BundleState extends Monitor implements CustomBundleStateMBean
 	 * {@inheritDoc}
 	 */
 	public long[] getRegisteredServices(long bundleId) throws IOException {
-		return BundleUtil.serviceIds(retrieveBundle(bundleId).getRegisteredServices());
+		return serviceIds(retrieveBundle(bundleId).getRegisteredServices());
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public long[] getRequiringBundles(long bundleId) throws IOException {
-		return BundleUtil.getRequiringBundles(retrieveBundle(bundleId));
-	}
-
+        BundleWiring wiring = retrieveBundle(bundleId).adapt(BundleWiring.class);
+        List<BundleWire> providedWires = wiring.getProvidedWires(BundleRevision.BUNDLE_NAMESPACE);
+        return bundleWiresToIds(providedWires);
+    }
 	/**
 	 * {@inheritDoc}
 	 */
 	public long[] getServicesInUse(long bundleIdentifier) throws IOException {
-		return BundleUtil.serviceIds(retrieveBundle(bundleIdentifier).getServicesInUse());
+		return serviceIds(retrieveBundle(bundleIdentifier).getServicesInUse());
 	}
 
 	/**
@@ -180,8 +191,10 @@ public final class BundleState extends Monitor implements CustomBundleStateMBean
 	 * {@inheritDoc}
 	 */
 	public long[] getRequiredBundles(long bundleIdentifier) throws IOException {
-		return BundleUtil.getRequiredBundles(retrieveBundle(bundleIdentifier));
-	}
+        BundleWiring wiring = retrieveBundle(bundleIdentifier).adapt(BundleWiring.class);
+        List<BundleWire> requiredWires = wiring.getRequiredWires(BundleRevision.BUNDLE_NAMESPACE);
+        return bundleWiresToIds(requiredWires);
+    }
 
 	/**
 	 * {@inheritDoc}
@@ -285,6 +298,29 @@ public final class BundleState extends Monitor implements CustomBundleStateMBean
 		return b;
 	}
 
+	private long[] bundleWiresToIds(List<BundleWire> wires){
+        long[] consumerWirings = new long[wires.size()];
+        int i = 0;
+        for (BundleWire bundleWire : wires) {
+            consumerWirings[i] = bundleWire.getRequirerWiring().getBundle().getBundleId();
+            i++;
+        }
+        return consumerWirings;
+	}
+
+	private long[] serviceIds(ServiceReference<?>[] refs) {
+		if (refs == null) {
+			return new long[0];
+		}
+		long[] ids = new long[refs.length];
+		for (int i = 0; i < refs.length; i++) {
+			ids[i] = (Long) refs[i].getProperty(Constants.SERVICE_ID);
+		}
+		return ids;
+	}
+	
+	//Monitor methods
+	
 	/**
 	 * {@inheritDoc}
 	 */

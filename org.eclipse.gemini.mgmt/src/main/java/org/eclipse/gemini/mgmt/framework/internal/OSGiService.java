@@ -15,7 +15,7 @@
 
 package org.eclipse.gemini.mgmt.framework.internal;
 
-import static org.eclipse.gemini.mgmt.internal.BundleUtil.LongArrayFrom;
+//import static org.eclipse.gemini.mgmt.internal.BundleUtil.LongArrayFrom;
 import static org.osgi.framework.Constants.OBJECTCLASS;
 import static org.osgi.framework.Constants.SERVICE_ID;
 
@@ -33,7 +33,7 @@ import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularDataSupport;
 
-import org.eclipse.gemini.mgmt.internal.ServiceUtil;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 import org.osgi.jmx.Item;
 import org.osgi.jmx.framework.ServiceStateMBean;
@@ -74,7 +74,7 @@ public final class OSGiService {
 	
 	private String[] interfaces;
 	
-	private long[] usingBundles;
+	private Long[] usingBundles;
 
 	/**
 	 * Construct an OSGiService from the underlying
@@ -88,9 +88,34 @@ public final class OSGiService {
 		this.identifier = (Long) reference.getProperty(SERVICE_ID);
 		this.interfaces = (String[]) reference.getProperty(OBJECTCLASS);
 		this.bundle = reference.getBundle().getBundleId();
-		this.usingBundles = ServiceUtil.getBundlesUsing(reference);
+		this.usingBundles = longArrayFrom(OSGiService.getBundlesUsing(reference));
 	}
 
+	private Long[] longArrayFrom(long[] array) {
+		if (array == null) {
+			return new Long[0];
+		}
+		Long[] result = new Long[array.length];
+		for (int i = 0; i < array.length; i++) {
+			result[i] = array[i];
+		}
+		return result;
+	}
+	
+	/**
+	 * 
+	 * @param serviceRef
+	 * @return
+	 */
+	public static long[] getBundlesUsing(ServiceReference<?> serviceRef) {
+		Bundle[] bundles = serviceRef.getUsingBundles();
+		long[] ids = new long[bundles.length];
+		for (int i = 0; i < bundles.length; i++) {
+			ids[i] = bundles[i].getBundleId();
+		}
+		return ids;
+	}
+	
 	/**
 	 * Construct the TabularData representing a list of services
 	 * 
@@ -152,7 +177,7 @@ public final class OSGiService {
 		items.put(ServiceStateMBean.IDENTIFIER, identifier);
 		items.put(ServiceStateMBean.OBJECT_CLASS, interfaces);
 		items.put(ServiceStateMBean.BUNDLE_IDENTIFIER, bundle);
-		items.put(ServiceStateMBean.USING_BUNDLES, LongArrayFrom(usingBundles));
+		items.put(ServiceStateMBean.USING_BUNDLES, usingBundles);
 
 		try {
 			return new CompositeDataSupport(ServiceStateMBean.SERVICE_TYPE, items);
@@ -178,7 +203,7 @@ public final class OSGiService {
 			items.put(ServiceStateMBean.BUNDLE_IDENTIFIER, bundle);
 		}
 		if(serviceTypes.contains(ServiceStateMBean.USING_BUNDLES)){
-			items.put(ServiceStateMBean.USING_BUNDLES, LongArrayFrom(usingBundles));
+			items.put(ServiceStateMBean.USING_BUNDLES, usingBundles);
 		}
 		try {
 			return new CompositeDataSupport(ServiceStateMBean.SERVICE_TYPE, items);

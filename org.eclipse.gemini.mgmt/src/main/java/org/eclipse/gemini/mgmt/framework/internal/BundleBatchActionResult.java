@@ -15,8 +15,6 @@
 
 package org.eclipse.gemini.mgmt.framework.internal;
 
-import static org.eclipse.gemini.mgmt.internal.BundleUtil.LongArrayFrom;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -56,11 +54,32 @@ import org.osgi.jmx.framework.FrameworkMBean;
  * </tr>
  * </table>
  */
-public final class BundleBatchActionResult extends BundleBatchResult {
+public final class BundleBatchActionResult {
 
+	/**
+	 * The list of bundles successfully completed
+	 */
+	private Long[] completed;
+	
+	/**
+	 * The error message of a failed result
+	 */
+	private String errorMessage;
+	
+	/**
+	 * True if the action completed without error
+	 */
+	private boolean success = true;
+	
+	/**
+	 * The bundle in error or -1L if no bundle is in error
+	 */
 	private long bundleInError;
 
-	private long[] remaining;
+	/**
+	 * The ids of the bundles remaining to be processed
+	 */
+	private Long[] remaining;
 	
 	/**
 	 * Construct a result signifying the successful completion of the batch
@@ -68,39 +87,6 @@ public final class BundleBatchActionResult extends BundleBatchResult {
 	 */
 	public BundleBatchActionResult() {
 		success = true;
-	}
-
-	/**
-	 * Construct a result representing the contents of the supplied
-	 * CompositeData returned from a batch operation.
-	 * 
-	 * @param compositeData
-	 *            - the CompositeData representing the result of a batch
-	 *            operation.
-	 */
-	@SuppressWarnings("boxing")
-	public BundleBatchActionResult(CompositeData compositeData) {
-		success = ((Boolean) compositeData.get(FrameworkMBean.SUCCESS)).booleanValue();
-		errorMessage = (String) compositeData.get(FrameworkMBean.ERROR);
-		Long[] c = (Long[]) compositeData.get(FrameworkMBean.COMPLETED);
-		bundleInError = (Long) compositeData.get(FrameworkMBean.BUNDLE_IN_ERROR);
-		if (c != null) {
-			completed = new long[c.length];
-			for (int i = 0; i < c.length; i++) {
-				completed[i] = c[i];
-			}
-		} else {
-			completed = new long[0];
-		}
-		c = (Long[]) compositeData.get(FrameworkMBean.REMAINING);
-		if (c != null) {
-			remaining = new long[c.length];
-			for (int i = 0; i < c.length; i++) {
-				remaining[i] = c[i];
-			}
-		} else {
-			remaining = new long[0];
-		}
 	}
 
 	/**
@@ -116,7 +102,7 @@ public final class BundleBatchActionResult extends BundleBatchResult {
 	 * @param remaining
 	 *            - the list of bundle identifiers which remain unprocessed
 	 */
-	public BundleBatchActionResult(String errorMessage, long[] completed, long bundleInError, long[] remaining) {
+	public BundleBatchActionResult(String errorMessage, Long[] completed, long bundleInError, Long[] remaining) {
 		success = false;
 		this.errorMessage = errorMessage;
 		this.completed = completed;
@@ -129,14 +115,13 @@ public final class BundleBatchActionResult extends BundleBatchResult {
 	 * 
 	 * @return the CompositeData encoding of the receiver.
 	 */
-	@SuppressWarnings("boxing")
 	public CompositeData asCompositeData() {
 		Map<String, Object> items = new HashMap<String, Object>();
 		items.put(FrameworkMBean.SUCCESS, success);
 		items.put(FrameworkMBean.ERROR, errorMessage);
-		items.put(FrameworkMBean.COMPLETED, LongArrayFrom(completed));
+		items.put(FrameworkMBean.COMPLETED, completed);
 		items.put(FrameworkMBean.BUNDLE_IN_ERROR, bundleInError);
-		items.put(FrameworkMBean.REMAINING, LongArrayFrom(remaining));
+		items.put(FrameworkMBean.REMAINING, remaining);
 
 		try {
 			return new CompositeDataSupport( FrameworkMBean.BATCH_ACTION_RESULT_TYPE, items);
@@ -145,26 +130,4 @@ public final class BundleBatchActionResult extends BundleBatchResult {
 		}
 	}
 
-	/**
-	 * Answer the bundle identifier which indicates the bundle that produced an
-	 * error during the batch operation.
-	 * 
-	 * @return the bundle identifier of the bundle in error, or -1L if no error
-	 *         occurred
-	 */
-	public long getBundleInError() {
-		return bundleInError;
-	}
-
-	/**
-	 * If the operation was unsuccessful, answer the list of bundle identifiers
-	 * of the bundles that were not processed during the batch operation. If the
-	 * operation was a success, then answer null
-	 * 
-	 * @return the remaining bundle identifiers or null if the operation was a
-	 *         success
-	 */
-	public long[] getRemaining() {
-		return remaining;
-	}
 }

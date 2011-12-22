@@ -20,41 +20,41 @@ import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.TabularDataSupport;
 
 import org.eclipse.gemini.mgmt.framework.CustomBundleWiringStateMBean;
-import org.eclipse.gemini.mgmt.internal.BundleWiringUtil;
 import org.eclipse.gemini.mgmt.internal.OSGiProperties;
-import org.osgi.framework.wiring.BundleRequirement;
+import org.osgi.framework.wiring.BundleCapability;
 
-public class OSGiBundleRequirement {
+public class OSGiBundleCapability {
 	
-	private final BundleRequirement bundleRequirement;
+	private final BundleCapability bundleCapability;
 
-	public OSGiBundleRequirement(BundleRequirement bundleRequirement) {
-		this.bundleRequirement = bundleRequirement;
+	public OSGiBundleCapability(BundleCapability bundleCapability) {
+		this.bundleCapability = bundleCapability;
 	}
 	
 	public CompositeData asCompositeData() {
 		try {
 			TabularDataSupport tabularAttributes = new TabularDataSupport(CustomBundleWiringStateMBean.ATTRIBUTES_TYPE);
-			Map<String, Object> attributes = bundleRequirement.getAttributes();
+			Map<String, Object> attributes = bundleCapability.getAttributes();
 			for (Entry<String, Object> attribute : attributes.entrySet()) {
 				tabularAttributes.put(OSGiProperties.encode(attribute.getKey(), attribute.getValue()));
 			}
 	
 			TabularDataSupport tabularDirectives = new TabularDataSupport(CustomBundleWiringStateMBean.DIRECTIVES_TYPE);
-			Map<String, String> directives = bundleRequirement.getDirectives();
+			Map<String, String> directives = bundleCapability.getDirectives();
 			for (Entry<String, String> directive : directives.entrySet()) {
-				tabularDirectives.put(new CompositeDataSupport(CustomBundleWiringStateMBean.PROPERTY_TYPE, BundleWiringUtil.getDirectiveKeyValueItem(directive.getKey(), directive.getValue())));
+				tabularDirectives.put(new CompositeDataSupport(CustomBundleWiringStateMBean.PROPERTY_TYPE, OSGiProperties.getDirectiveKeyValueItem(directive.getKey(), directive.getValue())));
 			}
 			
 			Map<String, Object> items = new HashMap<String, Object>();
 			items.put(CustomBundleWiringStateMBean.ATTRIBUTES, tabularAttributes);
 			items.put(CustomBundleWiringStateMBean.DIRECTIVES, tabularDirectives);
-			items.put(CustomBundleWiringStateMBean.NAMESPACE, bundleRequirement.getNamespace());
-			
-			return new CompositeDataSupport(CustomBundleWiringStateMBean.BUNDLE_REQUIREMENT_TYPE, items);
+			items.put(CustomBundleWiringStateMBean.NAMESPACE, bundleCapability.getNamespace());
+		
+			return new CompositeDataSupport(CustomBundleWiringStateMBean.BUNDLE_CAPABILITY_TYPE, items);
 		} catch (OpenDataException e) {
-			throw new IllegalStateException("Cannot form bundle requirment open data", e);
+			throw new IllegalStateException("Cannot form bundle capability open data.", e);
 		}
 	}
+
 	
 }

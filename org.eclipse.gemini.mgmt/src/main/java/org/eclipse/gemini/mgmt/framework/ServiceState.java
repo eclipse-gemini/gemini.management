@@ -29,7 +29,6 @@ import org.eclipse.gemini.mgmt.Monitor;
 import org.eclipse.gemini.mgmt.framework.internal.OSGiService;
 import org.eclipse.gemini.mgmt.framework.internal.OSGiServiceEvent;
 import org.eclipse.gemini.mgmt.internal.OSGiProperties;
-import org.eclipse.gemini.mgmt.internal.ServiceUtil;
 import org.osgi.framework.AllServiceListener;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -101,7 +100,7 @@ public final class ServiceState extends Monitor implements CustomServiceStateMBe
 	 * {@inheritDoc}
 	 */
 	public long[] getUsingBundles(long serviceId) throws IOException {
-		return ServiceUtil.getBundlesUsing(getServiceReference(serviceId));
+		return OSGiService.getBundlesUsing(getServiceReference(serviceId));
 	}
 
 	//New methods from the JMX Update RFC 169

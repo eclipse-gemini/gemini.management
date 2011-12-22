@@ -23,11 +23,11 @@ import javax.management.openmbean.TabularDataSupport;
 import org.eclipse.gemini.mgmt.framework.internal.OSGiBundleRevision;
 import org.eclipse.gemini.mgmt.framework.internal.OSGiBundleRevisionIdTracker;
 import org.eclipse.gemini.mgmt.framework.internal.OSGiBundleWiring;
-import org.eclipse.gemini.mgmt.internal.BundleWiringUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.BundleRevisions;
+import org.osgi.framework.wiring.BundleWire;
 import org.osgi.framework.wiring.BundleWiring;
 
 /**
@@ -79,7 +79,7 @@ public final class BundleWiringState implements CustomBundleWiringStateMBean {
 		namespace = processNamespace(namespace);
 		BundleWiring wiring = getBundle(rootBundleId).adapt(BundleWiring.class);
 		Map<BundleRevision, OSGiBundleWiring> mappings = new HashMap<BundleRevision, OSGiBundleWiring>();
-		BundleWiringUtil.processWiring(mappings, wiring, namespace);
+		processWiring(mappings, wiring, namespace);
 		TabularDataSupport table = new TabularDataSupport(CustomBundleWiringStateMBean.BUNDLE_REVISIONS_WIRINGS_CLOSURES_TYPE);
 		OSGiBundleRevisionIdTracker revisionTracker = new OSGiBundleRevisionIdTracker();
 		for(Entry<BundleRevision, OSGiBundleWiring> osgiBundleWiring : mappings.entrySet()){
@@ -140,7 +140,7 @@ public final class BundleWiringState implements CustomBundleWiringStateMBean {
 		List<BundleRevision> bundleRevisions = getBundle(rootBundleId).adapt(BundleRevisions.class).getRevisions();
 		Map<BundleRevision, OSGiBundleWiring> mappings = new HashMap<BundleRevision, OSGiBundleWiring>();
 		for (BundleRevision bundleRevision : bundleRevisions) {
-			BundleWiringUtil.processWiring(mappings, bundleRevision.getWiring(), namespace);
+			processWiring(mappings, bundleRevision.getWiring(), namespace);
 		}
 		TabularDataSupport table = new TabularDataSupport(CustomBundleWiringStateMBean.BUNDLE_REVISIONS_WIRINGS_CLOSURES_TYPE);
 		OSGiBundleRevisionIdTracker revisionTracker = new OSGiBundleRevisionIdTracker();
@@ -167,4 +167,37 @@ public final class BundleWiringState implements CustomBundleWiringStateMBean {
 		return namespace;
 	}
 	
+	/**
+	 * Add all related wirings to the provided map.
+	 * 
+	 * @param mappings of 
+	 * @param wiring
+	 * @param namespace
+	 */
+	private void processWiring(Map<BundleRevision, OSGiBundleWiring> mappings, BundleWiring wiring, String namespace){
+		BundleRevision bundleRevision = wiring.getRevision();
+		if(!mappings.containsKey(bundleRevision)) {
+			mappings.put(bundleRevision, new OSGiBundleWiring(wiring));
+			processRequiredWirings(mappings, wiring, namespace);
+			processProvidedWirings(mappings, wiring, namespace);
+		}
+	}
+	
+	private void processRequiredWirings(Map<BundleRevision, OSGiBundleWiring> mappings, BundleWiring wiring, String namespace){
+		List<BundleWire> requiredWires = wiring.getRequiredWires(namespace);
+		if(requiredWires != null) {
+			for (BundleWire bundleWire : requiredWires) {
+				processWiring(mappings, bundleWire.getProviderWiring(), namespace);
+			}
+		}
+	}
+	
+	private void processProvidedWirings(Map<BundleRevision, OSGiBundleWiring> mappings, BundleWiring wiring, String namespace){
+		List<BundleWire> providedWires = wiring.getProvidedWires(namespace);
+		if(providedWires != null) {
+			for (BundleWire bundleWire : providedWires) {
+				processWiring(mappings, bundleWire.getRequirerWiring(), namespace);
+			}
+		}
+	}
 }

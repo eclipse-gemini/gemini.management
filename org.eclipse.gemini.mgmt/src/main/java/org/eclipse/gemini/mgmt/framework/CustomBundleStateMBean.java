@@ -17,8 +17,10 @@ package org.eclipse.gemini.mgmt.framework;
 import java.io.IOException;
 
 import javax.management.openmbean.CompositeData;
+import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.SimpleType;
 import javax.management.openmbean.TabularData;
+import javax.management.openmbean.TabularType;
 
 import org.osgi.jmx.Item;
 import org.osgi.jmx.framework.BundleStateMBean;
@@ -157,7 +159,7 @@ public interface CustomBundleStateMBean extends BundleStateMBean{
 	 */
 	public final static int DEFAULT = LOCATION + IDENTIFIER
 	+ SYMBOLIC_NAME + VERSION + START_LEVEL + STATE + LAST_MODIFIED 
-	+ PERSISTENTLY_STARTED + REMOVAL_PENDING + REQUIRED + FRAGMENT + REGISTERED_SERVICES
+	+ PERSISTENTLY_STARTED + ACTIVATION_POLICY + REMOVAL_PENDING + REQUIRED + FRAGMENT + REGISTERED_SERVICES
 	+ SERVICES_IN_USE + HEADERS + EXPORTED_PACKAGES + IMPORTED_PACKAGES + FRAGMENTS 
 	+ HOSTS + REQUIRING_BUNDLES + REQUIRED_BUNDLES;
 
@@ -172,6 +174,8 @@ public interface CustomBundleStateMBean extends BundleStateMBean{
 	 * @throws IOException
 	 */
 	TabularData listBundles(int mask) throws IOException;
+
+	//New methods from the JMX Update RFC 169
 	
 	/**
 	 * The key PERSISTENTLY_STARTED, used in {@link #PERSISTENTLY_STARTED_ITEM}.
@@ -185,7 +189,21 @@ public interface CustomBundleStateMBean extends BundleStateMBean{
 	 */
 	Item ACTIVATION_POLICY_ITEM = new Item(ACTIVATION_POLICY_USED,	"Whether the bundle is using an activation policy", SimpleType.BOOLEAN);
 	
-	//New methods from the JMX Update RFC 169
+	CompositeType CUSTOM_BUNDLE_TYPE = Item.compositeType("BUNDLE",
+			"This type encapsulates OSGi bundles", EXPORTED_PACKAGES_ITEM,
+			FRAGMENT_ITEM, FRAGMENTS_ITEM, HEADERS_ITEM, HOSTS_ITEM,
+			IDENTIFIER_ITEM, IMPORTED_PACKAGES_ITEM, LAST_MODIFIED_ITEM,
+			LOCATION_ITEM, PERSISTENTLY_STARTED_ITEM, ACTIVATION_POLICY_ITEM, 
+			REGISTERED_SERVICES_ITEM, REMOVAL_PENDING_ITEM, REQUIRED_ITEM, 
+			REQUIRED_BUNDLES_ITEM, REQUIRING_BUNDLES_ITEM, START_LEVEL_ITEM, 
+			STATE_ITEM, SERVICES_IN_USE_ITEM, SYMBOLIC_NAME_ITEM, VERSION_ITEM);
+
+	/**
+	 * The Tabular Type for a list of bundles. The row type is
+	 * {@link #BUNDLE_TYPE}.
+	 */
+	TabularType CUSTOM_BUNDLES_TYPE = Item.tabularType("BUNDLES", "A list of bundles",
+			BUNDLE_TYPE, new String[] { BundleStateMBean.IDENTIFIER });
 	
 	/**
 	 * 

@@ -15,8 +15,6 @@
 
 package org.eclipse.gemini.mgmt.framework.internal;
 
-import static org.eclipse.gemini.mgmt.internal.BundleUtil.LongArrayFrom;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -64,8 +62,8 @@ import org.osgi.jmx.framework.PackageStateMBean;
  */
 public final class OSGiPackage {
 
-	private long[] exportingBundles;
-	private long[] importingBundles;
+	private Long[] exportingBundles;
+	private Long[] importingBundles;
 	private String name;
 	private boolean removalPending;
 	private String version;
@@ -93,11 +91,11 @@ public final class OSGiPackage {
 	 * @param bundles
 	 * @return the bundle ids of the bundles
 	 */
-	private static long[] bundleIds(Bundle[] bundles) {
+	private static Long[] bundleIds(Bundle[] bundles) {
 		if (bundles == null) {
-			return new long[0];
+			return new Long[0];
 		}
-		long[] ids = new long[bundles.length];
+		Long[] ids = new Long[bundles.length];
 		for (int i = 0; i < bundles.length; i++) {
 			ids[i] = bundles[i].getBundleId();
 		}
@@ -128,8 +126,8 @@ public final class OSGiPackage {
 		items.put(PackageStateMBean.NAME, name);
 		items.put(PackageStateMBean.VERSION, version);
 		items.put(PackageStateMBean.REMOVAL_PENDING, removalPending);
-		items.put(PackageStateMBean.EXPORTING_BUNDLES, LongArrayFrom(exportingBundles));
-		items.put(PackageStateMBean.IMPORTING_BUNDLES, LongArrayFrom(importingBundles));
+		items.put(PackageStateMBean.EXPORTING_BUNDLES, exportingBundles);
+		items.put(PackageStateMBean.IMPORTING_BUNDLES, importingBundles);
 
 		try {
 			return new CompositeDataSupport(PackageStateMBean.PACKAGE_TYPE, items);
