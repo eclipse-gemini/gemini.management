@@ -8,24 +8,25 @@
  * Contributors:
  *   VMware Inc. - initial contribution
  *******************************************************************************/
-package org.eclipse.gemini.mgmt.framework;
+package org.eclipse.gemini.mgmt.integration.tests;
 
-import org.eclipse.gemini.mgmt.AbstractOSGiMBeanTest;
+import org.eclipse.gemini.mgmt.framework.Framework;
 import org.junit.Test;
-import org.osgi.jmx.framework.PackageStateMBean;
+import org.osgi.jmx.framework.FrameworkMBean;
 
 /**
- * Integration tests for the {@link PackageState} implementation {@link PackageStateMBean}
+ * Integration tests for the {@link Framework} implementation of {@link FrameworkMBean}
  *
  */
-public final class PackageStateTest extends AbstractOSGiMBeanTest {
+public final class FrameworkTest extends AbstractOSGiMBeanTest {
 	
-	public PackageStateTest() {
-		super.mBeanObjectName = PackageStateMBean.OBJECTNAME;
+	public FrameworkTest() {
+		super.mBeanObjectName = FrameworkMBean.OBJECTNAME;
 	}
 	
 	@Test
 	public void somethingTest(){
 		
 	}
+	
 }

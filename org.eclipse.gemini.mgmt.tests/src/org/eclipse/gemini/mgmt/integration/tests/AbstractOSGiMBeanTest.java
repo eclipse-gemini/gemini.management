@@ -8,7 +8,7 @@
  * Contributors:
  *   VMware Inc. - initial contribution
  *******************************************************************************/
-package org.eclipse.gemini.mgmt;
+package org.eclipse.gemini.mgmt.integration.tests;
 
 import java.lang.management.ManagementFactory;
 
@@ -20,6 +20,7 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
+import org.eclipse.gemini.mgmt.Activator;
 import org.junit.BeforeClass;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;

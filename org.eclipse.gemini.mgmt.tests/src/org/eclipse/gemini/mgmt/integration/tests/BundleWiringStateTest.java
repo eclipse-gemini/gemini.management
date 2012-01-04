@@ -8,9 +8,10 @@
  * Contributors:
  *   VMware Inc. - initial contribution
  *******************************************************************************/
-package org.eclipse.gemini.mgmt.framework;
+package org.eclipse.gemini.mgmt.integration.tests;
 
-import org.eclipse.gemini.mgmt.AbstractOSGiMBeanTest;
+import org.eclipse.gemini.mgmt.framework.BundleWiringState;
+import org.eclipse.gemini.mgmt.framework.CustomBundleWiringStateMBean;
 import org.junit.Test;
 
 /**

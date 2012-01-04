@@ -8,7 +8,7 @@
  * Contributors:
  *   VMware Inc. - initial contribution
  *******************************************************************************/
-package org.eclipse.gemini.mgmt.framework;
+package org.eclipse.gemini.mgmt.integration.tests;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertArrayEquals;
@@ -19,7 +19,8 @@ import java.util.Set;
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.TabularData;
 
-import org.eclipse.gemini.mgmt.AbstractOSGiMBeanTest;
+import org.eclipse.gemini.mgmt.framework.CustomServiceStateMBean;
+import org.eclipse.gemini.mgmt.framework.ServiceState;
 import org.junit.Before;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
