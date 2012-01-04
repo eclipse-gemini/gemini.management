@@ -12,7 +12,7 @@
  * Contributors:
  *     SAP employees 
  ******************************************************************************/
-package org.eclipse.gemini.mgmt.framework;
+package org.eclipse.gemini.mgmt.integration.tests;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -29,6 +29,8 @@ import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.TabularData;
 
 import org.eclipse.gemini.mgmt.AbstractOSGiMBeanTest;
+import org.eclipse.gemini.mgmt.framework.BundleState;
+import org.eclipse.gemini.mgmt.framework.CustomBundleStateMBean;
 import org.eclipse.gemini.mgmt.framework.internal.OSGiBundle;
 import org.eclipse.gemini.mgmt.internal.BundleUtil;
 import org.junit.Before;

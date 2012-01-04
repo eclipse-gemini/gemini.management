@@ -8,16 +8,18 @@
  * Contributors:
  *   VMware Inc. - initial contribution
  *******************************************************************************/
-package org.eclipse.gemini.mgmt.framework;
+package org.eclipse.gemini.mgmt.integration.tests;
 
 import org.eclipse.gemini.mgmt.AbstractOSGiMBeanTest;
+import org.eclipse.gemini.mgmt.framework.Framework;
+import org.osgi.jmx.framework.FrameworkMBean;
 
 /**
- * Integration tests for the {@link BundleWiringState} implementation of {@link CustomBundleWiringStateMBean}
+ * Integration tests for the {@link Framework} implementation of {@link FrameworkMBean}
  *
  */
-public final class BundleWiringStateTests extends AbstractOSGiMBeanTest {
+public final class FrameworkTests extends AbstractOSGiMBeanTest {
 
-	protected String mBeanObjectName = CustomBundleWiringStateMBean.OBJECTNAME;
+	protected String mBeanObjectName = FrameworkMBean.OBJECTNAME;
 	
 }
