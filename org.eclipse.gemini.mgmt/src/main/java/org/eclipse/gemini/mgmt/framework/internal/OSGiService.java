@@ -109,6 +109,9 @@ public final class OSGiService {
 	 */
 	public static long[] getBundlesUsing(ServiceReference<?> serviceRef) {
 		Bundle[] bundles = serviceRef.getUsingBundles();
+		if(bundles == null){
+			return new long[0];
+		}
 		long[] ids = new long[bundles.length];
 		for (int i = 0; i < bundles.length; i++) {
 			ids[i] = bundles[i].getBundleId();

@@ -48,9 +48,7 @@ import org.osgi.jmx.framework.BundleStateMBean;
  * Integration tests for the {@link BundleState} implementation of {@link CustomBundleStateMBean} and {@link BundleStateMBean}
  *
  */
-public final class BundleStateTests extends AbstractOSGiMBeanTest{
-	
-	protected String mBeanObjectName = BundleStateMBean.OBJECTNAME;
+public final class BundleStateTest extends AbstractOSGiMBeanTest{
 	
 	private CompositeData bundleInfo;
 	private String location;
@@ -76,6 +74,10 @@ public final class BundleStateTests extends AbstractOSGiMBeanTest{
 	private Object key;
 	private Object[] keysArray;
 	private Bundle bundle;
+	
+	public BundleStateTest() {
+		super.mBeanObjectName = BundleStateMBean.OBJECTNAME;
+	}
 	
 	@Before
 	public void before(){
@@ -118,7 +120,7 @@ public final class BundleStateTests extends AbstractOSGiMBeanTest{
 		while (iter.hasNext()) {
 			key = iter.next();
 			keysArray = ((Collection<?>) key).toArray();
-			bundleInfo = (CompositeData) table.get(keysArray);
+			bundleInfo = table.get(keysArray);
 			symbolicName = (String) bundleInfo.get(BundleStateMBean.SYMBOLIC_NAME);
 			version = (String) bundleInfo.get(BundleStateMBean.VERSION);
 			bundle = bc.getBundle((Long) keysArray[0]);

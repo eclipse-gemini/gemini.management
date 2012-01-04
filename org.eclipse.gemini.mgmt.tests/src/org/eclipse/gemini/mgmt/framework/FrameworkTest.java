@@ -11,14 +11,22 @@
 package org.eclipse.gemini.mgmt.framework;
 
 import org.eclipse.gemini.mgmt.AbstractOSGiMBeanTest;
-import org.osgi.jmx.framework.PackageStateMBean;
+import org.junit.Test;
+import org.osgi.jmx.framework.FrameworkMBean;
 
 /**
- * Integration tests for the {@link PackageState} implementation {@link PackageStateMBean}
+ * Integration tests for the {@link Framework} implementation of {@link FrameworkMBean}
  *
  */
-public final class PackageStateTests extends AbstractOSGiMBeanTest {
-
-	protected String mBeanObjectName = PackageStateMBean.OBJECTNAME;
+public final class FrameworkTest extends AbstractOSGiMBeanTest {
+	
+	public FrameworkTest() {
+		super.mBeanObjectName = FrameworkMBean.OBJECTNAME;
+	}
+	
+	@Test
+	public void somethingTest(){
+		
+	}
 	
 }

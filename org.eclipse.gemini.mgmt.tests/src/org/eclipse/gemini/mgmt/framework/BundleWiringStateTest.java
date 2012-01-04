@@ -11,14 +11,21 @@
 package org.eclipse.gemini.mgmt.framework;
 
 import org.eclipse.gemini.mgmt.AbstractOSGiMBeanTest;
-import org.osgi.jmx.framework.ServiceStateMBean;
+import org.junit.Test;
 
 /**
- * Integration tests for the {@link ServiceState} implementation of {@link CustomServiceStateMBean} and {@link ServiceStateMBean}
+ * Integration tests for the {@link BundleWiringState} implementation of {@link CustomBundleWiringStateMBean}
  *
  */
-public final class ServiceStateTests extends AbstractOSGiMBeanTest {
+public final class BundleWiringStateTest extends AbstractOSGiMBeanTest {
 
-	protected String mBeanObjectName = ServiceStateMBean.OBJECTNAME;
+	public BundleWiringStateTest() {
+		super.mBeanObjectName = CustomBundleWiringStateMBean.OBJECTNAME;
+	}
+	
+	@Test
+	public void somethingTest(){
+		
+	}
 	
 }
