@@ -63,6 +63,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
  * the MBeanServer. When the MBeanServer is found, the MBeans representing the OSGi services will be installed.
  * 
  */
+@SuppressWarnings("deprecation")
 public class Activator implements BundleActivator {
 
 	private static final Logger LOGGER = Logger.getLogger(Activator.class.getCanonicalName());

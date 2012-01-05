@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.gemini.mgmt.integration.tests;
 
+import static org.junit.Assert.assertEquals;
+
 import org.eclipse.gemini.mgmt.framework.Framework;
 import org.junit.Test;
 import org.osgi.jmx.framework.FrameworkMBean;
@@ -25,8 +27,9 @@ public final class FrameworkTest extends AbstractOSGiMBeanTest {
 	}
 	
 	@Test
-	public void somethingTest(){
-		
+	public void frameworkStartLevelTest() throws Exception {
+		Integer result = jmxFetchAttribute("FrameworkStartLevel", Integer.class);
+		assertEquals(6, result.intValue());
 	}
 	
 }

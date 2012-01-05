@@ -59,7 +59,7 @@ public final class ServiceStateTest extends AbstractOSGiMBeanTest {
 	
 	@Test
 	public void listTest() throws Exception {
-		TabularData table = jmxInvokeBundleState("listServices", new Object[]{}, new String[]{});
+		TabularData table = jmxFetchData("listServices", new Object[]{}, new String[]{}, TabularData.class);
 		Set<?> keys = table.keySet();
 		Iterator<?> iter = keys.iterator();
 		BundleContext bc = FrameworkUtil.getBundle(ServiceState.class).getBundleContext();

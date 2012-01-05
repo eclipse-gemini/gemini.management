@@ -35,10 +35,8 @@ import org.eclipse.gemini.mgmt.framework.internal.OSGiPackage;
 /** 
  * 
  */
-@SuppressWarnings("deprecation")
+@Deprecated
 public final class PackageState implements PackageStateMBean {
-	
-	//private BundleContext bundleContext;
 	
 	private PackageAdmin admin;
 	
@@ -47,7 +45,6 @@ public final class PackageState implements PackageStateMBean {
 	 * @param bundleContext
 	 */
 	public PackageState(BundleContext bundleContext) {
-		//this.bundleContext = bundleContext;
 		this.admin = (PackageAdmin) bundleContext.getService(bundleContext.getServiceReference(PackageAdmin.class));
 	}
 
@@ -121,14 +118,6 @@ public final class PackageState implements PackageStateMBean {
 	 */
 	public TabularData listPackages() {
 		Set<OSGiPackage> packages = new HashSet<OSGiPackage>();
-//		for (Bundle bundle : bundleContext.getBundles()) {
-//			ExportedPackage[] pkgs = admin.getExportedPackages(bundle);
-//			if (pkgs != null) {
-//				for (ExportedPackage pkg : pkgs) {
-//					packages.add(new OSGiPackage(pkg.getName(), pkg.getVersion().toString(), pkg.isRemovalPending(), new Bundle[] { pkg.getExportingBundle() }, pkg.getImportingBundles()));
-//				}
-//			}
-//		}
 		for(ExportedPackage pkg : admin.getExportedPackages((Bundle) null)){
 			packages.add(new OSGiPackage(pkg.getName(), pkg.getVersion().toString(), pkg.isRemovalPending(), new Bundle[] { pkg.getExportingBundle() }, pkg.getImportingBundles()));
 		}

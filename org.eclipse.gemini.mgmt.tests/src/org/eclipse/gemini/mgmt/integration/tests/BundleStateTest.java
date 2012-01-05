@@ -112,7 +112,7 @@ public final class BundleStateTest extends AbstractOSGiMBeanTest{
 	public void nameAndVersionTest() throws Exception {
 		int mask = BundleState.SYMBOLIC_NAME + BundleState.IDENTIFIER + BundleState.VERSION;
 		long start = System.currentTimeMillis();
-		TabularData table = jmxInvokeBundleState("listBundles", new Object[]{ new Integer(mask) }, new String[]{ "int" });
+		TabularData table = jmxFetchData("listBundles", new Object[]{ new Integer(mask) }, new String[]{ "int" }, TabularData.class);
 		long end = System.currentTimeMillis();
 		assertTrue((end - start) < 1000);
 		Set<?> keys = table.keySet();
@@ -133,7 +133,7 @@ public final class BundleStateTest extends AbstractOSGiMBeanTest{
 	@SuppressWarnings("unchecked")
 	@Test
 	public void listTest() throws Exception {
-		TabularData table = jmxInvokeBundleState("listBundles", new Object[]{}, new String[]{});
+		TabularData table = jmxFetchData("listBundles", new Object[]{}, new String[]{}, TabularData.class);
 		Set<?> keys = table.keySet();
 		Iterator<?> iter = keys.iterator();
 		BundleContext bc = FrameworkUtil.getBundle(BundleState.class).getBundleContext();
@@ -223,7 +223,7 @@ public final class BundleStateTest extends AbstractOSGiMBeanTest{
 	@SuppressWarnings("unchecked")
 	@Test
 	public void fullMaskTest() throws Exception {
-		TabularData table = jmxInvokeBundleState("listBundles", new Object[]{ new Integer(CustomBundleStateMBean.DEFAULT) }, new String[]{ "int" });
+		TabularData table = jmxFetchData("listBundles", new Object[]{ new Integer(CustomBundleStateMBean.DEFAULT) }, new String[]{ "int" }, TabularData.class);
 		Set<?> keys = table.keySet();
 		Iterator<?> iter = keys.iterator();
 		BundleContext bc = FrameworkUtil.getBundle(BundleState.class).getBundleContext();
@@ -318,7 +318,7 @@ public final class BundleStateTest extends AbstractOSGiMBeanTest{
 				+ BundleState.REGISTERED_SERVICES + BundleState.SERVICES_IN_USE
 				+ BundleState.EXPORTED_PACKAGES + BundleState.IMPORTED_PACKAGES
 				+ BundleState.HOSTS + BundleState.REQUIRING_BUNDLES;
-		TabularData table = jmxInvokeBundleState("listBundles", new Object[]{ new Integer(mask) }, new String[]{ "int" });
+		TabularData table = jmxFetchData("listBundles", new Object[]{ new Integer(mask) }, new String[]{ "int" }, TabularData.class);
 		Set<?> keys = table.keySet();
 		Iterator<?> iter = keys.iterator();
 		BundleContext bc = FrameworkUtil.getBundle(BundleState.class).getBundleContext();
@@ -383,7 +383,7 @@ public final class BundleStateTest extends AbstractOSGiMBeanTest{
 		int mask = 2097152;
 		try {
 			@SuppressWarnings("unused")
-			TabularData table = jmxInvokeBundleState("listBundles", new Object[]{ new Integer(mask) }, new String[]{ "int" });
+			TabularData table = jmxFetchData("listBundles", new Object[]{ new Integer(mask) }, new String[]{ "int" }, TabularData.class);
 			fail("Expected exception did not occur!");
 		} catch (Exception e) {
 			assertTrue(e.getCause() instanceof IllegalArgumentException);

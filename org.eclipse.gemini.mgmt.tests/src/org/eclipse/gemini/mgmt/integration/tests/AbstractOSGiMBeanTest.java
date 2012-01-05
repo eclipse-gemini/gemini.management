@@ -15,7 +15,6 @@ import java.lang.management.ManagementFactory;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
-import javax.management.openmbean.TabularData;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
@@ -39,14 +38,26 @@ public class AbstractOSGiMBeanTest {
 		}
 	}
 
-	protected TabularData jmxInvokeBundleState(String operation, Object[] arguments, String[] types) throws Exception {
+	protected <T> T jmxFetchData(String operation, Object[] arguments, String[] types, Class<T> returnType) throws Exception {
 		JMXConnector connector;
 		String url = "service:jmx:rmi:///jndi/rmi://localhost:21045/jmxrmi";
 		JMXServiceURL jmxURL = new JMXServiceURL(url);
 		connector = JMXConnectorFactory.connect(jmxURL);
 		MBeanServerConnection connection = connector.getMBeanServerConnection();
 		ObjectName name = new ObjectName(mBeanObjectName);
-		return (TabularData) connection.invoke(name, operation, arguments, types);
+		Object result = connection.invoke(name, operation, arguments, types);
+		return returnType.cast(result);
+	}
+
+	protected <T> T jmxFetchAttribute(String attribute, Class<T> returnType) throws Exception {
+		JMXConnector connector;
+		String url = "service:jmx:rmi:///jndi/rmi://localhost:21045/jmxrmi";
+		JMXServiceURL jmxURL = new JMXServiceURL(url);
+		connector = JMXConnectorFactory.connect(jmxURL);
+		MBeanServerConnection connection = connector.getMBeanServerConnection();
+		ObjectName name = new ObjectName(mBeanObjectName);
+		Object result = connection.getAttribute(name, attribute);
+		return returnType.cast(result);
 	}
 	
 }
