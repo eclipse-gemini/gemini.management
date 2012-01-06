@@ -29,20 +29,16 @@ import org.junit.Before;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.ServiceReference;
 import org.osgi.jmx.framework.PackageStateMBean;
-import org.osgi.jmx.framework.ServiceStateMBean;
 import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.PackageAdmin;
-
-import com.sun.org.apache.xerces.internal.impl.Version;
 
 /**
  * Integration tests for the {@link PackageState} implementation {@link PackageStateMBean}
  *
  */
+@SuppressWarnings("deprecation")
 public final class PackageStateTest extends AbstractOSGiMBeanTest {
 	
 	private CompositeData packageInfo;

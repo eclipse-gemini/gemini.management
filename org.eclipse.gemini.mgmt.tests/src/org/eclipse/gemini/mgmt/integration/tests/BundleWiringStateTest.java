@@ -28,7 +28,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.BundleWiring;
-import org.osgi.jmx.framework.PackageStateMBean;
 
 /**
  * Integration tests for the {@link BundleWiringState} implementation of {@link CustomBundleWiringStateMBean}
