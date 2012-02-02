@@ -60,13 +60,13 @@
 											</fileset>
 										</delete> -->
 										<copy includeemptydirs="false"
-											todir="/home/data/httpd/download.eclipse.org/gemini/management/${site-folder-name}/${version}">
+											todir="/home/data/httpd/download.eclipse.org/gemini/management/${site-folder-name}/${project.version}">
 											<fileset dir="target/site">
 												<include name="**" />
 											</fileset>
 										</copy>
 										<copy includeemptydirs="false"
-											todir="/home/data/httpd/download.eclipse.org/gemini/management/${zip-folder-name}/${version}">
+											todir="/home/data/httpd/download.eclipse.org/gemini/management/${zip-folder-name}/${project.version}">
 											<fileset dir="target/site/plugins">
 												<include name="**" />
 											</fileset>
