@@ -11,10 +11,16 @@
 
 package org.eclipse.gemini.mgmt;
 
+import java.util.List;
+import java.util.logging.Logger;
+
 import javax.management.ObjectName;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.wiring.BundleRevision;
+import org.osgi.framework.wiring.BundleWire;
+import org.osgi.framework.wiring.BundleWiring;
 
 /**
  * {@link DefaultObjectNameTranslator} is a default implementation of {@link ObjectNameTranslator} which maps each
@@ -26,6 +32,8 @@ import org.osgi.framework.BundleContext;
  */
 final class DefaultObjectNameTranslator implements ObjectNameTranslator {
 
+	private static final Logger LOGGER = Logger.getLogger(DefaultObjectNameTranslator.class.getCanonicalName());
+	
     /**
      * {@inheritDoc}
      */
@@ -47,14 +55,23 @@ final class DefaultObjectNameTranslator implements ObjectNameTranslator {
     static ObjectNameTranslator initialiseObjectNameTranslator(BundleContext bundleContext) throws ClassNotFoundException, InstantiationException,
         IllegalAccessException {
         Bundle bundle = bundleContext.getBundle();
-        String ontClassName = bundle.getHeaders().get(ObjectNameTranslator.HEADER_NAME);
-        if (ontClassName == null) {
-            return new DefaultObjectNameTranslator();
-        }
-        // Attempt to load and instantiate the specified class, allowing exceptions to percolate.
-        @SuppressWarnings("unchecked")
-        Class<ObjectNameTranslator> ontClass = (Class<ObjectNameTranslator>) bundle.loadClass(ontClassName);
-        return ontClass.newInstance();
+		BundleWiring wiring = bundle.adapt(BundleWiring.class);
+		List<BundleWire> requiredWires = wiring.getProvidedWires(BundleRevision.HOST_NAMESPACE);
+		for (BundleWire bundleWire : requiredWires) {
+			Bundle fragment = bundleWire.getRequirerWiring().getBundle();
+			String objectNameTranslator = fragment.getHeaders().get(ObjectNameTranslator.HEADER_NAME);
+			if(objectNameTranslator != null){
+		        Class<?> objectNameTranslatorClass = bundle.loadClass(objectNameTranslator);
+		        if(ObjectNameTranslator.class.isAssignableFrom(objectNameTranslatorClass)){
+			        try {
+						return (ObjectNameTranslator) objectNameTranslatorClass.getConstructor(BundleContext.class).newInstance(bundleContext);
+					} catch (Exception e) {
+						LOGGER.warning(String.format("Unable to create ObjectNameTranslator from fragment %d '%s'", fragment.getBundleId(), e.getMessage()));
+					} 
+		        }
+			}
+		}
+		return new DefaultObjectNameTranslator();
     }
 
 }
