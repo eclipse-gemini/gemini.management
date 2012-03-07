@@ -103,8 +103,8 @@ public final class BundleState extends Monitor implements CustomBundleStateMBean
 	 */
 	public long[] getFragments(long bundleId) throws IOException {
 		BundleWiring wiring = retrieveBundle(bundleId).adapt(BundleWiring.class);
-		List<BundleWire> requiredWires = wiring.getRequiredWires(BundleRevision.HOST_NAMESPACE);
-        return bundleWiresToIds(requiredWires);
+		List<BundleWire> requiredWires = wiring.getProvidedWires(BundleRevision.HOST_NAMESPACE);
+        return bundleWiresToRequirerIds(requiredWires);
 	}
 
 	/**
@@ -119,8 +119,8 @@ public final class BundleState extends Monitor implements CustomBundleStateMBean
 	 */
 	public long[] getHosts(long fragment) throws IOException {
 		BundleWiring wiring = retrieveBundle(fragment).adapt(BundleWiring.class);
-		List<BundleWire> providedWires = wiring.getProvidedWires(BundleRevision.HOST_NAMESPACE);
-        return bundleWiresToIds(providedWires);
+		List<BundleWire> providedWires = wiring.getRequiredWires(BundleRevision.HOST_NAMESPACE);
+        return bundleWiresToProviderIds(providedWires);
 	}
 	
 	/**
@@ -150,7 +150,7 @@ public final class BundleState extends Monitor implements CustomBundleStateMBean
 	public long[] getRequiringBundles(long bundleId) throws IOException {
         BundleWiring wiring = retrieveBundle(bundleId).adapt(BundleWiring.class);
         List<BundleWire> providedWires = wiring.getProvidedWires(BundleRevision.BUNDLE_NAMESPACE);
-        return bundleWiresToIds(providedWires);
+        return bundleWiresToRequirerIds(providedWires);
     }
 	/**
 	 * {@inheritDoc}
@@ -193,7 +193,7 @@ public final class BundleState extends Monitor implements CustomBundleStateMBean
 	public long[] getRequiredBundles(long bundleIdentifier) throws IOException {
         BundleWiring wiring = retrieveBundle(bundleIdentifier).adapt(BundleWiring.class);
         List<BundleWire> requiredWires = wiring.getRequiredWires(BundleRevision.BUNDLE_NAMESPACE);
-        return bundleWiresToIds(requiredWires);
+        return bundleWiresToProviderIds(requiredWires);
     }
 
 	/**
@@ -298,11 +298,21 @@ public final class BundleState extends Monitor implements CustomBundleStateMBean
 		return b;
 	}
 
-	private long[] bundleWiresToIds(List<BundleWire> wires){
+	private long[] bundleWiresToRequirerIds(List<BundleWire> wires){
         long[] consumerWirings = new long[wires.size()];
         int i = 0;
         for (BundleWire bundleWire : wires) {
             consumerWirings[i] = bundleWire.getRequirerWiring().getBundle().getBundleId();
+            i++;
+        }
+        return consumerWirings;
+	}
+
+	private long[] bundleWiresToProviderIds(List<BundleWire> wires){
+        long[] consumerWirings = new long[wires.size()];
+        int i = 0;
+        for (BundleWire bundleWire : wires) {
+            consumerWirings[i] = bundleWire.getProviderWiring().getBundle().getBundleId();
             i++;
         }
         return consumerWirings;
