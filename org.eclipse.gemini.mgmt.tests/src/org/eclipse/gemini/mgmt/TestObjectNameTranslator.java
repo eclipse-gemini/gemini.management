@@ -13,8 +13,14 @@ package org.eclipse.gemini.mgmt;
 
 import javax.management.ObjectName;
 
+import org.osgi.framework.BundleContext;
+
 public class TestObjectNameTranslator implements ObjectNameTranslator {
 
+	public TestObjectNameTranslator(BundleContext context) {
+
+	}
+	
     /**
      * {@inheritDoc}
      */

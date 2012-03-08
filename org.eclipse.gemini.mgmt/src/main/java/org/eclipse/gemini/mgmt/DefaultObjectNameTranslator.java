@@ -68,6 +68,8 @@ final class DefaultObjectNameTranslator implements ObjectNameTranslator {
 					} catch (Exception e) {
 						LOGGER.warning(String.format("Unable to create ObjectNameTranslator from fragment %d '%s'", fragment.getBundleId(), e.getMessage()));
 					} 
+		        } else {
+					LOGGER.warning(String.format("Unable to create ObjectNameTranslator as specified class '%s' is not an assignable to '%s'", objectNameTranslator, ObjectNameTranslator.class.getName()));
 		        }
 			}
 		}
