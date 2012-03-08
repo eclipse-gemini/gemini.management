@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.eclipse.gemini.mgmt</groupId>
 		<artifactId>org.eclipse.gemini.mgmt_parent</artifactId>
-		<version>1.0.1-SNAPSHOT</version>
+		<version>1.0.1.RELEASE</version>
 		<relativePath>../gemini.mgmt.releng/pom.xml</relativePath>
 	</parent>
 
@@ -14,8 +14,8 @@
 	<name>Gemini Management Update Site</name>
 
   <properties>
-		<site-folder-name>nightly</site-folder-name>
-		<zip-folder-name>nightly-zips</zip-folder-name>
+		<site-folder-name>release</site-folder-name>
+		<zip-folder-name>release-zips</zip-folder-name>
 	</properties>
 
 	<build>
@@ -47,18 +47,6 @@
 								</goals>
 								<configuration>
 									<tasks>
-										<!-- <delete includeemptydirs="false">
-											<fileset
-												dir="/home/data/httpd/download.eclipse.org/gemini/management/${site-folder-name}">
-												<include name="**" />
-											</fileset>
-										</delete>
-										<delete includeemptydirs="false">
-											<fileset
-												dir="/home/data/httpd/download.eclipse.org/gemini/management/${zip-folder-name}">
-												<include name="**" />
-											</fileset>
-										</delete> -->
 										<copy includeemptydirs="false"
 											todir="/home/data/httpd/download.eclipse.org/gemini/management/${site-folder-name}/${project.version}">
 											<fileset dir="target/site">
