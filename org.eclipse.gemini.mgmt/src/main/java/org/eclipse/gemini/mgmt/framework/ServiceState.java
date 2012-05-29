@@ -103,6 +103,26 @@ public final class ServiceState extends Monitor implements CustomServiceStateMBe
 		return OSGiService.getBundlesUsing(getServiceReference(serviceId));
 	}
 
+	//Local extensions to the API
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public CompositeData[] getRegisteredServices(long bundleId) throws IOException {
+		Bundle bundle = this.getBundle(bundleId);
+		ServiceReference<?>[] registeredServices = bundle.getRegisteredServices();
+		return this.getServicesAsCompositeDatas(registeredServices);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public CompositeData[] getServicesInUse(long bundleId) throws IOException {
+		Bundle bundle = this.getBundle(bundleId);
+		ServiceReference<?>[] servicesInUse = bundle.getServicesInUse();
+		return this.getServicesAsCompositeDatas(servicesInUse);
+	}
+	
 	//New methods from the JMX Update RFC 169
 	
 	/**
@@ -187,6 +207,27 @@ public final class ServiceState extends Monitor implements CustomServiceStateMBe
 		} catch (InvalidSyntaxException e) {
 			throw new IOException(e);
 		}
+	}
+
+	private Bundle getBundle(long bundleId){
+		Bundle bundle = bundleContext.getBundle(bundleId);
+		if(bundle == null) {
+			throw new IllegalArgumentException("No such bundle '" + bundleId + "'");
+		}
+		return bundle;
+	}
+	
+	private CompositeData[] getServicesAsCompositeDatas(ServiceReference<?>[] services){
+		CompositeData[] servicesInUseCompositeData;
+		if (services != null) {
+			servicesInUseCompositeData = new CompositeData[services.length];
+			for (int i = 0; i < services.length; i++) {
+				servicesInUseCompositeData[i] = new OSGiService(services[i]).asCompositeData();
+			}
+		} else {
+			servicesInUseCompositeData = new CompositeData[0]; 
+		}
+		return servicesInUseCompositeData;
 	}
 	
 	private ServiceReference<?> getServiceReference(long serviceId) throws IOException {

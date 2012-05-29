@@ -25,7 +25,31 @@ import org.osgi.jmx.framework.ServiceStateMBean;
  *
  */
 public interface CustomServiceStateMBean extends ServiceStateMBean {
-
+	
+	/**
+	 * Answer the list of services representing the services this bundle exports
+	 * 
+	 * @param bundleId - the bundle identifier
+	 * @return the list of services
+	 * @throws IOException
+	 *             if the operation fails
+	 * @throws IllegalArgumentException
+	 *             if the bundle indicated does not exist
+	 */
+	CompositeData[] getRegisteredServices(long bundleId) throws IOException;
+	
+	/**
+	 * Answer the list of services which refer to the the services this bundle is using
+	 * 
+	 * @param bundleIdentifier - the bundle identifier
+	 * @return the list of servics
+	 * @throws IOException
+	 *             if the operation fails
+	 * @throws IllegalArgumentException
+	 *             if the bundle indicated does not exist
+	 */
+	CompositeData[] getServicesInUse(long bundleIdentifier) throws IOException;
+	
 	//New methods from the JMX Update RFC 169
 
 	/**
