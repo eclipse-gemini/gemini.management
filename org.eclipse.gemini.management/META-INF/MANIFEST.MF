@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Gemini Management
 Bundle-SymbolicName: org.eclipse.gemini.management
-Bundle-Version: 1.0.2.RELEASE
+Bundle-Version: 1.0.3.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: javax.management,
  javax.management.openmbean,

@@ -4,7 +4,7 @@
 
 	<groupId>org.eclipse.gemini.management</groupId>
 	<artifactId>org.eclipse.gemini.management_parent</artifactId>
-	<version>1.0.2.RELEASE</version>
+	<version>1.0.3-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Gemini Management Parent POM</name>
 
@@ -41,7 +41,7 @@
 						<artifact>
 							<groupId>org.eclipse.gemini.management</groupId>
 							<artifactId>target-platform</artifactId>
-							<version>1.0.2.RELEASE</version>
+							<version>1.0.3-SNAPSHOT</version>
 							<classifier>gemini-management</classifier>
 						</artifact>
 					</target>
