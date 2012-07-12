@@ -15,6 +15,7 @@
 
 package org.eclipse.gemini.management;
 
+import java.lang.management.ManagementFactory;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -136,7 +137,8 @@ public class Activator implements BundleActivator {
 	public void start(BundleContext bundleContext) throws Exception {
         objectNameTranslator = DefaultObjectNameTranslator.initialiseObjectNameTranslator(bundleContext);
         createObjectNames();
-		this.bundleContext = bundleContext;	
+		this.bundleContext = bundleContext;
+		registerDefaultMBeanServer();
 		this.mbeanServiceTracker = new ServiceTracker<MBeanServer, Object>(this.bundleContext, MBeanServer.class, new MBeanServiceTracker());
 		LOGGER.fine("Awaiting initial MBeanServer service registration");
 		this.mbeanServiceTracker.open();
@@ -144,6 +146,17 @@ public class Activator implements BundleActivator {
 	
     private ObjectName translateObjectName(String objectName) throws MalformedObjectNameException {
         return this.objectNameTranslator.translate(new ObjectName(objectName));
+    }
+    
+    private void registerDefaultMBeanServer () {
+    	if ("false".equals(bundleContext.getProperty("register.default.mbeanserver"))) {
+    		return;
+    	}
+    	
+    	ServiceReference<MBeanServer> ref = bundleContext.getServiceReference(MBeanServer.class);
+		if (ref == null) {
+			bundleContext.registerService(MBeanServer.class.getCanonicalName(), ManagementFactory.getPlatformMBeanServer(), null);
+		}
     }
 
 
