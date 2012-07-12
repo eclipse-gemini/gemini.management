@@ -58,14 +58,11 @@ import org.osgi.jmx.JmxConstants;
  * The syntax for the type indicator
  * 
  * <pre>
- * type   ::=    scalar | vector | array 
- * scalar ::=    String | Integer | Long | Float | 
- *               Double | Byte | Short | Character |
- *               Boolean | BigDecimal | BigInteger
- * primitive ::= int | long | float | double | byte | short | 
- *               char | boolean 
- * array ::=     &lt;Array of primitive&gt; | &lt;Array of scalar&gt;
- * vector ::=    Vector of scalar
+ * type       ::= scalar | collection | array 
+ * scalar     ::= String | Integer | Long | Float | Double | Byte | Short | Character | Boolean | BigDecimal | BigInteger | Version
+ * primitive  ::= int | long | float | double | byte | short | char | boolean
+ * array      ::= &lt;Array of primitive&gt; | &lt;Array of scalar&gt;
+ * collection ::= Collection of scalar
  * </pre>
  * 
  * The values for Arrays and Vectors are separated by ",".
@@ -97,6 +94,7 @@ public final class OSGiProperties {
 	 */
 	private static final List<String> SCALAR_TYPES = Collections.unmodifiableList(Arrays.asList(
 		JmxConstants.STRING,
+		VERSION,
 		JmxConstants.INTEGER,
 		JmxConstants.LONG,
 		JmxConstants.FLOAT,
@@ -163,8 +161,8 @@ public final class OSGiProperties {
 		Class<?> clazz = value.getClass();
 		if (clazz.isArray()) {
 			return encodeArray(key, value, clazz.getComponentType());
-		} else if (clazz.equals(Vector.class)) {
-			return encodeVector(key, (Vector<?>) value);
+		} else if (value instanceof Collection) {
+			return encodeCollection(key, (Collection<?>) value);
 		}
 		return propertyData(key, value.toString(), typeOf(clazz));
 	}
@@ -209,105 +207,86 @@ public final class OSGiProperties {
 	 * @param componentClazz
 	 * @return the composite data representation
 	 */
-	private static CompositeData encodeArray(String key, Object value, Class<?> componentClazz) {
-		StringBuffer buf = new StringBuffer();
+	private static <T> CompositeData encodeArray(String key, Object value, Class<T> componentClazz) {
+		StringBuilder builder = new StringBuilder();
 		if (Integer.TYPE.equals(componentClazz)) {
-			int[] array = (int[]) value;
+			int[] array = (int[]) value;			
 			for (int i = 0; i < array.length; i++) {
-				buf.append(array[i]);
-				if (i < array.length - 1) {
-					buf.append(',');
-				}
+				builder.append(array[i]);
+				builder.append(',');
 			}
 		} else if (Long.TYPE.equals(componentClazz)) {
 			long[] array = (long[]) value;
 			for (int i = 0; i < array.length; i++) {
-				buf.append(array[i]);
-				if (i < array.length - 1) {
-					buf.append(',');
-				}
+				builder.append(array[i]);
+				builder.append(',');
 			}
 		} else if (Double.TYPE.equals(componentClazz)) {
 			double[] array = (double[]) value;
 			for (int i = 0; i < array.length; i++) {
-				buf.append(array[i]);
-				if (i < array.length - 1) {
-					buf.append(',');
-				}
+				builder.append(array[i]);
+				builder.append(',');
 			}
 		} else if (Float.TYPE.equals(componentClazz)) {
 			float[] array = (float[]) value;
 			for (int i = 0; i < array.length; i++) {
-				buf.append(array[i]);
-				if (i < array.length - 1) {
-					buf.append(',');
-				}
+				builder.append(array[i]);
+				builder.append(',');
 			}
 		} else if (Byte.TYPE.equals(componentClazz)) {
 			byte[] array = (byte[]) value;
 			for (int i = 0; i < array.length; i++) {
-				buf.append(array[i]);
-				if (i < array.length - 1) {
-					buf.append(',');
-				}
+				builder.append(array[i]);
+				builder.append(',');
 			}
 		} else if (Short.TYPE.equals(componentClazz)) {
 			short[] array = (short[]) value;
 			for (int i = 0; i < array.length; i++) {
-				buf.append(array[i]);
-				if (i < array.length - 1) {
-					buf.append(',');
-				}
+				builder.append(array[i]);
+				builder.append(',');
 			}
 		} else if (Character.TYPE.equals(componentClazz)) {
 			char[] array = (char[]) value;
 			for (int i = 0; i < array.length; i++) {
-				buf.append(array[i]);
-				if (i < array.length - 1) {
-					buf.append(',');
-				}
+				builder.append(array[i]);
+				builder.append(',');
 			}
 		} else if (Boolean.TYPE.equals(componentClazz)) {
 			boolean[] array = (boolean[]) value;
 			for (int i = 0; i < array.length; i++) {
-				buf.append(array[i]);
-				if (i < array.length - 1) {
-					buf.append(',');
-				}
+				builder.append(array[i]);
+				builder.append(',');
 			}
 		} else {
 			Object[] array = (Object[]) value;
 			for (int i = 0; i < array.length; i++) {
-				buf.append(array[i]);
-				if (i < array.length - 1) {
-					buf.append(',');
-				}
+				builder.append(array[i]);
+				builder.append(',');
 			}
 		}
-		String type = typeOf(componentClazz);
-		return propertyData(key, buf.toString(), "Array of " + type);
+		builder.deleteCharAt(builder.length()-1);
+		return propertyData(key, builder.toString(), JmxConstants.ARRAY_OF + typeOf(componentClazz));
 	}
 
 	/**
-	 * Encode the vector as composite data
+	 * Encode the list as composite data
 	 * 
 	 * @param key
 	 * @param value
 	 * @return the composite data representation
 	 */
-	private static CompositeData encodeVector(String key, Vector<?> value) {
+	private static <T> CompositeData encodeCollection(String key, Collection<T> value) {
 		String type = JmxConstants.STRING;
 		if (value.size() > 0) {
-			type = typeOf(value.get(0).getClass());
+			type = typeOf(value.iterator().next().getClass());
 		}
-		StringBuffer buf = new StringBuffer();
-		for (int i = 0; i < value.size(); i++) {
-			buf.append(value.get(i));
-			if (i < value.size() - 1) {
-				buf.append(',');
-			}
+		StringBuilder builder = new StringBuilder();
+		for(T item: value){
+			builder.append(item);
+			builder.append(',');
 		}
-		return propertyData(key, buf.toString(), "Vector of " + type);
+		builder.deleteCharAt(builder.length()-1);
+		return propertyData(key, builder.toString(), JmxConstants.VECTOR_OF + type);
 	}
 	
 	/**
@@ -417,7 +396,7 @@ public final class OSGiProperties {
 			return parseArray(value, tokens);
 		}
 		if ("Vector".equals(token)) {
-			return parseVector(value, tokens);
+			return parseCollection(value, tokens);
 		}
 		if (SCALAR_TYPES.contains(token) || PRIMITIVE_TYPES.contains(token)) {
 			return parseValue(value, token);
@@ -459,26 +438,26 @@ public final class OSGiProperties {
 	 * @param tokens
 	 * @return the vector represented by the supplied string value
 	 */
-	private static Object parseVector(String value, StringTokenizer tokens) {
+	private static Object parseCollection(String value, StringTokenizer tokens) {
 		if (!tokens.hasMoreTokens()) {
-			throw new IllegalArgumentException("Expecting <of> token in Vector type");
+			throw new IllegalArgumentException("Expecting <of> token in Collection type");
 		}
 		if (!tokens.nextElement().equals("of")) {
-			throw new IllegalArgumentException("Expecting <of> token in Vector type");
+			throw new IllegalArgumentException("Expecting <of> token in Collection type");
 		}
 		if (!tokens.hasMoreTokens()) {
-			throw new IllegalArgumentException("Expecting <scalar> token in Vector type");
+			throw new IllegalArgumentException("Expecting <scalar> token in Collection type");
 		}
 		String type = tokens.nextToken();
 		StringTokenizer values = new StringTokenizer(value, ",");
-		Vector<Object> vector = new Vector<Object>();
+		Collection<Object> collection = new Vector<Object>();
 		if (!SCALAR_TYPES.contains(type)) {
-			throw new IllegalArgumentException("Expecting <scalar> type token in Vector type: " + type);
+			throw new IllegalArgumentException("Expecting <scalar> type token in Collection type: " + type);
 		}
 		while (values.hasMoreTokens()) {
-			vector.add(parseScalar(values.nextToken().trim(), type));
+			collection.add(parseScalar(values.nextToken().trim(), type));
 		}
-		return vector;
+		return collection;
 	}
 
 	/**
