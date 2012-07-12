@@ -4,15 +4,15 @@
 <target name="gemini-management" sequenceNumber="60">
 <locations>
 <location includeAllPlatforms="false" includeMode="planner" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.osgi" version="3.7.1.R37x_v20110808-1106"/>
-<unit id="org.eclipse.osgi.services" version="3.3.0.v20110513"/>
+<unit id="org.eclipse.osgi" version="3.8.0.v20120529-1548"/>
+<unit id="org.eclipse.osgi.services" version="3.3.100.v20120522-1822"/>
 <unit id="org.junit4" version="0.0.0"/>
-<repository location="http://download.eclipse.org/eclipse/updates/3.7/"/>
+<repository location="http://download.eclipse.org/eclipse/updates/3.8/"/>
 </location>
 <location includeAllPlatforms="false" includeMode="planner" includeSource="false" type="InstallableUnit">
 <unit id="osgi.enterprise" version="4.2.0.v201108120515"/>
 <unit id="org.easymock" version="2.4.0.v20090202-0900"/>
-<repository location="http://download.eclipse.org/tools/orbit/downloads/drops/S20111018035124/repository/"/>
+<repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20120526062928/repository/"/>
 </location>
 </locations>
 </target>

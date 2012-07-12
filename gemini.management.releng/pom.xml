@@ -10,10 +10,6 @@
 
 	<properties>
 		<tycho-version>0.11.0</tycho-version>
-		<!--eclipse-site>http://download.eclipse.org/eclipse/updates/3.7milestones/</eclipse-site-->
-		<!--emf-site>http://download.eclipse.org/modeling/emf/emf/updates/2.7milestones/</emf-site-->
-		<!--wtp-site>http://download.eclipse.org/webtools/repository/indigo/</wtp-site-->
-		<!--orbit-site>http://download.eclipse.org/tools/orbit/downloads/drops/S20111018035124/repository/</orbit-site-->
 	</properties>
 	
 	<modules>
