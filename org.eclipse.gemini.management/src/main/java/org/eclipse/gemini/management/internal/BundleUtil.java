@@ -30,6 +30,7 @@ import org.osgi.framework.wiring.BundleWiring;
  * 
  */
 public final class BundleUtil {
+	private static final String FRAGMENT_HOST_HEADER = "Fragment-Host";
 	
 	/**
 	 * Answer the string representation of the exported packages of the bundle
@@ -40,6 +41,9 @@ public final class BundleUtil {
 	 */
 	public static String[] getBundleExportedPackages(Bundle bundle) {
 		BundleWiring wiring = bundle.adapt(BundleWiring.class);
+		if (wiring == null) {
+			return new String[0];
+		}
 		List<BundleWire> providedWires = wiring.getProvidedWires(BundleRevision.PACKAGE_NAMESPACE);
 		List<String> packages = new ArrayList<String>();
         for(BundleWire wire: providedWires){
@@ -61,6 +65,9 @@ public final class BundleUtil {
 	 */
 	public static String[] getBundleImportedPackages(Bundle bundle) {
 		BundleWiring wiring = bundle.adapt(BundleWiring.class);
+		if (wiring == null) {
+			return new String[0];
+		}
 		List<BundleWire> providedWires = wiring.getRequiredWires(BundleRevision.PACKAGE_NAMESPACE);
         List<String> packages = new ArrayList<String>();
         for(BundleWire wire: providedWires){
@@ -106,7 +113,11 @@ public final class BundleUtil {
 	 */
 	public static boolean isBundleFragment(Bundle bundle) {
 		BundleWiring wiring = bundle.adapt(BundleWiring.class);
-		return 0 != (wiring.getRevision().getTypes() & BundleRevision.TYPE_FRAGMENT);
+		if (wiring != null) {
+			return 0 != (wiring.getRevision().getTypes() & BundleRevision.TYPE_FRAGMENT);
+		} else {
+			return bundle.getHeaders().get(FRAGMENT_HOST_HEADER) != null;
+		}
 	}
 
 	/**
@@ -153,7 +164,11 @@ public final class BundleUtil {
 	 */
 	public static boolean isRequired(Bundle bundle) {
 		BundleWiring wiring = bundle.adapt(BundleWiring.class);
-		return wiring.getProvidedWires(BundleRevision.BUNDLE_NAMESPACE).size() > 0;
+		if (wiring != null) {
+			return wiring.getProvidedWires(BundleRevision.BUNDLE_NAMESPACE).size() > 0;
+		} else {
+			return false;
+		}
 	}
 
 	/**
@@ -165,7 +180,11 @@ public final class BundleUtil {
 	 */
 	public static boolean isRemovalPending(Bundle bundle) {
         BundleWiring wiring = bundle.adapt(BundleWiring.class);
-        return (!wiring.isCurrent()) && wiring.isInUse();
+        if (wiring != null) {
+        	return (!wiring.isCurrent()) && wiring.isInUse();
+        } else {
+        	return false;
+        }
 	}
 
 }
