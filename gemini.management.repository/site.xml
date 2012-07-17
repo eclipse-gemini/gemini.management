@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature url="features/org.eclipse.gemini.management.feature_0.0.0.jar" id="org.eclipse.gemini.management.feature" version="0.0.0">
+   <feature url="features/org.eclipse.gemini.management.feature_1.0.3.RELEASE.jar" id="org.eclipse.gemini.management.feature" version="1.0.3.RELEASE">
       <category name="gemini.management"/>
    </feature>
    <category-def name="gemini.management" label="Gemini Management"/>
