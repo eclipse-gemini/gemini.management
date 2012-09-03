@@ -71,25 +71,6 @@ public final class BundleState extends Monitor implements CustomBundleStateMBean
 			throw new IOException(e);
 		}
 	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public TabularData listBundles(int mask) throws IOException {
-		if (mask < 1 || mask > 2097151) {
-			throw new IllegalArgumentException("Mask out of range!");
-		}
-		try {
-			ArrayList<OSGiBundle> bundles = new ArrayList<OSGiBundle>();
-			for (Bundle bundle : bundleContext.getBundles()) {
-				bundles.add(new OSGiBundle(bundle));
-			}
-			TabularData table = OSGiBundle.tableFrom(bundles, mask);
-			return table;
-		} catch (Throwable e) {
-			throw new IOException(e);
-		}
-	}
 
 	/**
 	 * {@inheritDoc}
@@ -356,6 +337,19 @@ public final class BundleState extends Monitor implements CustomBundleStateMBean
 		if (bundleListener != null) {
 			bundleContext.removeBundleListener(bundleListener);
 		}
+	}
+
+	@Override
+	public long[] getBundleIds() throws IOException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getHeader(long bundleId, String key, String locale)
+			throws IOException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
