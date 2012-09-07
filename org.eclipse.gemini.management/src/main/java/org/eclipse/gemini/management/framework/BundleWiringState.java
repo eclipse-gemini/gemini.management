@@ -29,12 +29,18 @@ import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.BundleRevisions;
 import org.osgi.framework.wiring.BundleWire;
 import org.osgi.framework.wiring.BundleWiring;
+import org.osgi.jmx.framework.wiring.BundleWiringStateMBean;
 
 /**
  * MBean that represents the current wiring state of the 
  */
-public final class BundleWiringState implements CustomBundleWiringStateMBean {
+public final class BundleWiringState implements BundleWiringStateMBean {
 
+    /**
+     * To be specified on any operation that takes a 'namespace' argument when results from all namespaces are wanted.
+     */
+    private final String ALL_NAMESPACE = "osgi.wiring.all";
+    
 	private final BundleContext bundleContext;
 
 	/**
@@ -69,9 +75,10 @@ public final class BundleWiringState implements CustomBundleWiringStateMBean {
 	public CompositeData getCurrentWiring(long bundleId, String namespace) throws IOException {
 		namespace = processNamespace(namespace);
 		BundleWiring wiring = getBundle(bundleId).adapt(BundleWiring.class);
-		return new OSGiBundleWiring(wiring).asCompositeData(namespace);
+		OSGiBundleRevisionIdTracker revisionTracker = new OSGiBundleRevisionIdTracker();
+		return new OSGiBundleWiring(wiring).asCompositeData(namespace, revisionTracker);
 	}
-
+	
 	/**
 	 * {@inheritDoc}
 	 */
@@ -80,7 +87,7 @@ public final class BundleWiringState implements CustomBundleWiringStateMBean {
 		BundleWiring wiring = getBundle(rootBundleId).adapt(BundleWiring.class);
 		Map<BundleRevision, OSGiBundleWiring> mappings = new HashMap<BundleRevision, OSGiBundleWiring>();
 		processWiring(mappings, wiring, namespace);
-		TabularDataSupport table = new TabularDataSupport(CustomBundleWiringStateMBean.BUNDLE_REVISIONS_WIRINGS_CLOSURES_TYPE);
+		TabularDataSupport table = new TabularDataSupport(BundleWiringStateMBean.BUNDLES_WIRING_TYPE);
 		OSGiBundleRevisionIdTracker revisionTracker = new OSGiBundleRevisionIdTracker();
 		for(Entry<BundleRevision, OSGiBundleWiring> osgiBundleWiring : mappings.entrySet()){
 			table.put(osgiBundleWiring.getValue().asCompositeData(namespace, osgiBundleWiring.getKey().getBundle().getBundleId(), revisionTracker));
@@ -94,7 +101,7 @@ public final class BundleWiringState implements CustomBundleWiringStateMBean {
 	public TabularData getRevisionsDeclaredRequirements(long bundleId, String namespace) throws IOException {
 		namespace = processNamespace(namespace);
 		List<BundleRevision> bundleRevisions = getBundle(bundleId).adapt(BundleRevisions.class).getRevisions();
-		TabularDataSupport table = new TabularDataSupport(CustomBundleWiringStateMBean.BUNDLE_REVISIONS_REQUIREMENTS_TYPE);
+		TabularDataSupport table = new TabularDataSupport(BundleWiringStateMBean.REVISIONS_REQUIREMENTS_TYPE);
 		int revisionCounter = 0;
 		for (BundleRevision bundleRevision : bundleRevisions) {
 			table.put(new OSGiBundleRevision(bundleRevision).requirementsAsCompositeData(namespace, revisionCounter));
@@ -109,7 +116,7 @@ public final class BundleWiringState implements CustomBundleWiringStateMBean {
 	public TabularData getRevisionsDeclaredCapabilities(long bundleId, String namespace) throws IOException {
 		namespace = processNamespace(namespace);
 		List<BundleRevision> bundleRevisions = getBundle(bundleId).adapt(BundleRevisions.class).getRevisions();
-		TabularDataSupport table = new TabularDataSupport(CustomBundleWiringStateMBean.BUNDLE_REVISIONS_CAPABILITIES_TYPE);
+		TabularDataSupport table = new TabularDataSupport(BundleWiringStateMBean.REVISIONS_CAPABILITIES_TYPE);
 		int revisionCounter = 0;
 		for (BundleRevision bundleRevision : bundleRevisions) {
 			table.put(new OSGiBundleRevision(bundleRevision).capabilitiesAsCompositeData(namespace, revisionCounter));
@@ -124,7 +131,7 @@ public final class BundleWiringState implements CustomBundleWiringStateMBean {
 	public TabularData getRevisionsWiring(long bundleId, String namespace) throws IOException {
 		namespace = processNamespace(namespace);
 		List<BundleRevision> bundleRevisions = getBundle(bundleId).adapt(BundleRevisions.class).getRevisions();
-		TabularDataSupport table = new TabularDataSupport(CustomBundleWiringStateMBean.BUNDLE_REVISIONS_WIRINGS_TYPE);
+		TabularDataSupport table = new TabularDataSupport(BundleWiringStateMBean.BUNDLES_WIRING_TYPE);
 		OSGiBundleRevisionIdTracker revisionTracker = new OSGiBundleRevisionIdTracker();
 		for (BundleRevision bundleRevision : bundleRevisions) {
 			table.put(new OSGiBundleWiring(bundleRevision.getWiring()).asCompositeData(namespace, revisionTracker));
@@ -142,7 +149,7 @@ public final class BundleWiringState implements CustomBundleWiringStateMBean {
 		for (BundleRevision bundleRevision : bundleRevisions) {
 			processWiring(mappings, bundleRevision.getWiring(), namespace);
 		}
-		TabularDataSupport table = new TabularDataSupport(CustomBundleWiringStateMBean.BUNDLE_REVISIONS_WIRINGS_CLOSURES_TYPE);
+		TabularDataSupport table = new TabularDataSupport(BundleWiringStateMBean.BUNDLES_WIRING_TYPE);
 		OSGiBundleRevisionIdTracker revisionTracker = new OSGiBundleRevisionIdTracker();
 		for(Entry<BundleRevision, OSGiBundleWiring> osgiBundleWiring : mappings.entrySet()){
 			table.put(osgiBundleWiring.getValue().asCompositeData(namespace, osgiBundleWiring.getKey().getBundle().getBundleId(), revisionTracker));
@@ -161,7 +168,7 @@ public final class BundleWiringState implements CustomBundleWiringStateMBean {
 	}
 	
 	private String processNamespace(String namespace){
-		if(CustomBundleWiringStateMBean.ALL_NAMESPACE.equals(namespace)){
+		if(ALL_NAMESPACE.equals(namespace)){
 			return null;
 		}
 		return namespace;

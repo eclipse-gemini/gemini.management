@@ -34,9 +34,7 @@ import javax.management.StandardMBean;
 import org.eclipse.gemini.management.configurationadmin.ConfigAdminManager;
 import org.eclipse.gemini.management.framework.BundleState;
 import org.eclipse.gemini.management.framework.BundleWiringState;
-import org.eclipse.gemini.management.framework.CustomBundleStateMBean;
 import org.eclipse.gemini.management.framework.CustomServiceStateMBean;
-import org.eclipse.gemini.management.framework.CustomBundleWiringStateMBean;
 import org.eclipse.gemini.management.framework.Framework;
 import org.eclipse.gemini.management.framework.PackageState;
 import org.eclipse.gemini.management.framework.ServiceState;
@@ -46,8 +44,10 @@ import org.eclipse.gemini.management.useradmin.UserManager;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.jmx.framework.BundleStateMBean;
 import org.osgi.jmx.framework.FrameworkMBean;
 import org.osgi.jmx.framework.PackageStateMBean;
+import org.osgi.jmx.framework.wiring.BundleWiringStateMBean;
 import org.osgi.jmx.service.cm.ConfigurationAdminMBean;
 import org.osgi.jmx.service.permissionadmin.PermissionAdminMBean;
 import org.osgi.jmx.service.provisioning.ProvisioningServiceMBean;
@@ -118,8 +118,8 @@ public class Activator implements BundleActivator {
 	private void createObjectNames() {
 		try {
 			frameworkName = translateObjectName(FrameworkMBean.OBJECTNAME);
-			bundleStateName = translateObjectName(CustomBundleStateMBean.OBJECTNAME);
-			bundleWiringStateName = translateObjectName(CustomBundleWiringStateMBean.OBJECTNAME);
+			bundleStateName = translateObjectName(BundleStateMBean.OBJECTNAME);
+			bundleWiringStateName = translateObjectName(BundleWiringStateMBean.OBJECTNAME);
 			serviceStateName = translateObjectName(CustomServiceStateMBean.OBJECTNAME);
 			packageStateName = translateObjectName(PackageStateMBean.OBJECTNAME);
 			configAdminName = translateObjectName(ConfigurationAdminMBean.OBJECTNAME);
@@ -289,13 +289,13 @@ public class Activator implements BundleActivator {
 			return;
 		}
 		try {
-			bundleState = new StandardMBean(new BundleState(bundleContext), CustomBundleStateMBean.class);
+			bundleState = new StandardMBean(new BundleState(bundleContext), BundleStateMBean.class);
 		} catch (NotCompliantMBeanException e) {
 			LOGGER.log(Level.SEVERE, "Unable to create StandardMBean for BundleState", e);
 			return;
 		}
 		try {
-			bundleWiringState = new StandardMBean(new BundleWiringState(bundleContext), CustomBundleWiringStateMBean.class);
+			bundleWiringState = new StandardMBean(new BundleWiringState(bundleContext), BundleWiringStateMBean.class);
 		} catch (NotCompliantMBeanException e) {
 			LOGGER.log(Level.SEVERE, "Unable to create StandardMBean for BundleWiringState", e);
 			return;

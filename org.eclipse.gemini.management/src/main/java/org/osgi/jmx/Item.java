@@ -115,9 +115,9 @@ public class Item {
 	 * @param elementType The element type
 	 * @return A new Array Type
 	 */
-	public static ArrayType arrayType(int dim, OpenType elementType) {
+	public static <T> ArrayType<T> arrayType(int dim, OpenType<T> elementType) {
 		try {
-			return new ArrayType(dim, elementType);
+			return new ArrayType<T>(dim, elementType);
 		} catch (OpenDataException e) {
 			throw new RuntimeException(e);
 		}

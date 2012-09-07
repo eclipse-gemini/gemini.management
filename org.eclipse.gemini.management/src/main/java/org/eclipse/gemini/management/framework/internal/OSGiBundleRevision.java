@@ -18,10 +18,10 @@ import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.OpenDataException;
 
-import org.eclipse.gemini.management.framework.CustomBundleWiringStateMBean;
 import org.osgi.framework.wiring.BundleCapability;
 import org.osgi.framework.wiring.BundleRequirement;
 import org.osgi.framework.wiring.BundleRevision;
+import org.osgi.jmx.framework.wiring.BundleWiringStateMBean;
 
 /**
  * Utility methods for retrieving JMX data from a {@link BundleRevision}
@@ -61,10 +61,10 @@ public final class OSGiBundleRevision {
 	 */
 	public CompositeData capabilitiesAsCompositeData(String namespace, int revisionCounter){
 		Map<String, Object> items = new HashMap<String, Object>();
-		items.put(CustomBundleWiringStateMBean.CAPABILITIES, this.getBundleCapabilityItems(namespace));
-		items.put(CustomBundleWiringStateMBean.BUNDLE_REVISION_ID, revisionCounter);
+		items.put(BundleWiringStateMBean.CAPABILITIES, this.getBundleCapabilityItems(namespace));
+		items.put(BundleWiringStateMBean.BUNDLE_REVISION_ID, revisionCounter);
 		try {
-			return new CompositeDataSupport(CustomBundleWiringStateMBean.BUNDLE_REVISION_CAPABILITIES_TYPE, items);
+			return new CompositeDataSupport(BundleWiringStateMBean.REVISION_CAPABILITIES_TYPE, items);
 		} catch (OpenDataException e) {
 			throw new IllegalStateException("Cannot form bundle revision capabilities open data", e);
 		}
@@ -77,10 +77,10 @@ public final class OSGiBundleRevision {
 	 */
 	public CompositeData requirementsAsCompositeData(String namespace, int revisionCounter){
 		Map<String, Object> items = new HashMap<String, Object>();
-		items.put(CustomBundleWiringStateMBean.REQUIREMENTS, this.getBundleRequirementItems(namespace));
-		items.put(CustomBundleWiringStateMBean.BUNDLE_REVISION_ID, revisionCounter);
+		items.put(BundleWiringStateMBean.REQUIREMENTS, this.getBundleRequirementItems(namespace));
+		items.put(BundleWiringStateMBean.BUNDLE_REVISION_ID, revisionCounter);
 		try {
-			return new CompositeDataSupport(CustomBundleWiringStateMBean.BUNDLE_REVISION_REQUIREMENTS_TYPE, items);
+			return new CompositeDataSupport(BundleWiringStateMBean.REVISION_REQUIREMENTS_TYPE, items);
 		} catch (OpenDataException e) {
 			throw new IllegalStateException("Cannot form bundle revision requirements open data", e);
 		}

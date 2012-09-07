@@ -133,9 +133,7 @@ public final class BundleBatchInstallResult {
 		try {
 			return new CompositeDataSupport(FrameworkMBean.BATCH_INSTALL_RESULT_TYPE, items);
 		} catch (OpenDataException e) {
-			IOException iox = new IOException("Cannot form batch result open data");
-			iox.initCause(e);
-			throw iox;
+			throw new IOException("Cannot form batch result open data", e);
 		}
 	}
 

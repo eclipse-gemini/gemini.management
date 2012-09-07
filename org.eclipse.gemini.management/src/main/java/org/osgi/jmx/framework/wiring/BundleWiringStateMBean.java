@@ -249,7 +249,7 @@ public interface BundleWiringStateMBean {
 	/**
 	 * An array of {@link #BUNDLE_WIRE_TYPE}s.
 	 */
-	ArrayType		BUNDLE_WIRES_TYPE_ARRAY				= Item.arrayType(1, BUNDLE_WIRE_TYPE);
+	ArrayType<CompositeData>		BUNDLE_WIRES_TYPE_ARRAY				= Item.arrayType(1, BUNDLE_WIRE_TYPE);
 
 	/**
 	 * The key of {@link #BUNDLE_REVISION_ID_ITEM}.
@@ -279,12 +279,12 @@ public interface BundleWiringStateMBean {
 	/**
 	 * An array of {@link #BUNDLE_REQUIREMENT_TYPE}s.
 	 */
-	ArrayType		REQUIREMENT_TYPE_ARRAY				= Item.arrayType(1, BUNDLE_REQUIREMENT_TYPE);
+	ArrayType<CompositeData>		REQUIREMENT_TYPE_ARRAY				= Item.arrayType(1, BUNDLE_REQUIREMENT_TYPE);
 
 	/**
 	 * An array of {@link #BUNDLE_CAPABILITY_TYPE}s.
 	 */
-	ArrayType		CAPABILITY_TYPE_ARRAY				= Item.arrayType(1, BUNDLE_CAPABILITY_TYPE);
+	ArrayType<CompositeData>		CAPABILITY_TYPE_ARRAY				= Item.arrayType(1, BUNDLE_CAPABILITY_TYPE);
 
 	/**
 	 * The key of {@link #REQUIREMENTS_ITEM}.

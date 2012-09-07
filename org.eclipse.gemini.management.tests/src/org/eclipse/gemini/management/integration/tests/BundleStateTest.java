@@ -16,7 +16,6 @@ package org.eclipse.gemini.management.integration.tests;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -29,7 +28,6 @@ import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.TabularData;
 
 import org.eclipse.gemini.management.framework.BundleState;
-import org.eclipse.gemini.management.framework.CustomBundleStateMBean;
 import org.eclipse.gemini.management.framework.internal.OSGiBundle;
 import org.eclipse.gemini.management.internal.BundleUtil;
 import org.junit.Before;
@@ -46,12 +44,13 @@ import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.jmx.framework.BundleStateMBean;
 
 /**
- * Integration tests for the {@link BundleState} implementation of {@link CustomBundleStateMBean} and {@link BundleStateMBean}
+ * Integration tests for the {@link BundleState} implementation of {@link BundleStateMBean}
  *
  */
 public final class BundleStateTest extends AbstractOSGiMBeanTest{
 	
 	private CompositeData bundleInfo;
+	private Long identifier;
 	private String location;
 	private String symbolicName;
 	private String version;
@@ -83,6 +82,7 @@ public final class BundleStateTest extends AbstractOSGiMBeanTest{
 	@Before
 	public void before(){
 		this.bundleInfo = null;
+		this.identifier = null;
 		this.location = null;
 		this.symbolicName = null;
 		this.version = null;
@@ -110,9 +110,10 @@ public final class BundleStateTest extends AbstractOSGiMBeanTest{
 	
 	@Test
 	public void nameAndVersionTest() throws Exception {
-		int mask = BundleState.SYMBOLIC_NAME + BundleState.IDENTIFIER + BundleState.VERSION;
 		long start = System.currentTimeMillis();
-		TabularData table = jmxFetchData("listBundles", new Object[]{ new Integer(mask) }, new String[]{ "int" }, TabularData.class);
+		Object[] arguments = new Object[]{new String[]{BundleStateMBean.SYMBOLIC_NAME, BundleStateMBean.VERSION}};
+		String[] types = new String[]{String[].class.getName()};
+		TabularData table = jmxFetchData("listBundles", arguments, types, TabularData.class);
 		long end = System.currentTimeMillis();
 		assertTrue((end - start) < 1000);
 		Set<?> keys = table.keySet();
@@ -142,6 +143,7 @@ public final class BundleStateTest extends AbstractOSGiMBeanTest{
 			keysArray = ((Collection<?>) key).toArray();
 			bundleInfo = table.get(keysArray);
 
+			identifier = (Long) bundleInfo.get(BundleStateMBean.IDENTIFIER);
 			location = (String) bundleInfo.get(BundleStateMBean.LOCATION);
 			symbolicName = (String) bundleInfo.get(BundleStateMBean.SYMBOLIC_NAME);
 			version = (String) bundleInfo.get(BundleStateMBean.VERSION);
@@ -149,7 +151,7 @@ public final class BundleStateTest extends AbstractOSGiMBeanTest{
 			state = (String) bundleInfo.get(BundleStateMBean.STATE);
 			lastModified = (Long) bundleInfo.get(BundleStateMBean.LAST_MODIFIED);
 			persistenlyStarted = (Boolean) bundleInfo.get(BundleStateMBean.PERSISTENTLY_STARTED);
-			activationPolicyUsed = (Boolean) bundleInfo.get(CustomBundleStateMBean.ACTIVATION_POLICY_USED);
+			activationPolicyUsed = (Boolean) bundleInfo.get(BundleStateMBean.ACTIVATION_POLICY_USED);
 			removalPending = (Boolean) bundleInfo.get(BundleStateMBean.REMOVAL_PENDING);
 			required = (Boolean) bundleInfo.get(BundleStateMBean.REQUIRED);
 			fragment = (Boolean) bundleInfo.get(BundleStateMBean.FRAGMENT);
@@ -164,6 +166,7 @@ public final class BundleStateTest extends AbstractOSGiMBeanTest{
 			requiredBundles = (Long[]) bundleInfo.get(BundleStateMBean.REQUIRED_BUNDLES);
 
 			bundle = bc.getBundle((Long) keysArray[0]);
+			assertEquals(identifier, Long.valueOf(bundle.getBundleId()));
 			assertEquals(location, bundle.getLocation());
 			assertEquals(symbolicName, bundle.getSymbolicName());
 			assertEquals(version, bundle.getVersion().toString());
@@ -217,176 +220,6 @@ public final class BundleStateTest extends AbstractOSGiMBeanTest{
 			Arrays.sort(requiredBundles);
 			Arrays.sort(requiredB2);
 			assertTrue(Arrays.equals(requiredBundles, requiredB2));
-		}
-	}
-
-	@SuppressWarnings("unchecked")
-	@Test
-	public void fullMaskTest() throws Exception {
-		TabularData table = jmxFetchData("listBundles", new Object[]{ new Integer(CustomBundleStateMBean.DEFAULT) }, new String[]{ "int" }, TabularData.class);
-		Set<?> keys = table.keySet();
-		Iterator<?> iter = keys.iterator();
-		BundleContext bc = FrameworkUtil.getBundle(BundleState.class).getBundleContext();
-		while (iter.hasNext()) {
-			key = iter.next();
-			keysArray = ((Collection<?>) key).toArray();
-			bundleInfo = table.get(keysArray);
-
-			location = (String) bundleInfo.get(BundleStateMBean.LOCATION);
-			symbolicName = (String) bundleInfo.get(BundleStateMBean.SYMBOLIC_NAME);
-			version = (String) bundleInfo.get(BundleStateMBean.VERSION);
-			startLevel = (Integer) bundleInfo.get(BundleStateMBean.START_LEVEL);
-			state = (String) bundleInfo.get(BundleStateMBean.STATE);
-			lastModified = (Long) bundleInfo.get(BundleStateMBean.LAST_MODIFIED);
-			persistenlyStarted = (Boolean) bundleInfo.get(BundleStateMBean.PERSISTENTLY_STARTED);
-			activationPolicyUsed = (Boolean) bundleInfo.get(CustomBundleStateMBean.ACTIVATION_POLICY_USED);
-			removalPending = (Boolean) bundleInfo.get(BundleStateMBean.REMOVAL_PENDING);
-			required = (Boolean) bundleInfo.get(BundleStateMBean.REQUIRED);
-			fragment = (Boolean) bundleInfo.get(BundleStateMBean.FRAGMENT);
-			registeredServices = (Long[]) bundleInfo.get(BundleStateMBean.REGISTERED_SERVICES);
-			servicesInUse = (Long[]) bundleInfo.get(BundleStateMBean.SERVICES_IN_USE);
-			headers = (Map<String, CompositeData>) bundleInfo.get(BundleStateMBean.HEADERS);
-			exportedPackages = (String[]) bundleInfo.get(BundleStateMBean.EXPORTED_PACKAGES);
-			importedPackages = (String[]) bundleInfo.get(BundleStateMBean.IMPORTED_PACKAGES);
-			fragments = (Long[]) bundleInfo.get(BundleStateMBean.FRAGMENTS);
-			hosts = (Long[]) bundleInfo.get(BundleStateMBean.HOSTS);
-			requiringBundles = (Long[]) bundleInfo.get(BundleStateMBean.REQUIRING_BUNDLES);
-			requiredBundles = (Long[]) bundleInfo.get(BundleStateMBean.REQUIRED_BUNDLES);
-
-			bundle = bc.getBundle((Long) keysArray[0]);
-			assertEquals(location, bundle.getLocation());
-			assertEquals(symbolicName, bundle.getSymbolicName());
-			assertEquals(version, bundle.getVersion().toString());
-			assertEquals(startLevel, bundle.adapt(BundleStartLevel.class).getStartLevel());
-			assertEquals(state, stateToString(bundle.getState()));
-			assertEquals(lastModified, bundle.getLastModified());
-			assertEquals(persistenlyStarted, BundleUtil.isBundlePersistentlyStarted(bundle));
-			assertEquals(activationPolicyUsed, BundleUtil.isBundleActivationPolicyUsed(bundle));
-			assertEquals(removalPending, BundleUtil.isRemovalPending(bundle));
-			assertEquals(required, BundleUtil.isRequired(bundle));
-			assertEquals(fragment, BundleUtil.isBundleFragment(bundle));
-
-			Long[] rs2 = serviceIds(bundle.getRegisteredServices());
-			Arrays.sort(registeredServices);
-			Arrays.sort(rs2);
-			assertTrue(Arrays.equals(registeredServices, rs2));
-
-			Long[] siu2 = serviceIds(bundle.getServicesInUse());
-			Arrays.sort(servicesInUse);
-			Arrays.sort(siu2);
-			assertTrue(Arrays.equals(servicesInUse, siu2));
-
-			assertEquals((TabularData) headers,	OSGiBundle.headerTable(bundle.getHeaders()));
-
-			String[] exportedPackages2 = BundleUtil.getBundleExportedPackages(bundle);
-			Arrays.sort(exportedPackages);
-			Arrays.sort(exportedPackages2);
-			assertTrue(Arrays.equals(exportedPackages, exportedPackages2));
-
-			String[] importedPackages2 = BundleUtil.getBundleImportedPackages(bundle);
-			Arrays.sort(importedPackages);
-			Arrays.sort(importedPackages2);
-			assertTrue(Arrays.equals(importedPackages, importedPackages2));
-
-			Long[] frags2 = getBundleFragments(bundle);
-			Arrays.sort(fragments);
-			Arrays.sort(frags2);
-			assertTrue(Arrays.equals(fragments, frags2));
-
-			Long[] hst2 = getBundleHosts(bundle);
-			Arrays.sort(hosts);
-			Arrays.sort(hst2);
-			assertTrue(Arrays.equals(hosts, hst2));
-
-			Long[] reqB2 = getRequiringBundles(bundle);
-			Arrays.sort(requiringBundles);
-			Arrays.sort(reqB2);
-			assertTrue(Arrays.equals(requiringBundles, reqB2));
-
-			Long[] requiredB2 = getRequiredBundles(bundle);
-			Arrays.sort(requiredBundles);
-			Arrays.sort(requiredB2);
-			assertTrue(Arrays.equals(requiredBundles, requiredB2));
-		}
-	}
-
-	@Test
-	public void randomMaskTest() throws Exception {
-		int mask = BundleState.IDENTIFIER + BundleState.VERSION
-				+ BundleState.STATE + BundleState.LAST_MODIFIED
-				+ BundleState.PERSISTENTLY_STARTED + BundleState.REMOVAL_PENDING
-				+ BundleState.REGISTERED_SERVICES + BundleState.SERVICES_IN_USE
-				+ BundleState.EXPORTED_PACKAGES + BundleState.IMPORTED_PACKAGES
-				+ BundleState.HOSTS + BundleState.REQUIRING_BUNDLES;
-		TabularData table = jmxFetchData("listBundles", new Object[]{ new Integer(mask) }, new String[]{ "int" }, TabularData.class);
-		Set<?> keys = table.keySet();
-		Iterator<?> iter = keys.iterator();
-		BundleContext bc = FrameworkUtil.getBundle(BundleState.class).getBundleContext();
-		while (iter.hasNext()) {
-			key = iter.next();
-			keysArray = ((Collection<?>) key).toArray();
-			bundleInfo = (CompositeData) table.get(keysArray);
-
-			version = (String) bundleInfo.get(BundleStateMBean.VERSION);
-			state = (String) bundleInfo.get(BundleStateMBean.STATE);
-			lastModified = (Long) bundleInfo.get(BundleStateMBean.LAST_MODIFIED);
-			persistenlyStarted = (Boolean) bundleInfo.get(BundleStateMBean.PERSISTENTLY_STARTED);
-			removalPending = (Boolean) bundleInfo.get(BundleStateMBean.REMOVAL_PENDING);
-			registeredServices = (Long[]) bundleInfo.get(BundleStateMBean.REGISTERED_SERVICES);
-			servicesInUse = (Long[]) bundleInfo.get(BundleStateMBean.SERVICES_IN_USE);
-			exportedPackages = (String[]) bundleInfo.get(BundleStateMBean.EXPORTED_PACKAGES);
-			importedPackages = (String[]) bundleInfo.get(BundleStateMBean.IMPORTED_PACKAGES);
-			hosts = (Long[]) bundleInfo.get(BundleStateMBean.HOSTS);
-			requiringBundles = (Long[]) bundleInfo.get(BundleStateMBean.REQUIRING_BUNDLES);
-			bundle = bc.getBundle((Long) keysArray[0]);
-
-			assertEquals(version, bundle.getVersion().toString());
-			assertEquals(state, stateToString(bundle.getState()));
-			assertEquals(lastModified, bundle.getLastModified());
-			assertEquals(persistenlyStarted, BundleUtil.isBundlePersistentlyStarted(bundle));
-			assertEquals(removalPending, BundleUtil.isRemovalPending(bundle));
-
-			Long[] rs2 = serviceIds(bundle.getRegisteredServices());
-			Arrays.sort(registeredServices);
-			Arrays.sort(rs2);
-			assertTrue(Arrays.equals(registeredServices, rs2));
-
-			Long[] siu2 = serviceIds(bundle.getServicesInUse());
-			Arrays.sort(servicesInUse);
-			Arrays.sort(siu2);
-			assertTrue(Arrays.equals(servicesInUse, siu2));
-
-			String[] exportedPackages2 = BundleUtil.getBundleExportedPackages(bundle);
-			Arrays.sort(exportedPackages);
-			Arrays.sort(exportedPackages2);
-			assertTrue(Arrays.equals(exportedPackages, exportedPackages2));
-
-			String[] importedPackages2 = BundleUtil.getBundleImportedPackages(bundle);
-			Arrays.sort(importedPackages);
-			Arrays.sort(importedPackages2);
-			assertTrue(Arrays.equals(importedPackages, importedPackages2));
-
-			Long[] hst2 = getBundleHosts(bundle);
-			Arrays.sort(hosts);
-			Arrays.sort(hst2);
-			assertTrue(Arrays.equals(hosts, hst2));
-
-			Long[] reqB2 = getRequiringBundles(bundle);
-			Arrays.sort(requiringBundles);
-			Arrays.sort(reqB2);
-			assertTrue(Arrays.equals(requiringBundles, reqB2));
-		}
-	}
-
-	@Test
-	public void illegalMaskTest() throws Exception {
-		int mask = 2097152;
-		try {
-			@SuppressWarnings("unused")
-			TabularData table = jmxFetchData("listBundles", new Object[]{ new Integer(mask) }, new String[]{ "int" }, TabularData.class);
-			fail("Expected exception did not occur!");
-		} catch (Exception e) {
-			assertTrue(e.getCause() instanceof IllegalArgumentException);
 		}
 	}
 

@@ -43,7 +43,7 @@ import org.eclipse.gemini.management.internal.BundleUtil;
 /** 
  * 
  */
-public final class BundleState extends Monitor implements CustomBundleStateMBean {
+public final class BundleState extends Monitor implements BundleStateMBean {
 	
 	private BundleListener bundleListener;
 	
@@ -57,12 +57,32 @@ public final class BundleState extends Monitor implements CustomBundleStateMBean
 		this.bundleContext = bundleContext;
 	}
 
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public CompositeData getBundle(long bundleId) throws IOException {
+		return new OSGiBundle(retrieveBundle(bundleId)).asCompositeData();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public long[] getBundleIds() throws IOException {
+		Bundle[] bundles = bundleContext.getBundles();
+		long[] ids = new long[bundles.length];
+		for (int i = 0; i < bundles.length; i++) {
+			ids[i] = bundles[i].getBundleId();
+		}
+		return ids;
+	}
+	
 	/**
 	 * {@inheritDoc}
 	 */
 	public TabularData listBundles() throws IOException {
 		try {
-			TabularDataSupport table = new TabularDataSupport(CustomBundleStateMBean.CUSTOM_BUNDLES_TYPE);
+			TabularDataSupport table = new TabularDataSupport(BundleStateMBean.BUNDLES_TYPE);
 			for (Bundle bundle : bundleContext.getBundles()) {
 				table.put(new OSGiBundle(bundle).asCompositeData());
 			}
@@ -72,6 +92,22 @@ public final class BundleState extends Monitor implements CustomBundleStateMBean
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	public TabularData listBundles(String... bundleTypeItems) throws IOException {
+		try {
+			ArrayList<OSGiBundle> bundles = new ArrayList<OSGiBundle>();
+			for (Bundle bundle : bundleContext.getBundles()) {
+				bundles.add(new OSGiBundle(bundle));
+			}
+			TabularData table = OSGiBundle.tableFrom(bundles, bundleTypeItems);
+			return table;
+		} catch (Throwable e) {
+			throw new IOException(e);
+		}
+	}
+	
 	/**
 	 * {@inheritDoc}
 	 */
@@ -93,6 +129,27 @@ public final class BundleState extends Monitor implements CustomBundleStateMBean
 	 */
 	public TabularData getHeaders(long bundleId) throws IOException {
 		return OSGiBundle.headerTable(retrieveBundle(bundleId).getHeaders());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public TabularData getHeaders(long bundleId, String locale) throws IOException {
+		return OSGiBundle.headerTable(retrieveBundle(bundleId).getHeaders(locale));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getHeader(long bundleId, String key) throws IOException {
+		return retrieveBundle(bundleId).getHeaders().get(key);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getHeader(long bundleId, String key, String locale) throws IOException {
+		return retrieveBundle(bundleId).getHeaders(locale).get(key);
 	}
 
 	/**
@@ -187,6 +244,13 @@ public final class BundleState extends Monitor implements CustomBundleStateMBean
 	/**
 	 * {@inheritDoc}
 	 */
+	public boolean isActivationPolicyUsed(long bundleId) throws IOException {
+		return BundleUtil.isBundleActivationPolicyUsed(retrieveBundle(bundleId));
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
 	public boolean isPersistentlyStarted(long bundleId) throws IOException {
 		return BundleUtil.isBundlePersistentlyStarted(retrieveBundle(bundleId));
 	}
@@ -210,63 +274,6 @@ public final class BundleState extends Monitor implements CustomBundleStateMBean
 	 */
 	public boolean isRequired(long bundleId) throws IOException {
 		return BundleUtil.isRequired(retrieveBundle(bundleId));
-	}
-
-	//New methods from the JMX Update RFC 169
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public CompositeData getBundle(long bundleId) throws IOException {
-		return new OSGiBundle(retrieveBundle(bundleId)).asCompositeData();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public TabularData listBundles(String... bundleTypeItems) throws IOException {
-		try {
-			ArrayList<OSGiBundle> bundles = new ArrayList<OSGiBundle>();
-			for (Bundle bundle : bundleContext.getBundles()) {
-				bundles.add(new OSGiBundle(bundle));
-			}
-			TabularData table = OSGiBundle.tableFrom(bundles, bundleTypeItems);
-			return table;
-		} catch (Throwable e) {
-			throw new IOException(e);
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public boolean isActivationPolicyUsed(long bundleId) throws IOException {
-		return BundleUtil.isBundleActivationPolicyUsed(retrieveBundle(bundleId));
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public String getHeader(long bundleId, String key) throws IOException {
-		return retrieveBundle(bundleId).getHeaders().get(key);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public TabularData getHeaders(long bundleId, String locale) throws IOException {
-		return OSGiBundle.headerTable(retrieveBundle(bundleId).getHeaders(locale));
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public CompositeData getHeaders(long bundleId, String key, String locale) throws IOException {
-		String value = retrieveBundle(bundleId).getHeaders(locale).get(key);
-		if(value == null){
-			return null;
-		}
-		return OSGiBundle.getHeaderCompositeData(key, value);
 	}
 
 	//End methods for the MBean
@@ -337,19 +344,6 @@ public final class BundleState extends Monitor implements CustomBundleStateMBean
 		if (bundleListener != null) {
 			bundleContext.removeBundleListener(bundleListener);
 		}
-	}
-
-	@Override
-	public long[] getBundleIds() throws IOException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String getHeader(long bundleId, String key, String locale)
-			throws IOException {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 }

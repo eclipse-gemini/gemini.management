@@ -15,7 +15,6 @@
 
 package org.eclipse.gemini.management.framework.internal;
 
-//import static org.eclipse.gemini.management.internal.BundleUtil.LongArrayFrom;
 import static org.osgi.framework.Constants.OBJECTCLASS;
 import static org.osgi.framework.Constants.SERVICE_ID;
 
@@ -33,6 +32,7 @@ import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularDataSupport;
 
+import org.eclipse.gemini.management.internal.OSGiProperties;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 import org.osgi.jmx.Item;
@@ -75,6 +75,8 @@ public final class OSGiService {
 	private String[] interfaces;
 	
 	private Long[] usingBundles;
+	
+	private TabularData properties;
 
 	/**
 	 * Construct an OSGiService from the underlying
@@ -85,12 +87,13 @@ public final class OSGiService {
 	 * @throws  
 	 */
 	public OSGiService(ServiceReference<?> reference) {
+		this.bundle = reference.getBundle().getBundleId();
 		this.identifier = (Long) reference.getProperty(SERVICE_ID);
 		this.interfaces = (String[]) reference.getProperty(OBJECTCLASS);
-		this.bundle = reference.getBundle().getBundleId();
+		this.properties = OSGiProperties.tableFrom(reference);
 		this.usingBundles = longArrayFrom(OSGiService.getBundlesUsing(reference));
 	}
-
+	
 	private Long[] longArrayFrom(long[] array) {
 		if (array == null) {
 			return new Long[0];
@@ -177,9 +180,10 @@ public final class OSGiService {
 	 */
 	public CompositeData asCompositeData() {
 		Map<String, Object> items = new HashMap<String, Object>();
+		items.put(ServiceStateMBean.BUNDLE_IDENTIFIER, bundle);
 		items.put(ServiceStateMBean.IDENTIFIER, identifier);
 		items.put(ServiceStateMBean.OBJECT_CLASS, interfaces);
-		items.put(ServiceStateMBean.BUNDLE_IDENTIFIER, bundle);
+		items.put(ServiceStateMBean.PROPERTIES, properties);
 		items.put(ServiceStateMBean.USING_BUNDLES, usingBundles);
 
 		try {

@@ -37,10 +37,10 @@ import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularDataSupport;
 
-import org.eclipse.gemini.management.framework.CustomBundleWiringStateMBean;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.Version;
 import org.osgi.jmx.JmxConstants;
+import org.osgi.jmx.framework.wiring.BundleWiringStateMBean;
 
 /**
  * <p>
@@ -143,7 +143,7 @@ public final class OSGiProperties {
 	 * @return the tabular data representing the service reference properties
 	 */
 	public static TabularData tableFrom(ServiceReference<?> ref) {
-		Hashtable<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<String, Object>();
 		for (String key : ref.getPropertyKeys()) {
 			props.put(key, ref.getProperty(key));
 		}
@@ -194,8 +194,8 @@ public final class OSGiProperties {
 	 */
 	public static Map<String, ?> getDirectiveKeyValueItem(String key, Object value){
 		Map<String, Object> items = new HashMap<String, Object>();
-		items.put(CustomBundleWiringStateMBean.KEY, key);
-		items.put(CustomBundleWiringStateMBean.VALUE, value);
+		items.put(BundleWiringStateMBean.KEY, key);
+		items.put(BundleWiringStateMBean.VALUE, value);
 		return items;
 	}
 	

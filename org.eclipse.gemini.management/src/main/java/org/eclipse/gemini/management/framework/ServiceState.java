@@ -103,27 +103,6 @@ public final class ServiceState extends Monitor implements CustomServiceStateMBe
 		return OSGiService.getBundlesUsing(getServiceReference(serviceId));
 	}
 
-	//Local extensions to the API
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public CompositeData[] getRegisteredServices(long bundleId) throws IOException {
-		Bundle bundle = this.getBundle(bundleId);
-		ServiceReference<?>[] registeredServices = bundle.getRegisteredServices();
-		return this.getServicesAsCompositeDatas(registeredServices);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public CompositeData[] getServicesInUse(long bundleId) throws IOException {
-		Bundle bundle = this.getBundle(bundleId);
-		ServiceReference<?>[] servicesInUse = bundle.getServicesInUse();
-		return this.getServicesAsCompositeDatas(servicesInUse);
-	}
-	
-	//New methods from the JMX Update RFC 169
 	
 	/**
 	 * {@inheritDoc}
@@ -209,6 +188,26 @@ public final class ServiceState extends Monitor implements CustomServiceStateMBe
 		}
 	}
 
+	//Local extensions to the API
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public CompositeData[] getRegisteredServices(long bundleId) throws IOException {
+		Bundle bundle = this.getBundle(bundleId);
+		ServiceReference<?>[] registeredServices = bundle.getRegisteredServices();
+		return this.getServicesAsCompositeDatas(registeredServices);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public CompositeData[] getServicesInUse(long bundleId) throws IOException {
+		Bundle bundle = this.getBundle(bundleId);
+		ServiceReference<?>[] servicesInUse = bundle.getServicesInUse();
+		return this.getServicesAsCompositeDatas(servicesInUse);
+	}
+	
 	private Bundle getBundle(long bundleId){
 		Bundle bundle = bundleContext.getBundle(bundleId);
 		if(bundle == null) {

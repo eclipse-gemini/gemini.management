@@ -33,7 +33,6 @@ import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularDataSupport;
 
-import org.eclipse.gemini.management.framework.CustomBundleStateMBean;
 import org.eclipse.gemini.management.internal.BundleUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
@@ -100,8 +99,8 @@ public final class OSGiBundle {
 		if(bundleTypes.contains(BundleStateMBean.PERSISTENTLY_STARTED)) {
 			bundleTypeItems.add(BundleStateMBean.PERSISTENTLY_STARTED_ITEM);
 		}
-		if(bundleTypes.contains(CustomBundleStateMBean.ACTIVATION_POLICY)) {
-			bundleTypeItems.add(CustomBundleStateMBean.ACTIVATION_POLICY_ITEM);
+		if(bundleTypes.contains(BundleStateMBean.ACTIVATION_POLICY_USED)) {
+			bundleTypeItems.add(BundleStateMBean.ACTIVATION_POLICY_USED_ITEM);
 		}
 		if(bundleTypes.contains(BundleStateMBean.REMOVAL_PENDING)) {
 			bundleTypeItems.add(BundleStateMBean.REMOVAL_PENDING_ITEM);
@@ -167,8 +166,8 @@ public final class OSGiBundle {
 		if(bundleTypes.contains(BundleStateMBean.PERSISTENTLY_STARTED)) {
 			items.put(BundleStateMBean.PERSISTENTLY_STARTED, isPersistentlyStarted());
 		}
-		if(bundleTypes.contains(CustomBundleStateMBean.ACTIVATION_POLICY)) {
-			items.put(CustomBundleStateMBean.ACTIVATION_POLICY_USED, isActivationPolicyUsed());
+		if(bundleTypes.contains(BundleStateMBean.ACTIVATION_POLICY_USED)) {
+			items.put(BundleStateMBean.ACTIVATION_POLICY_USED, isActivationPolicyUsed());
 		}
 		if(bundleTypes.contains(BundleStateMBean.REMOVAL_PENDING)) {
 			items.put(BundleStateMBean.REMOVAL_PENDING, isRemovalPending());
@@ -230,7 +229,7 @@ public final class OSGiBundle {
 		items.put(BundleStateMBean.STATE, getState());
 		items.put(BundleStateMBean.LAST_MODIFIED, getLastModified());
 		items.put(BundleStateMBean.PERSISTENTLY_STARTED, isPersistentlyStarted());
-		items.put(CustomBundleStateMBean.ACTIVATION_POLICY_USED, isActivationPolicyUsed());
+		items.put(BundleStateMBean.ACTIVATION_POLICY_USED, isActivationPolicyUsed());
 		items.put(BundleStateMBean.REMOVAL_PENDING, isRemovalPending());
 		items.put(BundleStateMBean.REQUIRED, isRequired());
 		items.put(BundleStateMBean.FRAGMENT, isFragment());
@@ -244,7 +243,7 @@ public final class OSGiBundle {
 		items.put(BundleStateMBean.REQUIRING_BUNDLES, getRequiringBundles());
 		items.put(BundleStateMBean.REQUIRED_BUNDLES, getRequiredBundles());
 		try {
-			return new CompositeDataSupport(CustomBundleStateMBean.CUSTOM_BUNDLE_TYPE, items);
+			return new CompositeDataSupport(BundleStateMBean.BUNDLE_TYPE, items);
 		} catch (OpenDataException e) {
 			throw new IllegalStateException("Cannot form bundle open data", e);
 		}
@@ -265,7 +264,7 @@ public final class OSGiBundle {
 		return table;
 	}
 
-	public static CompositeData getHeaderCompositeData(String key, String value) {
+	private static CompositeData getHeaderCompositeData(String key, String value) {
 		Map<String, Object> items = new HashMap<String, Object>();
 		items.put(BundleStateMBean.KEY, key);
 		items.put(BundleStateMBean.VALUE, value);		

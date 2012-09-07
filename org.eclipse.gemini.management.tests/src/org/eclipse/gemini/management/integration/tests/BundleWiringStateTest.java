@@ -20,7 +20,6 @@ import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.TabularData;
 
 import org.eclipse.gemini.management.framework.BundleWiringState;
-import org.eclipse.gemini.management.framework.CustomBundleWiringStateMBean;
 import org.eclipse.gemini.management.framework.ServiceState;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,9 +27,10 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.BundleWiring;
+import org.osgi.jmx.framework.wiring.BundleWiringStateMBean;
 
 /**
- * Integration tests for the {@link BundleWiringState} implementation of {@link CustomBundleWiringStateMBean}
+ * Integration tests for the {@link BundleWiringState} implementation of {@link BundleWiringStateMBean}
  *
  */
 public final class BundleWiringStateTest extends AbstractOSGiMBeanTest {
@@ -46,7 +46,7 @@ public final class BundleWiringStateTest extends AbstractOSGiMBeanTest {
 	private CompositeData[] revisionRequiredWires;
 
 	public BundleWiringStateTest() {
-		super.mBeanObjectName = CustomBundleWiringStateMBean.OBJECTNAME;
+		super.mBeanObjectName = BundleWiringStateMBean.OBJECTNAME;
 	}
 	
 	@Before
@@ -74,12 +74,12 @@ public final class BundleWiringStateTest extends AbstractOSGiMBeanTest {
 			wireInfo = table.get(keysArray);
 			
 			
-			this.bundleId = (Long) wireInfo.get(CustomBundleWiringStateMBean.BUNDLE_ID);
+			this.bundleId = (Long) wireInfo.get(BundleWiringStateMBean.BUNDLE_ID);
 			//this.bundleRevisionId = (Integer) wireInfo.get(CustomBundleWiringStateMBean.BUNDLE_REVISION_ID);
-			this.capabilities = (CompositeData[]) wireInfo.get(CustomBundleWiringStateMBean.CAPABILITIES);
-			this.requirements = (CompositeData[]) wireInfo.get(CustomBundleWiringStateMBean.REQUIREMENTS);
-			this.revisionProvidedWires = (CompositeData[]) wireInfo.get(CustomBundleWiringStateMBean.REVISION_PROVIDED_WIRES);
-			this.revisionRequiredWires = (CompositeData[]) wireInfo.get(CustomBundleWiringStateMBean.REVISION_REQUIRED_WIRES);
+			this.capabilities = (CompositeData[]) wireInfo.get(BundleWiringStateMBean.CAPABILITIES);
+			this.requirements = (CompositeData[]) wireInfo.get(BundleWiringStateMBean.REQUIREMENTS);
+			this.revisionProvidedWires = (CompositeData[]) wireInfo.get(BundleWiringStateMBean.PROVIDED_WIRES);
+			this.revisionRequiredWires = (CompositeData[]) wireInfo.get(BundleWiringStateMBean.REQUIRED_WIRES);
 			
 
 			BundleWiring wiring = bc.getBundle(this.bundleId).adapt(BundleWiring.class);

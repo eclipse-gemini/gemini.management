@@ -15,7 +15,8 @@
 
 package org.eclipse.gemini.management.configurationadmin;
 
-import static org.eclipse.gemini.management.internal.OSGiProperties.*;
+import static org.eclipse.gemini.management.internal.OSGiProperties.propertiesFrom;
+import static org.eclipse.gemini.management.internal.OSGiProperties.tableFrom;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,7 +27,6 @@ import java.util.logging.Logger;
 import javax.management.openmbean.TabularData;
 
 import org.osgi.framework.InvalidSyntaxException;
-
 import org.osgi.jmx.service.cm.ConfigurationAdminMBean;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -144,7 +144,6 @@ public final class ConfigAdminManager implements ConfigurationAdminMBean {
 		if (pid == null) {
 			throw new IOException("PID must not be null");
 		}
-		@SuppressWarnings("unchecked")
 		Dictionary<String, Object> properties = admin.getConfiguration(pid, null).getProperties();
 		return properties == null ? null : tableFrom(properties);
 	}
@@ -157,7 +156,6 @@ public final class ConfigAdminManager implements ConfigurationAdminMBean {
 		if (pid == null) {
 			throw new IOException("PID must not be null");
 		}
-		@SuppressWarnings("unchecked")
 		Dictionary<String, Object> properties = admin.getConfiguration(pid, location).getProperties();
 		return properties == null ? null : tableFrom(properties);
 	}

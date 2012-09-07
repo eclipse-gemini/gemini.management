@@ -11,6 +11,7 @@
  *
  * Contributors:
  *     Hal Hildebrand - Initial JMX support 
+ *     Christopher Frost - 5.0 spec changes
  ******************************************************************************/
 
 package org.eclipse.gemini.management.framework;
@@ -21,20 +22,22 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 import javax.management.openmbean.CompositeData;
 
+import org.eclipse.gemini.management.framework.internal.BundleBatchActionResult;
+import org.eclipse.gemini.management.framework.internal.BundleBatchInstallResult;
+import org.eclipse.gemini.management.framework.internal.BundleBatchResolveResult;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.startlevel.BundleStartLevel;
 import org.osgi.framework.startlevel.FrameworkStartLevel;
 import org.osgi.framework.wiring.FrameworkWiring;
-
-import org.eclipse.gemini.management.framework.internal.BundleBatchActionResult;
-import org.eclipse.gemini.management.framework.internal.BundleBatchInstallResult;
-
 import org.osgi.jmx.framework.FrameworkMBean;
 
 /**
@@ -481,6 +484,98 @@ public final class Framework implements FrameworkMBean {
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	public long[] getDependencyClosure(long[] bundleIdentifiers) throws IOException {
+		Collection<Bundle> bundles = this.frameworkWiring.getDependencyClosure(this.getBundles(bundleIdentifiers));
+		long[] result = new long[bundles.size()];
+		int i = 0;
+		for (Bundle bundle : bundles) {
+			result[i] = bundle.getBundleId();
+			i++;
+		}
+		return result;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getProperty(String key) throws IOException {
+		return this.bundleContext.getProperty(key);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public long[] getRemovalPendingBundles() throws IOException {
+		Collection<Bundle> removalPendingBundles = this.frameworkWiring.getRemovalPendingBundles();
+		long[] result = new long[removalPendingBundles.size()];
+		int i = 0;
+		for (Bundle bundle : removalPendingBundles) {
+			result[i] = bundle.getBundleId();
+			i++;
+		}
+		return result;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean refreshBundleAndWait(long bundleIdentifier) throws IOException {
+		Collection<Bundle> bundles = new HashSet<Bundle>();
+		bundles.add(this.bundle(bundleIdentifier));
+		StandardFrameworkListener standardFrameworkListener = new StandardFrameworkListener();
+		this.frameworkWiring.refreshBundles(bundles, standardFrameworkListener);
+		return standardFrameworkListener.getResult();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public CompositeData refreshBundlesAndWait(long[] bundleIdentifiers) throws IOException {
+		Collection<Bundle> bundles = bundleIdentifiers == null ? null : this.getBundles(bundleIdentifiers);
+		StandardFrameworkListener standardFrameworkListener = new StandardFrameworkListener();
+		this.frameworkWiring.refreshBundles(bundles, standardFrameworkListener);
+		Long[] completedBundles = new Long[bundleIdentifiers.length];
+		System.arraycopy(bundleIdentifiers, 0, completedBundles, 0, bundleIdentifiers.length);
+		return new BundleBatchResolveResult(completedBundles, standardFrameworkListener.getResult()).asCompositeData();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public CompositeData resolve(long[] bundleIdentifiers) throws IOException {
+		boolean result;
+		Long[] completedBundles;
+		if(bundleIdentifiers == null){
+			Collection<Long> unresolvedBundles = new HashSet<Long>();
+			Bundle[] allBundles = this.bundleContext.getBundles();
+			for (Bundle bundle : allBundles) {
+				if(bundle.getState() == Bundle.INSTALLED){
+					unresolvedBundles.add(bundle.getBundleId());
+				}
+			}
+			completedBundles = new Long[unresolvedBundles.size()];
+			unresolvedBundles.toArray(completedBundles);
+			result = this.frameworkWiring.resolveBundles(null);	
+		}else{
+			Collection<Bundle> bundles = this.getBundles(bundleIdentifiers);
+			result = this.frameworkWiring.resolveBundles(bundles);
+			completedBundles = new Long[bundleIdentifiers.length];
+			System.arraycopy(bundleIdentifiers, 0, completedBundles, 0, bundleIdentifiers.length);
+		}
+		return new BundleBatchResolveResult(completedBundles, result).asCompositeData();
+	}
+
+	private Collection<Bundle> getBundles(long[] bundleIdentifiers) throws IOException{
+		Collection<Bundle> bundles = new HashSet<Bundle>();
+		for (int i = 0; i < bundleIdentifiers.length; i++) {
+			bundles.add(this.bundle(bundleIdentifiers[i]));
+		}
+		return bundles;	
+	}
+	
 	private Bundle bundle(long bundleIdentifier) throws IOException {
 		Bundle b = bundleContext.getBundle(bundleIdentifier);
 		if (b == null) {
@@ -488,5 +583,48 @@ public final class Framework implements FrameworkMBean {
 		}
 		return b;
 	}
+	
+	/**
+	 * 
+	 * @author Christopher Frost
+	 *
+	 * This class is thread safe and will only block until a framework event is received. 
+	 *
+	 */
+	private static class StandardFrameworkListener implements FrameworkListener {
 
+		private final int waitForEvent = FrameworkEvent.PACKAGES_REFRESHED;
+				
+		private final Object monitor = new Object();
+						
+		private volatile boolean sucsess = false;
+
+		private volatile boolean completed = false;
+		
+		@Override
+		public void frameworkEvent(FrameworkEvent event) {
+			if(this.waitForEvent == event.getType()){
+				this.sucsess = true;
+			} else if(FrameworkEvent.ERROR == event.getType()){
+				this.sucsess = false;
+			}
+			this.completed = true;
+			this.monitor.notifyAll();
+		}
+		
+		public boolean getResult(){
+			synchronized (monitor) {
+				while(!this.completed){
+					try {
+						this.monitor.wait(5000); //Just to make sure as it is possible that we could get to wait after notify has been called
+					} catch (InterruptedException e) {
+						// no-op
+					}
+				}
+				return this.sucsess;
+			}
+		}
+		
+	}
+	
 }
