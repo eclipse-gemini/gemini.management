@@ -15,8 +15,6 @@
 
 package org.eclipse.gemini.management.framework.internal;
 
-import static org.osgi.framework.Constants.SERVICE_ID;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,6 +33,7 @@ import javax.management.openmbean.TabularDataSupport;
 
 import org.eclipse.gemini.management.internal.BundleUtil;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.BundleWire;
@@ -298,7 +297,7 @@ public final class OSGiBundle {
 	private Long[] getFragments() {
 		BundleWiring wiring = bundle.adapt(BundleWiring.class);
 		List<BundleWire> requiredWires = wiring.getRequiredWires(BundleRevision.HOST_NAMESPACE);
-        return bundleWiresToIds(requiredWires);
+        return OSGiBundle.bundleWiresToProviderIds(requiredWires);
 	}
 
 	/**
@@ -307,7 +306,7 @@ public final class OSGiBundle {
 	private Long[] getHosts() {
 		BundleWiring wiring = bundle.adapt(BundleWiring.class);
 		List<BundleWire> providedWires = wiring.getProvidedWires(BundleRevision.HOST_NAMESPACE);
-        return bundleWiresToIds(providedWires);
+        return OSGiBundle.bundleWiresToRequirerIds(providedWires);
 	}
 
 	/**
@@ -353,7 +352,7 @@ public final class OSGiBundle {
 	private Long[] getRequiredBundles() throws IOException {
         BundleWiring wiring = bundle.adapt(BundleWiring.class);
         List<BundleWire> requiredWires = wiring.getRequiredWires(BundleRevision.BUNDLE_NAMESPACE);
-        return bundleWiresToIds(requiredWires);
+        return OSGiBundle.bundleWiresToProviderIds(requiredWires);
 	}
 
 	/**
@@ -363,7 +362,7 @@ public final class OSGiBundle {
 	private Long[] getRequiringBundles() throws IOException {
         BundleWiring wiring = bundle.adapt(BundleWiring.class);
         List<BundleWire> providedWires = wiring.getProvidedWires(BundleRevision.BUNDLE_NAMESPACE);
-        return bundleWiresToIds(providedWires);
+        return OSGiBundle.bundleWiresToRequirerIds(providedWires);
 	}
 
 	/**
@@ -436,23 +435,33 @@ public final class OSGiBundle {
 		return BundleUtil.isRequired(bundle);
 	}
 
-	private Long[] bundleWiresToIds(List<BundleWire> wires){
-        Long[] consumerWirings = new Long[wires.size()];
+	public static Long[] bundleWiresToRequirerIds(List<BundleWire> wires){
+        Long[] requirerIds = new Long[wires.size()];
         int i = 0;
         for (BundleWire bundleWire : wires) {
-            consumerWirings[i] = bundleWire.getRequirerWiring().getBundle().getBundleId();
+            requirerIds[i] = bundleWire.getRequirerWiring().getBundle().getBundleId();
             i++;
         }
-        return consumerWirings;
+        return requirerIds;
 	}
-	
-	private Long[] serviceIds(ServiceReference<?>[] refs) {
+
+	public static Long[] bundleWiresToProviderIds(List<BundleWire> wires){
+        Long[] providerIds = new Long[wires.size()];
+        int i = 0;
+        for (BundleWire bundleWire : wires) {
+            providerIds[i] = bundleWire.getProviderWiring().getBundle().getBundleId();
+            i++;
+        }
+        return providerIds;
+	}
+
+	public static Long[] serviceIds(ServiceReference<?>[] refs) {
 		if (refs == null) {
 			return new Long[0];
 		}
 		Long[] ids = new Long[refs.length];
 		for (int i = 0; i < refs.length; i++) {
-			ids[i] = (Long) refs[i].getProperty(SERVICE_ID);
+			ids[i] = (Long) refs[i].getProperty(Constants.SERVICE_ID);
 		}
 		return ids;
 	}

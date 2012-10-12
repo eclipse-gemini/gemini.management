@@ -28,7 +28,6 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
-import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.BundleWire;
@@ -121,7 +120,7 @@ public final class BundleState extends Monitor implements BundleStateMBean {
 	public long[] getFragments(long bundleId) throws IOException {
 		BundleWiring wiring = retrieveBundle(bundleId).adapt(BundleWiring.class);
 		List<BundleWire> requiredWires = wiring.getProvidedWires(BundleRevision.HOST_NAMESPACE);
-        return bundleWiresToRequirerIds(requiredWires);
+        return convertToPrimativeArray(OSGiBundle.bundleWiresToRequirerIds(requiredWires));
 	}
 
 	/**
@@ -158,7 +157,7 @@ public final class BundleState extends Monitor implements BundleStateMBean {
 	public long[] getHosts(long fragment) throws IOException {
 		BundleWiring wiring = retrieveBundle(fragment).adapt(BundleWiring.class);
 		List<BundleWire> providedWires = wiring.getRequiredWires(BundleRevision.HOST_NAMESPACE);
-        return bundleWiresToProviderIds(providedWires);
+        return convertToPrimativeArray(OSGiBundle.bundleWiresToProviderIds(providedWires));
 	}
 	
 	/**
@@ -179,23 +178,35 @@ public final class BundleState extends Monitor implements BundleStateMBean {
 	 * {@inheritDoc}
 	 */
 	public long[] getRegisteredServices(long bundleId) throws IOException {
-		return serviceIds(retrieveBundle(bundleId).getRegisteredServices());
+		ServiceReference<?>[] registeredServices = retrieveBundle(bundleId).getRegisteredServices();
+		return convertToPrimativeArray(OSGiBundle.serviceIds(registeredServices));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	public long[] getServicesInUse(long bundleIdentifier) throws IOException {
+		ServiceReference<?>[] servicesInUse = retrieveBundle(bundleIdentifier).getServicesInUse();
+		return convertToPrimativeArray(OSGiBundle.serviceIds(servicesInUse));
+	}
+	
 	/**
 	 * {@inheritDoc}
 	 */
 	public long[] getRequiringBundles(long bundleId) throws IOException {
         BundleWiring wiring = retrieveBundle(bundleId).adapt(BundleWiring.class);
         List<BundleWire> providedWires = wiring.getProvidedWires(BundleRevision.BUNDLE_NAMESPACE);
-        return bundleWiresToRequirerIds(providedWires);
+        return convertToPrimativeArray(OSGiBundle.bundleWiresToRequirerIds(providedWires));
     }
+
 	/**
 	 * {@inheritDoc}
 	 */
-	public long[] getServicesInUse(long bundleIdentifier) throws IOException {
-		return serviceIds(retrieveBundle(bundleIdentifier).getServicesInUse());
-	}
+	public long[] getRequiredBundles(long bundleIdentifier) throws IOException {
+        BundleWiring wiring = retrieveBundle(bundleIdentifier).adapt(BundleWiring.class);
+        List<BundleWire> requiredWires = wiring.getRequiredWires(BundleRevision.BUNDLE_NAMESPACE);
+        return convertToPrimativeArray(OSGiBundle.bundleWiresToProviderIds(requiredWires));
+    }
 
 	/**
 	 * {@inheritDoc}
@@ -224,15 +235,6 @@ public final class BundleState extends Monitor implements BundleStateMBean {
 	public String getLocation(long bundleId) throws IOException {
 		return retrieveBundle(bundleId).getLocation();
 	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public long[] getRequiredBundles(long bundleIdentifier) throws IOException {
-        BundleWiring wiring = retrieveBundle(bundleIdentifier).adapt(BundleWiring.class);
-        List<BundleWire> requiredWires = wiring.getRequiredWires(BundleRevision.BUNDLE_NAMESPACE);
-        return bundleWiresToProviderIds(requiredWires);
-    }
 
 	/**
 	 * {@inheritDoc}
@@ -285,36 +287,11 @@ public final class BundleState extends Monitor implements BundleStateMBean {
 		}
 		return b;
 	}
-
-	private long[] bundleWiresToRequirerIds(List<BundleWire> wires){
-        long[] consumerWirings = new long[wires.size()];
-        int i = 0;
-        for (BundleWire bundleWire : wires) {
-            consumerWirings[i] = bundleWire.getRequirerWiring().getBundle().getBundleId();
-            i++;
-        }
-        return consumerWirings;
-	}
-
-	private long[] bundleWiresToProviderIds(List<BundleWire> wires){
-        long[] consumerWirings = new long[wires.size()];
-        int i = 0;
-        for (BundleWire bundleWire : wires) {
-            consumerWirings[i] = bundleWire.getProviderWiring().getBundle().getBundleId();
-            i++;
-        }
-        return consumerWirings;
-	}
-
-	private long[] serviceIds(ServiceReference<?>[] refs) {
-		if (refs == null) {
-			return new long[0];
-		}
-		long[] ids = new long[refs.length];
-		for (int i = 0; i < refs.length; i++) {
-			ids[i] = (Long) refs[i].getProperty(Constants.SERVICE_ID);
-		}
-		return ids;
+	
+	private long[] convertToPrimativeArray(Long[] src){
+		long[] dest = new long[src.length];
+        System.arraycopy(src, 0, dest, 0, src.length);
+        return dest;
 	}
 	
 	//Monitor methods

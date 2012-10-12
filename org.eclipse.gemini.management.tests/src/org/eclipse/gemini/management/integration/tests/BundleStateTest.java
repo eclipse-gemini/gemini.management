@@ -245,35 +245,45 @@ public final class BundleStateTest extends AbstractOSGiMBeanTest{
     private Long[] getRequiredBundles(Bundle bundle) {
         BundleWiring wiring = bundle.adapt(BundleWiring.class);
         List<BundleWire> requiredWires = wiring.getRequiredWires(BundleRevision.BUNDLE_NAMESPACE);
-        return bundleWiresToIds(requiredWires);
+        return bundleWiresToProviderIds(requiredWires);
     }
 
     private Long[] getRequiringBundles(Bundle bundle) {
         BundleWiring wiring = bundle.adapt(BundleWiring.class);
         List<BundleWire> providedWires = wiring.getProvidedWires(BundleRevision.BUNDLE_NAMESPACE);
-        return bundleWiresToIds(providedWires);
+        return bundleWiresToRequirerIds(providedWires);
     }
 
 	private Long[] getBundleFragments(Bundle bundle) {
 		BundleWiring wiring = bundle.adapt(BundleWiring.class);
 		List<BundleWire> requiredWires = wiring.getRequiredWires(BundleRevision.HOST_NAMESPACE);
-        return bundleWiresToIds(requiredWires);
+        return bundleWiresToProviderIds(requiredWires);
 	}
 
 	private Long[] getBundleHosts(Bundle bundle) {
 		BundleWiring wiring = bundle.adapt(BundleWiring.class);
 		List<BundleWire> providedWires = wiring.getProvidedWires(BundleRevision.HOST_NAMESPACE);
-        return bundleWiresToIds(providedWires);
+        return bundleWiresToRequirerIds(providedWires);
 	}
 
-	private Long[] bundleWiresToIds(List<BundleWire> wires){
-        Long[] consumerWirings = new Long[wires.size()];
+	private Long[] bundleWiresToRequirerIds(List<BundleWire> wires){
+        Long[] requirerIds = new Long[wires.size()];
         int i = 0;
         for (BundleWire bundleWire : wires) {
-            consumerWirings[i] = bundleWire.getRequirerWiring().getBundle().getBundleId();
+            requirerIds[i] = bundleWire.getRequirerWiring().getBundle().getBundleId();
             i++;
         }
-        return consumerWirings;
+        return requirerIds;
+	}
+
+	private Long[] bundleWiresToProviderIds(List<BundleWire> wires){
+        Long[] providerIds = new Long[wires.size()];
+        int i = 0;
+        for (BundleWire bundleWire : wires) {
+            providerIds[i] = bundleWire.getProviderWiring().getBundle().getBundleId();
+            i++;
+        }
+        return providerIds;
 	}
 	
 	private Long[] serviceIds(ServiceReference<?>[] refs) {
