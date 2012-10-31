@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.eclipse.gemini.management</groupId>
 		<artifactId>org.eclipse.gemini.management_parent</artifactId>
-		<version>1.0.4-SNAPSHOT</version>
+		<version>1.0.4.RELEASE</version>
 		<relativePath>../gemini.management.releng/pom.xml</relativePath>
 	</parent>
 
@@ -14,8 +14,8 @@
 	<name>Gemini Management Update Site</name>
 
 	<properties>
-		<site-folder-name>nightly</site-folder-name>
-		<zip-folder-name>nightly-zips</zip-folder-name>
+		<site-folder-name>release</site-folder-name>
+		<zip-folder-name>release-zips</zip-folder-name>
 	</properties>
 
 	<build>
