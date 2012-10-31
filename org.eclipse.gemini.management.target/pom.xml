@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.eclipse.gemini.management</groupId>
 		<artifactId>org.eclipse.gemini.management_parent</artifactId>
-		<version>1.0.4.RELEASE</version>
+		<version>1.0.5-SNAPSHOT</version>
 		<relativePath>../gemini.management.releng/pom.xml</relativePath>
 	</parent>
 
