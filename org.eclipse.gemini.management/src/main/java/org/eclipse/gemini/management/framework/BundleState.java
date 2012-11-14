@@ -102,15 +102,12 @@ public final class BundleState extends Monitor implements CustomBundleStateMBean
 	 */
 	public long[] getFragments(long bundleId) throws IOException {
 		BundleWiring wiring = retrieveBundle(bundleId).adapt(BundleWiring.class);
-		List<BundleWire> requiredWires = wiring.getProvidedWires(BundleRevision.HOST_NAMESPACE);
-        return convertToPrimativeArray(OSGiBundle.bundleWiresToRequirerIds(requiredWires));
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public TabularData getHeaders(long bundleId) throws IOException {
-		return OSGiBundle.headerTable(retrieveBundle(bundleId).getHeaders());
+        if(wiring == null) {
+        	return new long[0];
+        } else {
+        	List<BundleWire> providedWires = wiring.getProvidedWires(BundleRevision.HOST_NAMESPACE);
+        	return convertToPrimativeArray(OSGiBundle.bundleWiresToRequirerIds(providedWires));
+        }
 	}
 
 	/**
@@ -118,8 +115,19 @@ public final class BundleState extends Monitor implements CustomBundleStateMBean
 	 */
 	public long[] getHosts(long fragment) throws IOException {
 		BundleWiring wiring = retrieveBundle(fragment).adapt(BundleWiring.class);
-		List<BundleWire> providedWires = wiring.getRequiredWires(BundleRevision.HOST_NAMESPACE);
-        return convertToPrimativeArray(OSGiBundle.bundleWiresToProviderIds(providedWires));
+        if(wiring == null) {
+        	return new long[0];
+        } else {
+        	List<BundleWire> requiredWires = wiring.getRequiredWires(BundleRevision.HOST_NAMESPACE);
+        	return convertToPrimativeArray(OSGiBundle.bundleWiresToProviderIds(requiredWires));
+        }
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public TabularData getHeaders(long bundleId) throws IOException {
+		return OSGiBundle.headerTable(retrieveBundle(bundleId).getHeaders());
 	}
 	
 	/**
@@ -149,8 +157,12 @@ public final class BundleState extends Monitor implements CustomBundleStateMBean
 	 */
 	public long[] getRequiringBundles(long bundleId) throws IOException {
         BundleWiring wiring = retrieveBundle(bundleId).adapt(BundleWiring.class);
-        List<BundleWire> providedWires = wiring.getProvidedWires(BundleRevision.BUNDLE_NAMESPACE);
-        return convertToPrimativeArray(OSGiBundle.bundleWiresToRequirerIds(providedWires));
+        if(wiring == null) {
+        	return new long[0];
+        } else {
+        	List<BundleWire> providedWires = wiring.getProvidedWires(BundleRevision.BUNDLE_NAMESPACE);
+        	return convertToPrimativeArray(OSGiBundle.bundleWiresToRequirerIds(providedWires));
+        }
     }
 	/**
 	 * {@inheritDoc}
@@ -193,8 +205,12 @@ public final class BundleState extends Monitor implements CustomBundleStateMBean
 	 */
 	public long[] getRequiredBundles(long bundleIdentifier) throws IOException {
         BundleWiring wiring = retrieveBundle(bundleIdentifier).adapt(BundleWiring.class);
-        List<BundleWire> requiredWires = wiring.getRequiredWires(BundleRevision.BUNDLE_NAMESPACE);
-        return convertToPrimativeArray(OSGiBundle.bundleWiresToProviderIds(requiredWires));
+        if(wiring == null) {
+        	return new long[0];
+        } else {
+        	List<BundleWire> requiredWires = wiring.getRequiredWires(BundleRevision.BUNDLE_NAMESPACE);
+        	return convertToPrimativeArray(OSGiBundle.bundleWiresToProviderIds(requiredWires));
+        }
     }
 
 	/**
@@ -301,7 +317,9 @@ public final class BundleState extends Monitor implements CustomBundleStateMBean
 	
 	private long[] convertToPrimativeArray(Long[] src){
 		long[] dest = new long[src.length];
-        System.arraycopy(src, 0, dest, 0, src.length);
+		for (int i = 0; i < src.length; i++) {
+			dest[i] = (long) src[i];
+		}
         return dest;
 	}
 	

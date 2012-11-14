@@ -460,8 +460,12 @@ public final class OSGiBundle {
 	 */
 	private Long[] getFragments() {
 		BundleWiring wiring = bundle.adapt(BundleWiring.class);
-		List<BundleWire> requiredWires = wiring.getRequiredWires(BundleRevision.HOST_NAMESPACE);
-        return OSGiBundle.bundleWiresToProviderIds(requiredWires);
+        if(wiring == null) {
+        	return new Long[0];
+        } else {
+        	List<BundleWire> providedWires = wiring.getProvidedWires(BundleRevision.HOST_NAMESPACE);
+        	return OSGiBundle.bundleWiresToRequirerIds(providedWires);
+        }
 	}
 
 	/**
@@ -469,8 +473,12 @@ public final class OSGiBundle {
 	 */
 	private Long[] getHosts() {
 		BundleWiring wiring = bundle.adapt(BundleWiring.class);
-		List<BundleWire> providedWires = wiring.getProvidedWires(BundleRevision.HOST_NAMESPACE);
-        return OSGiBundle.bundleWiresToRequirerIds(providedWires);
+        if(wiring == null) {
+        	return new Long[0];
+        } else {
+        	List<BundleWire> requiredWires = wiring.getRequiredWires(BundleRevision.HOST_NAMESPACE);
+        	return OSGiBundle.bundleWiresToProviderIds(requiredWires);
+        }
 	}
 	
 	/**
@@ -515,8 +523,12 @@ public final class OSGiBundle {
 	 */
 	private Long[] getRequiredBundles() throws IOException {
         BundleWiring wiring = bundle.adapt(BundleWiring.class);
-        List<BundleWire> requiredWires = wiring.getRequiredWires(BundleRevision.BUNDLE_NAMESPACE);
-        return OSGiBundle.bundleWiresToProviderIds(requiredWires);
+        if(wiring == null) {
+        	return new Long[0];
+        } else {
+        	List<BundleWire> requiredWires = wiring.getRequiredWires(BundleRevision.BUNDLE_NAMESPACE);
+        	return OSGiBundle.bundleWiresToProviderIds(requiredWires);
+        }
 	}
 
 	/**
@@ -525,8 +537,12 @@ public final class OSGiBundle {
 	 */
 	private Long[] getRequiringBundles() throws IOException {
         BundleWiring wiring = bundle.adapt(BundleWiring.class);
-        List<BundleWire> providedWires = wiring.getProvidedWires(BundleRevision.BUNDLE_NAMESPACE);
-        return OSGiBundle.bundleWiresToRequirerIds(providedWires);
+        if(wiring == null) {
+        	return new Long[0];
+        } else {
+        	List<BundleWire> providedWires = wiring.getProvidedWires(BundleRevision.BUNDLE_NAMESPACE);
+        	return OSGiBundle.bundleWiresToRequirerIds(providedWires);
+        }
 	}
 
 	/**
