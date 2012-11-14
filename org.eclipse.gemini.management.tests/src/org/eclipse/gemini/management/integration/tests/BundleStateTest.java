@@ -423,14 +423,14 @@ public final class BundleStateTest extends AbstractOSGiMBeanTest{
 
 	private Long[] getBundleFragments(Bundle bundle) {
 		BundleWiring wiring = bundle.adapt(BundleWiring.class);
-		List<BundleWire> requiredWires = wiring.getRequiredWires(BundleRevision.HOST_NAMESPACE);
-        return bundleWiresToProviderIds(requiredWires);
+		List<BundleWire> providedWires = wiring.getProvidedWires(BundleRevision.HOST_NAMESPACE);
+        return bundleWiresToRequirerIds(providedWires);
 	}
 
 	private Long[] getBundleHosts(Bundle bundle) {
 		BundleWiring wiring = bundle.adapt(BundleWiring.class);
-		List<BundleWire> providedWires = wiring.getProvidedWires(BundleRevision.HOST_NAMESPACE);
-        return bundleWiresToRequirerIds(providedWires);
+		List<BundleWire> requiredWires = wiring.getRequiredWires(BundleRevision.HOST_NAMESPACE);
+        return bundleWiresToProviderIds(requiredWires);
 	}
 
 	private Long[] bundleWiresToRequirerIds(List<BundleWire> wires){
