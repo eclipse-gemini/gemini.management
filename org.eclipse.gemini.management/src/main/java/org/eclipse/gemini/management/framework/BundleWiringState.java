@@ -75,8 +75,11 @@ public final class BundleWiringState implements BundleWiringStateMBean {
 	public CompositeData getCurrentWiring(long bundleId, String namespace) throws IOException {
 		namespace = processNamespace(namespace);
 		BundleWiring wiring = getBundle(bundleId).adapt(BundleWiring.class);
-		OSGiBundleRevisionIdTracker revisionTracker = new OSGiBundleRevisionIdTracker();
-		return new OSGiBundleWiring(wiring).asCompositeData(namespace, revisionTracker);
+		if(wiring != null){
+			return new OSGiBundleWiring(wiring).asCompositeData(namespace, revisionTracker);
+		}else{
+			return null;
+		}
 	}
 	
 	/**
@@ -134,7 +137,10 @@ public final class BundleWiringState implements BundleWiringStateMBean {
 		TabularDataSupport table = new TabularDataSupport(BundleWiringStateMBean.BUNDLES_WIRING_TYPE);
 		OSGiBundleRevisionIdTracker revisionTracker = new OSGiBundleRevisionIdTracker();
 		for (BundleRevision bundleRevision : bundleRevisions) {
-			table.put(new OSGiBundleWiring(bundleRevision.getWiring()).asCompositeData(namespace, revisionTracker));
+			BundleWiring wiring = bundleRevision.getWiring();
+			if(wiring != null){
+				table.put(new OSGiBundleWiring(wiring).asCompositeData(namespace, revisionTracker));
+			}
 		}
 		return table;
 	}
@@ -182,11 +188,13 @@ public final class BundleWiringState implements BundleWiringStateMBean {
 	 * @param namespace
 	 */
 	private void processWiring(Map<BundleRevision, OSGiBundleWiring> mappings, BundleWiring wiring, String namespace){
-		BundleRevision bundleRevision = wiring.getRevision();
-		if(!mappings.containsKey(bundleRevision)) {
-			mappings.put(bundleRevision, new OSGiBundleWiring(wiring));
-			processRequiredWirings(mappings, wiring, namespace);
-			processProvidedWirings(mappings, wiring, namespace);
+		if(wiring != null){
+			BundleRevision bundleRevision = wiring.getRevision();
+			if(!mappings.containsKey(bundleRevision)) {
+				mappings.put(bundleRevision, new OSGiBundleWiring(wiring));
+				processRequiredWirings(mappings, wiring, namespace);
+				processProvidedWirings(mappings, wiring, namespace);
+			}
 		}
 	}
 	
