@@ -69,7 +69,11 @@ public final class BundleWiringState implements CustomBundleWiringStateMBean {
 	public CompositeData getCurrentWiring(long bundleId, String namespace) throws IOException {
 		namespace = processNamespace(namespace);
 		BundleWiring wiring = getBundle(bundleId).adapt(BundleWiring.class);
-		return new OSGiBundleWiring(wiring).asCompositeData(namespace);
+		if(wiring != null){
+			return new OSGiBundleWiring(wiring).asCompositeData(namespace);
+		}else{
+			return null;
+		}
 	}
 
 	/**
@@ -127,7 +131,10 @@ public final class BundleWiringState implements CustomBundleWiringStateMBean {
 		TabularDataSupport table = new TabularDataSupport(CustomBundleWiringStateMBean.BUNDLE_REVISIONS_WIRINGS_TYPE);
 		OSGiBundleRevisionIdTracker revisionTracker = new OSGiBundleRevisionIdTracker();
 		for (BundleRevision bundleRevision : bundleRevisions) {
-			table.put(new OSGiBundleWiring(bundleRevision.getWiring()).asCompositeData(namespace, revisionTracker));
+			BundleWiring wiring = bundleRevision.getWiring();
+			if(wiring != null){
+				table.put(new OSGiBundleWiring(wiring).asCompositeData(namespace, revisionTracker));
+			}
 		}
 		return table;
 	}
@@ -175,11 +182,13 @@ public final class BundleWiringState implements CustomBundleWiringStateMBean {
 	 * @param namespace
 	 */
 	private void processWiring(Map<BundleRevision, OSGiBundleWiring> mappings, BundleWiring wiring, String namespace){
-		BundleRevision bundleRevision = wiring.getRevision();
-		if(!mappings.containsKey(bundleRevision)) {
-			mappings.put(bundleRevision, new OSGiBundleWiring(wiring));
-			processRequiredWirings(mappings, wiring, namespace);
-			processProvidedWirings(mappings, wiring, namespace);
+		if(wiring != null){
+			BundleRevision bundleRevision = wiring.getRevision();
+			if(!mappings.containsKey(bundleRevision)) {
+				mappings.put(bundleRevision, new OSGiBundleWiring(wiring));
+				processRequiredWirings(mappings, wiring, namespace);
+				processProvidedWirings(mappings, wiring, namespace);
+			}
 		}
 	}
 	
