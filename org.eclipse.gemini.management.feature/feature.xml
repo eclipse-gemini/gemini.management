@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.gemini.management.feature"
       label="Feature"
-      version="1.0.5.qualifier">
+      version="1.0.5.RELEASE">
 
    <description url="http://www.example.com/description">
       [Enter Feature Description here.]
