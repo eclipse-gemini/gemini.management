@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.management.openmbean.CompositeData;
+import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularDataSupport;
 
@@ -73,6 +74,8 @@ public final class BundleWiringState implements CustomBundleWiringStateMBean {
 			return new OSGiBundleWiring(wiring).asCompositeData(namespace);
 		}else{
 			return null;
+			//Would be better returning 
+			//return new CompositeDataSupport(CustomBundleWiringStateMBean.BUNDLE_WIRING_TYPE, new HashMap<String, Object>());
 		}
 	}
 
