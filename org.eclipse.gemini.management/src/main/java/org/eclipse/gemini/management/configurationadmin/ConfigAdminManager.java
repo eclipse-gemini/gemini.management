@@ -144,7 +144,6 @@ public final class ConfigAdminManager implements ConfigurationAdminMBean {
 		if (pid == null) {
 			throw new IOException("PID must not be null");
 		}
-		@SuppressWarnings("unchecked")
 		Dictionary<String, Object> properties = admin.getConfiguration(pid, null).getProperties();
 		return properties == null ? null : tableFrom(properties);
 	}
@@ -157,7 +156,6 @@ public final class ConfigAdminManager implements ConfigurationAdminMBean {
 		if (pid == null) {
 			throw new IOException("PID must not be null");
 		}
-		@SuppressWarnings("unchecked")
 		Dictionary<String, Object> properties = admin.getConfiguration(pid, location).getProperties();
 		return properties == null ? null : tableFrom(properties);
 	}

@@ -17,7 +17,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.management.openmbean.CompositeData;
-import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularDataSupport;
 
