@@ -16,6 +16,7 @@
 package org.eclipse.gemini.management;
 
 import java.lang.management.ManagementFactory;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -39,6 +40,7 @@ import org.eclipse.gemini.management.framework.ServiceState;
 import org.eclipse.gemini.management.permissionadmin.PermissionManager;
 import org.eclipse.gemini.management.provisioning.Provisioning;
 import org.eclipse.gemini.management.useradmin.UserManager;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -65,13 +67,15 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
  */
 @SuppressWarnings("deprecation")
 public class Activator implements BundleActivator {
+
+	private static final String REGION_KEY = "region";
 	
+	private static final String REGION_SUPPORT = "org.eclipse.gemini.management.region.support";
+		
 	private final List<MBeanServer> mbeanServers = new CopyOnWriteArrayList<MBeanServer>();
 	
 	private final AtomicBoolean servicesRegistered = new AtomicBoolean(false);
-	
-    private ObjectNameTranslator objectNameTranslator;
-	
+		
 	private ObjectName frameworkName;
 	
 	private ObjectName bundleStateName;
@@ -113,7 +117,9 @@ public class Activator implements BundleActivator {
 	private ServiceTracker<UserAdmin, ?> userAdminTracker;
 	
 	private ServiceTracker<LogService, ?> logServiceTracker;
-	
+
+	private String regionName;
+
 	private LogService logger;
 	
 	private void log (int level, String message) {
@@ -149,8 +155,15 @@ public class Activator implements BundleActivator {
 	 */
 	public void start(BundleContext bundleContext) throws Exception {
 		logServiceTracker = new ServiceTracker<LogService, Object>(bundleContext, LogService.class, new LogServiceTracker());
-		logServiceTracker.open();
-        objectNameTranslator = DefaultObjectNameTranslator.initialiseObjectNameTranslator(bundleContext, logger);
+		logServiceTracker.open();        
+		String regionSupportProperty = bundleContext.getProperty(REGION_SUPPORT);
+		if(regionSupportProperty != null && Boolean.valueOf(regionSupportProperty)){
+			ServiceReference<?> service = bundleContext.getServiceReference("org.eclipse.equinox.region.Region");
+			Object regionService = bundleContext.getService(service);
+			this.regionName = (String) regionService.getClass().getDeclaredMethod("getRegion", Bundle.class).invoke(regionService, bundleContext.getBundle());
+		} else {
+			this.regionName = null;
+		}
         createObjectNames();
 		this.bundleContext = bundleContext;
 		registerDefaultMBeanServer();
@@ -160,7 +173,18 @@ public class Activator implements BundleActivator {
 	}
 	
     private ObjectName translateObjectName(String objectName) throws MalformedObjectNameException {
-        return this.objectNameTranslator.translate(new ObjectName(objectName));
+    	ObjectName originalName = new ObjectName(objectName);
+    	if(this.regionName != null){
+    		Hashtable<String, String> keyPropertyList = originalName.getKeyPropertyList();
+    		keyPropertyList.put(REGION_KEY, regionName);
+    		try {
+    			return new ObjectName(originalName.getDomain(), keyPropertyList);
+    		} catch (Exception e) {
+    			throw new RuntimeException("Error modifying ObjectName for '" + originalName.getCanonicalName() + "'", e);
+    		}
+    	}else{
+    		return originalName;
+    	}
     }
     
     private void registerDefaultMBeanServer () {
