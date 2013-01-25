@@ -184,6 +184,7 @@ public class Activator implements BundleActivator {
 			deregisterServices(mbeanServer);
 		}
 		mbeanServers.clear();
+		logServiceTracker.close();
 	}
 
 	/**

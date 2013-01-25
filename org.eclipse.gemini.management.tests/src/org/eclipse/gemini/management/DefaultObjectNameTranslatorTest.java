@@ -16,16 +16,18 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
 
+import org.easymock.EasyMock;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.Assert;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.BundleWire;
 import org.osgi.framework.wiring.BundleWiring;
-import org.easymock.EasyMock;
+import org.osgi.service.log.LogService;
 
 public class DefaultObjectNameTranslatorTest {
 
@@ -48,6 +50,8 @@ public class DefaultObjectNameTranslatorTest {
 	private BundleWire mockBundleWire;
 
 	private BundleWiring mockBundleWiring;
+	
+	private LogService stubLogService;
 
     @Before
     public void setUp() throws Exception {
@@ -64,6 +68,23 @@ public class DefaultObjectNameTranslatorTest {
         EasyMock.expect(mockBundleWire.getRequirerWiring()).andReturn(mockBundleWiring);
         EasyMock.expect(mockBundleWiring.getBundle()).andReturn(mockBundle);
         EasyMock.expect(mockBundle.getHeaders()).andReturn(headers);
+        this.stubLogService = new LogService() {
+			@Override
+			public void log(ServiceReference arg0, int arg1, String arg2, Throwable arg3) {
+			}
+			
+			@Override
+			public void log(ServiceReference arg0, int arg1, String arg2) {
+			}
+			
+			@Override
+			public void log(int arg0, String arg1, Throwable arg2) {
+			}
+			
+			@Override
+			public void log(int arg0, String arg1) {
+			}
+		};
     }
 
     private void replayMocks() {
@@ -78,7 +99,7 @@ public class DefaultObjectNameTranslatorTest {
     @Test
     public void testDefaultObjectNameTranslator() throws Exception {
         replayMocks();
-        ObjectNameTranslator defaultObjectNameTranslator = DefaultObjectNameTranslator.initialiseObjectNameTranslator(mockBundleContext);
+        ObjectNameTranslator defaultObjectNameTranslator = DefaultObjectNameTranslator.initialiseObjectNameTranslator(mockBundleContext, this.stubLogService);
         Assert.assertTrue("Default ObjectNameTranslator has the wrong type", defaultObjectNameTranslator instanceof DefaultObjectNameTranslator);
     }
 
@@ -88,7 +109,7 @@ public class DefaultObjectNameTranslatorTest {
         EasyMock.expect((Class) mockBundle.loadClass(TEST_OBJECT_NAME_TRANSLATOR_CLASS_NAME)).andReturn(TestObjectNameTranslator.class);
         replayMocks();
         headers.put(ObjectNameTranslator.HEADER_NAME, TEST_OBJECT_NAME_TRANSLATOR_CLASS_NAME);
-        ObjectNameTranslator testObjectNameTranslator = DefaultObjectNameTranslator.initialiseObjectNameTranslator(mockBundleContext);
+        ObjectNameTranslator testObjectNameTranslator = DefaultObjectNameTranslator.initialiseObjectNameTranslator(mockBundleContext, this.stubLogService);
         Assert.assertTrue("Test ObjectNameTranslator has the wrong type", testObjectNameTranslator instanceof TestObjectNameTranslator);
     }
 
@@ -98,7 +119,7 @@ public class DefaultObjectNameTranslatorTest {
         EasyMock.expect((Class) mockBundle.loadClass(UNLOADABLE_CLASS_NAME)).andThrow(TEST_CLASS_NOT_FOUND_EXCEPTION);
         replayMocks();
         headers.put(ObjectNameTranslator.HEADER_NAME, UNLOADABLE_CLASS_NAME);
-        DefaultObjectNameTranslator.initialiseObjectNameTranslator(mockBundleContext);
+        DefaultObjectNameTranslator.initialiseObjectNameTranslator(mockBundleContext, this.stubLogService);
     }
 
     @SuppressWarnings("rawtypes")
@@ -107,7 +128,7 @@ public class DefaultObjectNameTranslatorTest {
         EasyMock.expect((Class) mockBundle.loadClass(NOT_A_OBJECT_NAME_TRANSLATOR_CLASS_NAME)).andReturn(DefaultObjectNameTranslatorTest.class);
         replayMocks();
         headers.put(ObjectNameTranslator.HEADER_NAME, NOT_A_OBJECT_NAME_TRANSLATOR_CLASS_NAME);
-        ObjectNameTranslator defaultObjectNameTranslator = DefaultObjectNameTranslator.initialiseObjectNameTranslator(mockBundleContext);
+        ObjectNameTranslator defaultObjectNameTranslator = DefaultObjectNameTranslator.initialiseObjectNameTranslator(mockBundleContext, this.stubLogService);
         Assert.assertTrue("Test ObjectNameTranslator has the wrong type", defaultObjectNameTranslator instanceof DefaultObjectNameTranslator);
     }
 
@@ -116,7 +137,7 @@ public class DefaultObjectNameTranslatorTest {
         EasyMock.expect((Class) mockBundle.loadClass(UNINSTANTIABLE_OBJECT_NAME_TRANSLATOR_CLASS_NAME)).andReturn(UninstantiableObjectNameTranslator.class);
         replayMocks();
         headers.put(ObjectNameTranslator.HEADER_NAME, UNINSTANTIABLE_OBJECT_NAME_TRANSLATOR_CLASS_NAME);
-        ObjectNameTranslator defaultObjectNameTranslator = DefaultObjectNameTranslator.initialiseObjectNameTranslator(mockBundleContext);
+        ObjectNameTranslator defaultObjectNameTranslator = DefaultObjectNameTranslator.initialiseObjectNameTranslator(mockBundleContext, this.stubLogService);
         Assert.assertTrue("Default ObjectNameTranslator has the wrong type", defaultObjectNameTranslator instanceof DefaultObjectNameTranslator);
     }
 

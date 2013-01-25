@@ -75,6 +75,7 @@ public final class BundleWiringState implements BundleWiringStateMBean {
 	public CompositeData getCurrentWiring(long bundleId, String namespace) throws IOException {
 		namespace = processNamespace(namespace);
 		BundleWiring wiring = getBundle(bundleId).adapt(BundleWiring.class);
+		OSGiBundleRevisionIdTracker revisionTracker = new OSGiBundleRevisionIdTracker();
 		if(wiring != null){
 			return new OSGiBundleWiring(wiring).asCompositeData(namespace, revisionTracker);
 		}else{

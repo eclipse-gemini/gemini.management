@@ -21,8 +21,6 @@ import static org.eclipse.gemini.management.internal.OSGiProperties.tableFrom;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Dictionary;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.management.openmbean.TabularData;
 

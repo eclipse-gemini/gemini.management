@@ -12,7 +12,6 @@
 package org.eclipse.gemini.management;
 
 import java.util.List;
-import java.util.logging.Logger;
 
 import javax.management.ObjectName;
 
