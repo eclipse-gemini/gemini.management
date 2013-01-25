@@ -30,6 +30,7 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.jmx.service.cm.ConfigurationAdminMBean;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.log.LogService;
 
 /** 
  * 
@@ -38,10 +39,17 @@ public final class ConfigAdminManager implements ConfigurationAdminMBean {
 
 	private final ConfigurationAdmin admin;
 	
-	private static final Logger log = Logger.getLogger(ConfigAdminManager.class.getCanonicalName());
+	private final LogService logger;
 
-	public ConfigAdminManager(ConfigurationAdmin admin) {
+	public ConfigAdminManager(ConfigurationAdmin admin, LogService logger) {
 		this.admin = admin;
+		this.logger = logger;
+	}
+	
+	private void log(int level, String message, Throwable t) {
+		if (logger != null) {
+			logger.log(level, message, t);
+		}
 	}
 
 	/**
@@ -96,7 +104,7 @@ public final class ConfigAdminManager implements ConfigurationAdminMBean {
 		try {
 			confs = admin.listConfigurations(filter);
 		} catch (InvalidSyntaxException e) {
-			log.log(Level.SEVERE, "Invalid filter argument: " + filter, e);
+			log(LogService.LOG_ERROR, "Invalid filter argument: " + filter, e);
 			throw new IOException("Invalid filter: " + e);
 		}
 		if (confs != null) {
@@ -169,7 +177,7 @@ public final class ConfigAdminManager implements ConfigurationAdminMBean {
 		try {
 			configurations = admin.listConfigurations(filter);
 		} catch (InvalidSyntaxException e) {
-			log.log(Level.SEVERE, "Invalid filter argument: " + filter, e);
+			log(LogService.LOG_ERROR, "Invalid filter argument: " + filter, e);
 			throw new IOException("Invalid filter: " + e);
 		}
 		if (configurations != null) {

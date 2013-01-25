@@ -21,6 +21,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.BundleWire;
 import org.osgi.framework.wiring.BundleWiring;
+import org.osgi.service.log.LogService;
 
 /**
  * {@link DefaultObjectNameTranslator} is a default implementation of {@link ObjectNameTranslator} which maps each
@@ -32,7 +33,7 @@ import org.osgi.framework.wiring.BundleWiring;
  */
 final class DefaultObjectNameTranslator implements ObjectNameTranslator {
 
-	private static final Logger LOGGER = Logger.getLogger(DefaultObjectNameTranslator.class.getCanonicalName());
+//	private static final Logger LOGGER = Logger.getLogger(DefaultObjectNameTranslator.class.getCanonicalName());
 	
     /**
      * {@inheritDoc}
@@ -52,7 +53,7 @@ final class DefaultObjectNameTranslator implements ObjectNameTranslator {
      * @throws InstantiationException if the configured class cannot be instantiated
      * @throws IllegalAccessException if the configured class or its default constructor is not accessible
      */
-    static ObjectNameTranslator initialiseObjectNameTranslator(BundleContext bundleContext) throws ClassNotFoundException, InstantiationException,
+    static ObjectNameTranslator initialiseObjectNameTranslator(BundleContext bundleContext, LogService logger) throws ClassNotFoundException, InstantiationException,
         IllegalAccessException {
         Bundle bundle = bundleContext.getBundle();
 		BundleWiring wiring = bundle.adapt(BundleWiring.class);
@@ -66,10 +67,14 @@ final class DefaultObjectNameTranslator implements ObjectNameTranslator {
 			        try {
 						return (ObjectNameTranslator) objectNameTranslatorClass.getConstructor(BundleContext.class).newInstance(bundleContext);
 					} catch (Exception e) {
-						LOGGER.warning(String.format("Unable to create ObjectNameTranslator from fragment %d '%s'", fragment.getBundleId(), e.getMessage()));
+						if (logger != null) {
+							logger.log(LogService.LOG_WARNING, String.format("Unable to create ObjectNameTranslator from fragment %d '%s'", fragment.getBundleId(), e.getMessage()));
+						}
 					} 
 		        } else {
-					LOGGER.warning(String.format("Unable to create ObjectNameTranslator as specified class '%s' is not an assignable to '%s'", objectNameTranslator, ObjectNameTranslator.class.getName()));
+		        	if (logger != null) {
+		        		logger.log(LogService.LOG_WARNING, String.format("Unable to create ObjectNameTranslator as specified class '%s' is not an assignable to '%s'", objectNameTranslator, ObjectNameTranslator.class.getName()));
+		        	}
 		        }
 			}
 		}
