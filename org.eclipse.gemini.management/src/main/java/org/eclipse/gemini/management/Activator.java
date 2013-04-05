@@ -16,7 +16,6 @@
 package org.eclipse.gemini.management;
 
 import java.lang.management.ManagementFactory;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -43,6 +42,7 @@ import org.eclipse.gemini.management.useradmin.UserManager;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.jmx.framework.BundleStateMBean;
 import org.osgi.jmx.framework.FrameworkMBean;
@@ -69,12 +69,20 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 public class Activator implements BundleActivator {
 
 	private static final String REGION_KEY = "region";
+
+	private static final String FRAMEWORK_KEY = "framework";
+
+	private static final String UUID_KEY = "uuid";
 	
 	private static final String REGION_SUPPORT = "org.eclipse.gemini.management.region.support";
 		
 	private final List<MBeanServer> mbeanServers = new CopyOnWriteArrayList<MBeanServer>();
 	
 	private final AtomicBoolean servicesRegistered = new AtomicBoolean(false);
+	
+	private final Object myLock = new Object();
+	
+	private final AtomicBoolean shuttingdown = new AtomicBoolean(false);
 		
 	private ObjectName frameworkName;
 	
@@ -136,15 +144,15 @@ public class Activator implements BundleActivator {
 
 	private void createObjectNames() {
 		try {
-			frameworkName = translateObjectName(FrameworkMBean.OBJECTNAME);
-			bundleStateName = translateObjectName(BundleStateMBean.OBJECTNAME);
-			bundleWiringStateName = translateObjectName(BundleWiringStateMBean.OBJECTNAME);
-			serviceStateName = translateObjectName(CustomServiceStateMBean.OBJECTNAME);
-			packageStateName = translateObjectName(PackageStateMBean.OBJECTNAME);
-			configAdminName = translateObjectName(ConfigurationAdminMBean.OBJECTNAME);
-			permissionAdminName = translateObjectName(PermissionAdminMBean.OBJECTNAME);
-			provisioningServiceName = translateObjectName(ProvisioningServiceMBean.OBJECTNAME);
-			userAdminName = translateObjectName(UserAdminMBean.OBJECTNAME);		
+			frameworkName = translateObjectName(FrameworkMBean.OBJECTNAME, true);
+			bundleStateName = translateObjectName(BundleStateMBean.OBJECTNAME, true);
+			bundleWiringStateName = translateObjectName(BundleWiringStateMBean.OBJECTNAME, true);
+			serviceStateName = translateObjectName(CustomServiceStateMBean.OBJECTNAME, true);
+			packageStateName = translateObjectName(PackageStateMBean.OBJECTNAME, false);
+			configAdminName = translateObjectName(ConfigurationAdminMBean.OBJECTNAME, false);
+			permissionAdminName = translateObjectName(PermissionAdminMBean.OBJECTNAME, false);
+			provisioningServiceName = translateObjectName(ProvisioningServiceMBean.OBJECTNAME, false);
+			userAdminName = translateObjectName(UserAdminMBean.OBJECTNAME, false);
 		} catch (Exception e) {
 			throw new IllegalStateException("Unable to start Gemini Management, Object name creation failed.", e);
 		}
@@ -154,6 +162,7 @@ public class Activator implements BundleActivator {
 	 * {@inheritDoc}
 	 */
 	public void start(BundleContext bundleContext) throws Exception {
+		this.bundleContext = bundleContext;
 		logServiceTracker = new ServiceTracker<LogService, Object>(bundleContext, LogService.class, new LogServiceTracker());
 		logServiceTracker.open();        
 		String regionSupportProperty = bundleContext.getProperty(REGION_SUPPORT);
@@ -165,26 +174,22 @@ public class Activator implements BundleActivator {
 			this.regionName = null;
 		}
         createObjectNames();
-		this.bundleContext = bundleContext;
 		registerDefaultMBeanServer();
 		this.mbeanServiceTracker = new ServiceTracker<MBeanServer, Object>(this.bundleContext, MBeanServer.class, new MBeanServiceTracker());
 		log(LogService.LOG_INFO, "Awaiting initial MBeanServer service registration");
 		this.mbeanServiceTracker.open();
 	}
 	
-    private ObjectName translateObjectName(String objectName) throws MalformedObjectNameException {
-    	ObjectName originalName = new ObjectName(objectName);
-    	if(this.regionName != null){
-    		Hashtable<String, String> keyPropertyList = originalName.getKeyPropertyList();
-    		keyPropertyList.put(REGION_KEY, regionName);
-    		try {
-    			return new ObjectName(originalName.getDomain(), keyPropertyList);
-    		} catch (Exception e) {
-    			throw new RuntimeException("Error modifying ObjectName for '" + originalName.getCanonicalName() + "'", e);
-    		}
-    	}else{
-    		return originalName;
+    private ObjectName translateObjectName(String objectName, boolean addFrameworkAndUUID) throws MalformedObjectNameException {
+    	StringBuilder builder = new StringBuilder(objectName);
+    	if(addFrameworkAndUUID){
+    		builder.append("," + FRAMEWORK_KEY + "=" + this.bundleContext.getBundle(0).getSymbolicName());
+    		builder.append("," + UUID_KEY + "=" + this.bundleContext.getBundle(0).getBundleContext().getProperty(Constants.FRAMEWORK_UUID));
     	}
+    	if(this.regionName != null){
+    		builder.append("," + REGION_KEY + "=" + regionName);
+    	}
+    	return new ObjectName(builder.toString());
     }
     
     private void registerDefaultMBeanServer () {
@@ -203,9 +208,12 @@ public class Activator implements BundleActivator {
 	 * {@inheritDoc}
 	 */
 	public void stop(BundleContext arg0) throws Exception {
+		this.shuttingdown.set(true);
 		mbeanServiceTracker.close();
-		for (MBeanServer mbeanServer : mbeanServers) {
-			deregisterServices(mbeanServer);
+		synchronized (myLock) {
+			for (MBeanServer mbeanServer : mbeanServers) {
+				deregisterServices(mbeanServer);
+			}
 		}
 		mbeanServers.clear();
 		logServiceTracker.close();
@@ -222,7 +230,9 @@ public class Activator implements BundleActivator {
 		}
 		log(LogService.LOG_INFO, "Deregistering framework with MBeanServer: " + mbeanServer);
 		try {
-			mbeanServer.unregisterMBean(frameworkName);
+			if(mbeanServer.isRegistered(frameworkName)){
+				mbeanServer.unregisterMBean(frameworkName);
+			}
 		} catch (InstanceNotFoundException e) {
 			log(LogService.LOG_INFO, "FrameworkMBean not found on deregistration", e);
 		} catch (MBeanRegistrationException e) {
@@ -232,7 +242,9 @@ public class Activator implements BundleActivator {
 
 		log(LogService.LOG_INFO, "Deregistering bundle state with MBeanServer: " + mbeanServer);
 		try {
-			mbeanServer.unregisterMBean(bundleStateName);
+			if(mbeanServer.isRegistered(bundleStateName)){
+				mbeanServer.unregisterMBean(bundleStateName);
+			}
 		} catch (InstanceNotFoundException e) {
 			log(LogService.LOG_INFO, "OSGi BundleStateMBean not found on deregistration", e);
 		} catch (MBeanRegistrationException e) {
@@ -242,7 +254,9 @@ public class Activator implements BundleActivator {
 
 		log(LogService.LOG_INFO, "Deregistering bundle wiring state with MBeanServer: " + mbeanServer);
 		try {
-			mbeanServer.unregisterMBean(bundleWiringStateName);
+			if(mbeanServer.isRegistered(bundleWiringStateName)){
+				mbeanServer.unregisterMBean(bundleWiringStateName);
+			}
 		} catch (InstanceNotFoundException e) {
 			log(LogService.LOG_DEBUG, "OSGi BundleWiringStateMBean not found on deregistration", e);
 		} catch (MBeanRegistrationException e) {
@@ -252,7 +266,9 @@ public class Activator implements BundleActivator {
 		
 		log(LogService.LOG_INFO, "Deregistering services monitor with MBeanServer: " + mbeanServer);
 		try {
-			mbeanServer.unregisterMBean(serviceStateName);
+			if(mbeanServer.isRegistered(serviceStateName)){
+				mbeanServer.unregisterMBean(serviceStateName);
+			}
 		} catch (InstanceNotFoundException e) {
 			log(LogService.LOG_DEBUG, "OSGi ServiceStateMBean not found on deregistration", e);
 		} catch (MBeanRegistrationException e) {
@@ -262,7 +278,9 @@ public class Activator implements BundleActivator {
 
 		log(LogService.LOG_INFO, "Deregistering packages monitor with MBeanServer: " + mbeanServer);
 		try {
-			mbeanServer.unregisterMBean(packageStateName);
+			if(mbeanServer.isRegistered(packageStateName)){
+				mbeanServer.unregisterMBean(packageStateName);
+			}
 		} catch (InstanceNotFoundException e) {
 			log(LogService.LOG_DEBUG, "OSGi PackageStateMBean not found on deregistration", e);
 		} catch (MBeanRegistrationException e) {
@@ -273,7 +291,9 @@ public class Activator implements BundleActivator {
 		log(LogService.LOG_INFO, "Deregistering config admin with MBeanServer: " + mbeanServer);
 		configAdminTracker.close();
 		try {
-			mbeanServer.unregisterMBean(configAdminName);
+			if(mbeanServer.isRegistered(configAdminName)){
+				mbeanServer.unregisterMBean(configAdminName);
+			}
 		} catch (InstanceNotFoundException e) {
 			log(LogService.LOG_DEBUG, "OSGi ConfigAdminMBean not found on deregistration", e);
 		} catch (MBeanRegistrationException e) {
@@ -284,7 +304,9 @@ public class Activator implements BundleActivator {
 		log(LogService.LOG_INFO, "Deregistering permission admin with MBeanServer: " + mbeanServer);
 		permissionAdminTracker.close();
 		try {
-			mbeanServer.unregisterMBean(permissionAdminName);
+			if(mbeanServer.isRegistered(permissionAdminName)){
+				mbeanServer.unregisterMBean(permissionAdminName);
+			}
 		} catch (InstanceNotFoundException e) {
 			log(LogService.LOG_DEBUG, "OSGi PermissionAdminMBean not found on deregistration", e);
 		} catch (MBeanRegistrationException e) {
@@ -295,7 +317,9 @@ public class Activator implements BundleActivator {
 		log(LogService.LOG_INFO, "Deregistering provisioning service admin with MBeanServer: " + mbeanServer);
 		provisioningServiceTracker.close();
 		try {
-			mbeanServer.unregisterMBean(provisioningServiceName);
+			if(mbeanServer.isRegistered(provisioningServiceName)){
+				mbeanServer.unregisterMBean(provisioningServiceName);
+			}
 		} catch (InstanceNotFoundException e) {
 			log(LogService.LOG_DEBUG, "OSGi ProvisioningServiceMBean not found on deregistration", e);
 		} catch (MBeanRegistrationException e) {
@@ -306,7 +330,9 @@ public class Activator implements BundleActivator {
 		log(LogService.LOG_INFO, "Deregistering user admin with MBeanServer: " + mbeanServer);
 		userAdminTracker.close();
 		try {
-			mbeanServer.unregisterMBean(userAdminName);
+			if(mbeanServer.isRegistered(userAdminName)){
+				mbeanServer.unregisterMBean(userAdminName);
+			}
 		} catch (InstanceNotFoundException e) {
 			log(LogService.LOG_DEBUG, "OSGi UserAdminMBean not found on deregistration", e);
 		} catch (MBeanRegistrationException e) {
@@ -322,6 +348,9 @@ public class Activator implements BundleActivator {
 	 * @param mbeanServer MBean Server to register the MBeans in
      */
 	private synchronized void registerServices(MBeanServer mbeanServer) {
+		if(shuttingdown.get()){
+			return;
+		}
 		try {
 			framework = new StandardMBean(new Framework(bundleContext), FrameworkMBean.class);
 		} catch (NotCompliantMBeanException e) {
@@ -743,14 +772,12 @@ public class Activator implements BundleActivator {
 		}
 
 		@Override
-		public void modifiedService(ServiceReference<LogService> reference,
-				Object service) {
+		public void modifiedService(ServiceReference<LogService> reference, Object service) {
 			// no op
 		}
 
 		@Override
-		public void removedService(ServiceReference<LogService> reference,
-				Object service) {
+		public void removedService(ServiceReference<LogService> reference, Object service) {
 			logger = null;
 		}
 		

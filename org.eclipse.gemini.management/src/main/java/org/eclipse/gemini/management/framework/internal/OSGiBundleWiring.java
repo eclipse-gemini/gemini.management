@@ -43,25 +43,6 @@ public final class OSGiBundleWiring {
 	/**
 	 * 
 	 * @param namespace
-	 * @param revisionCounter
-	 * @return
-	 */
-	public CompositeData asCompositeData(String namespace, OSGiBundleRevisionIdTracker revisionTracker) {
-		Map<String, Object> items = new HashMap<String, Object>();
-		int myRevisionId = revisionTracker.getRevisionId(wiring.getRevision());
-		this.addCapabilityAndRequirementItems(items, namespace);
-		this.addRevisionedProvidedAndRequiredWireItems(items, namespace, revisionTracker);
-		items.put(BundleWiringStateMBean.BUNDLE_REVISION_ID, myRevisionId);
-		try {
-			return new CompositeDataSupport(BundleWiringStateMBean.BUNDLE_WIRING_TYPE, items);
-		} catch (OpenDataException e) {
-			throw new IllegalStateException("Cannot form bundle revisions wiring open data", e);
-		}
-	}
-
-	/**
-	 * 
-	 * @param namespace
 	 * @param bundleId
 	 * @param revisionCounter
 	 * @return
@@ -76,7 +57,7 @@ public final class OSGiBundleWiring {
 		try {
 			return new CompositeDataSupport(BundleWiringStateMBean.BUNDLE_WIRING_TYPE, items);
 		} catch (OpenDataException e) {
-			throw new IllegalStateException("Cannot form bundle revisions wiring closures open data", e);
+			throw new IllegalStateException("Cannot form bundle revisions wiring closures open data (" + e.getMessage() + ")", e);
 		}
 	}
 

@@ -264,7 +264,9 @@ public final class OSGiProperties {
 				builder.append(',');
 			}
 		}
-		builder.deleteCharAt(builder.length()-1);
+		if(builder.length() > 0){
+			builder.deleteCharAt(builder.length()-1);
+		}
 		return propertyData(key, builder.toString(), JmxConstants.ARRAY_OF + typeOf(componentClazz));
 	}
 

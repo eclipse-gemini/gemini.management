@@ -47,6 +47,7 @@ public final class BundleWiringStateTest extends AbstractOSGiMBeanTest {
 
 	public BundleWiringStateTest() {
 		super.mBeanObjectName = BundleWiringStateMBean.OBJECTNAME;
+		super.addFrameworkAndUUID = true;
 	}
 	
 	@Before

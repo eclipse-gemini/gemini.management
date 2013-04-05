@@ -77,7 +77,7 @@ public final class BundleWiringState implements BundleWiringStateMBean {
 		BundleWiring wiring = getBundle(bundleId).adapt(BundleWiring.class);
 		OSGiBundleRevisionIdTracker revisionTracker = new OSGiBundleRevisionIdTracker();
 		if(wiring != null){
-			return new OSGiBundleWiring(wiring).asCompositeData(namespace, revisionTracker);
+			return new OSGiBundleWiring(wiring).asCompositeData(namespace, bundleId, revisionTracker);
 		}else{
 			return null;
 		}
@@ -140,7 +140,7 @@ public final class BundleWiringState implements BundleWiringStateMBean {
 		for (BundleRevision bundleRevision : bundleRevisions) {
 			BundleWiring wiring = bundleRevision.getWiring();
 			if(wiring != null){
-				table.put(new OSGiBundleWiring(wiring).asCompositeData(namespace, revisionTracker));
+				table.put(new OSGiBundleWiring(wiring).asCompositeData(namespace, bundleId, revisionTracker));
 			}
 		}
 		return table;

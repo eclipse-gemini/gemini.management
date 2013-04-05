@@ -77,6 +77,7 @@ public final class BundleStateTest extends AbstractOSGiMBeanTest{
 	
 	public BundleStateTest() {
 		super.mBeanObjectName = BundleStateMBean.OBJECTNAME;
+		super.addFrameworkAndUUID = true;
 	}
 	
 	@Before
@@ -244,13 +245,13 @@ public final class BundleStateTest extends AbstractOSGiMBeanTest{
 
     private Long[] getRequiredBundles(Bundle bundle) {
         BundleWiring wiring = bundle.adapt(BundleWiring.class);
-        List<BundleWire> requiredWires = wiring.getRequiredWires(BundleRevision.BUNDLE_NAMESPACE);
+        List<BundleWire> requiredWires = wiring.getRequiredWires(null);//BundleRevision.BUNDLE_NAMESPACE);
         return bundleWiresToProviderIds(requiredWires);
     }
 
     private Long[] getRequiringBundles(Bundle bundle) {
         BundleWiring wiring = bundle.adapt(BundleWiring.class);
-        List<BundleWire> providedWires = wiring.getProvidedWires(BundleRevision.BUNDLE_NAMESPACE);
+        List<BundleWire> providedWires = wiring.getProvidedWires(null);//BundleRevision.BUNDLE_NAMESPACE);
         return bundleWiresToRequirerIds(providedWires);
     }
 

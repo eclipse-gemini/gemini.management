@@ -24,6 +24,7 @@ public final class FrameworkTest extends AbstractOSGiMBeanTest {
 	
 	public FrameworkTest() {
 		super.mBeanObjectName = FrameworkMBean.OBJECTNAME;
+		super.addFrameworkAndUUID = true;
 	}
 	
 	@Test

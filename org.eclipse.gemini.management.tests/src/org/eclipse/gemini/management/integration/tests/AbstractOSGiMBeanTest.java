@@ -22,16 +22,22 @@ import javax.management.remote.JMXServiceURL;
 import org.eclipse.gemini.management.Activator;
 import org.junit.BeforeClass;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 
-public class AbstractOSGiMBeanTest {
+public abstract class AbstractOSGiMBeanTest {
+
+	private static BundleContext bc;
 
 	protected String mBeanObjectName;
+	
+	protected boolean addFrameworkAndUUID = false;
 	
 	@BeforeClass
 	public static void setup(){
 		BundleContext bc = FrameworkUtil.getBundle(Activator.class).getBundleContext();
+		AbstractOSGiMBeanTest.bc = bc;
 		ServiceReference<MBeanServer> ref = bc.getServiceReference(MBeanServer.class);
 		if (ref == null) {
 			bc.registerService(MBeanServer.class.getCanonicalName(), ManagementFactory.getPlatformMBeanServer(), null);
@@ -44,7 +50,7 @@ public class AbstractOSGiMBeanTest {
 		JMXServiceURL jmxURL = new JMXServiceURL(url);
 		connector = JMXConnectorFactory.connect(jmxURL);
 		MBeanServerConnection connection = connector.getMBeanServerConnection();
-		ObjectName name = new ObjectName(mBeanObjectName);
+		ObjectName name = new ObjectName(getMBeanObjectName());
 		Object result = connection.invoke(name, operation, arguments, types);
 		return returnType.cast(result);
 	}
@@ -55,9 +61,19 @@ public class AbstractOSGiMBeanTest {
 		JMXServiceURL jmxURL = new JMXServiceURL(url);
 		connector = JMXConnectorFactory.connect(jmxURL);
 		MBeanServerConnection connection = connector.getMBeanServerConnection();
-		ObjectName name = new ObjectName(mBeanObjectName);
+		ObjectName name = new ObjectName(getMBeanObjectName());
 		Object result = connection.getAttribute(name, attribute);
 		return returnType.cast(result);
+	}
+	
+	private String getMBeanObjectName(){
+		String newObjectName = this.mBeanObjectName;
+		if(this.addFrameworkAndUUID){
+			newObjectName = newObjectName + 
+					",framework=" + AbstractOSGiMBeanTest.bc.getBundle(0).getSymbolicName() + 
+					",uuid=" + AbstractOSGiMBeanTest.bc.getBundle(0).getBundleContext().getProperty(Constants.FRAMEWORK_UUID);
+		}
+		return newObjectName;
 	}
 	
 }

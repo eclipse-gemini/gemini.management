@@ -45,6 +45,7 @@ public final class ServiceStateTest extends AbstractOSGiMBeanTest {
 	
 	public ServiceStateTest() {
 		super.mBeanObjectName = ServiceStateMBean.OBJECTNAME;
+		super.addFrameworkAndUUID = true;
 	}
 	
 	@Before

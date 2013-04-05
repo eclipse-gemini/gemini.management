@@ -350,9 +350,7 @@ public final class OSGiBundle {
 	 * @throws IOException 
 	 */
 	private Long[] getRequiredBundles() throws IOException {
-        BundleWiring wiring = bundle.adapt(BundleWiring.class);
-        List<BundleWire> requiredWires = wiring.getRequiredWires(BundleRevision.BUNDLE_NAMESPACE);
-        return OSGiBundle.bundleWiresToProviderIds(requiredWires);
+        return BundleUtil.getRequiredBundles(bundle);
 	}
 
 	/**
@@ -360,9 +358,7 @@ public final class OSGiBundle {
 	 * @throws IOException 
 	 */
 	private Long[] getRequiringBundles() throws IOException {
-        BundleWiring wiring = bundle.adapt(BundleWiring.class);
-        List<BundleWire> providedWires = wiring.getProvidedWires(BundleRevision.BUNDLE_NAMESPACE);
-        return OSGiBundle.bundleWiresToRequirerIds(providedWires);
+        return BundleUtil.getRequiringBundles(bundle);
 	}
 
 	/**
@@ -459,11 +455,14 @@ public final class OSGiBundle {
 		if (refs == null) {
 			return new Long[0];
 		}
-		Long[] ids = new Long[refs.length];
+		List<Long> idsList = new ArrayList<Long>();
 		for (int i = 0; i < refs.length; i++) {
-			ids[i] = (Long) refs[i].getProperty(Constants.SERVICE_ID);
+			Object serviceIdProperty = refs[i].getProperty(Constants.SERVICE_ID);
+			if(serviceIdProperty != null){
+				idsList.add((Long) serviceIdProperty);
+			}
 		}
-		return ids;
+		return idsList.toArray(new Long[idsList.size()]);
 	}
 	
 }

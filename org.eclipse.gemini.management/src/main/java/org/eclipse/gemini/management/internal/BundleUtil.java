@@ -15,9 +15,11 @@
 
 package org.eclipse.gemini.management.internal;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.gemini.management.framework.internal.OSGiBundle;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.framework.startlevel.BundleStartLevel;
@@ -68,10 +70,10 @@ public final class BundleUtil {
 		if (wiring == null) {
 			return new String[0];
 		}
-		List<BundleWire> providedWires = wiring.getRequiredWires(BundleRevision.PACKAGE_NAMESPACE);
+		List<BundleWire> requiredWires = wiring.getRequiredWires(BundleRevision.PACKAGE_NAMESPACE);
         List<String> packages = new ArrayList<String>();
-        for(BundleWire wire: providedWires){
-            String packageName = String.format("%s;%s", wire.getCapability().getAttributes().get(BundleRevision.PACKAGE_NAMESPACE), wire.getCapability().getAttributes().get(Constants.VERSION_ATTRIBUTE));
+        for(BundleWire requiredWire: requiredWires){
+            String packageName = String.format("%s;%s", requiredWire.getCapability().getAttributes().get(BundleRevision.PACKAGE_NAMESPACE), requiredWire.getCapability().getAttributes().get(Constants.VERSION_ATTRIBUTE));
             if(!packages.contains(packageName)){
                 packages.add(packageName);
             }
@@ -154,6 +156,32 @@ public final class BundleUtil {
 		BundleStartLevel startLevel = bundle.adapt(BundleStartLevel.class);
 		return startLevel.isActivationPolicyUsed();
 	}
+	
+	/**
+	 * @return the list of identifiers of bundles required by this bundle
+	 * @throws IOException 
+	 */
+	public static Long[] getRequiredBundles(Bundle bundle) throws IOException {
+        BundleWiring wiring = bundle.adapt(BundleWiring.class);
+        if(wiring == null){
+        	return new Long[0];
+        }
+        List<BundleWire> requiredWires = wiring.getRequiredWires(null);//BundleRevision.BUNDLE_NAMESPACE);
+        return OSGiBundle.bundleWiresToProviderIds(requiredWires);
+	}
+
+	/**
+	 * @return the list of identifiers of bundles which require this bundle
+	 * @throws IOException 
+	 */
+	public static Long[] getRequiringBundles(Bundle bundle) throws IOException {
+        BundleWiring wiring = bundle.adapt(BundleWiring.class);
+        if(wiring == null){
+        	return new Long[0];
+        }
+        List<BundleWire> providedWires = wiring.getProvidedWires(null);//BundleRevision.BUNDLE_NAMESPACE);
+        return OSGiBundle.bundleWiresToRequirerIds(providedWires);
+	}
 
 	/**
 	 * Answer true if the bundle is required
@@ -165,7 +193,7 @@ public final class BundleUtil {
 	public static boolean isRequired(Bundle bundle) {
 		BundleWiring wiring = bundle.adapt(BundleWiring.class);
 		if (wiring != null) {
-			return wiring.getProvidedWires(BundleRevision.BUNDLE_NAMESPACE).size() > 0;
+			return wiring.getProvidedWires(null/*BundleRevision.BUNDLE_NAMESPACE*/).size() > 0;
 		} else {
 			return false;
 		}

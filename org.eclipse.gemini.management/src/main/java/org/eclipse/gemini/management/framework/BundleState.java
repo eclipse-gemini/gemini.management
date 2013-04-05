@@ -100,8 +100,7 @@ public final class BundleState extends Monitor implements BundleStateMBean {
 			for (Bundle bundle : bundleContext.getBundles()) {
 				bundles.add(new OSGiBundle(bundle));
 			}
-			TabularData table = OSGiBundle.tableFrom(bundles, bundleTypeItems);
-			return table;
+			return OSGiBundle.tableFrom(bundles, bundleTypeItems);          
 		} catch (Throwable e) {
 			throw new IOException(e);
 		}
@@ -185,8 +184,8 @@ public final class BundleState extends Monitor implements BundleStateMBean {
 	/**
 	 * {@inheritDoc}
 	 */
-	public long[] getServicesInUse(long bundleIdentifier) throws IOException {
-		ServiceReference<?>[] servicesInUse = retrieveBundle(bundleIdentifier).getServicesInUse();
+	public long[] getServicesInUse(long bundleId) throws IOException {
+		ServiceReference<?>[] servicesInUse = retrieveBundle(bundleId).getServicesInUse();
 		return convertToPrimativeArray(OSGiBundle.serviceIds(servicesInUse));
 	}
 	
@@ -194,18 +193,14 @@ public final class BundleState extends Monitor implements BundleStateMBean {
 	 * {@inheritDoc}
 	 */
 	public long[] getRequiringBundles(long bundleId) throws IOException {
-        BundleWiring wiring = retrieveBundle(bundleId).adapt(BundleWiring.class);
-        List<BundleWire> providedWires = wiring.getProvidedWires(BundleRevision.BUNDLE_NAMESPACE);
-        return convertToPrimativeArray(OSGiBundle.bundleWiresToRequirerIds(providedWires));
+        return convertToPrimativeArray(BundleUtil.getRequiringBundles(retrieveBundle(bundleId)));
     }
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public long[] getRequiredBundles(long bundleIdentifier) throws IOException {
-        BundleWiring wiring = retrieveBundle(bundleIdentifier).adapt(BundleWiring.class);
-        List<BundleWire> requiredWires = wiring.getRequiredWires(BundleRevision.BUNDLE_NAMESPACE);
-        return convertToPrimativeArray(OSGiBundle.bundleWiresToProviderIds(requiredWires));
+	public long[] getRequiredBundles(long bundleId) throws IOException {
+        return convertToPrimativeArray(BundleUtil.getRequiredBundles(retrieveBundle(bundleId)));
     }
 
 	/**
@@ -289,8 +284,14 @@ public final class BundleState extends Monitor implements BundleStateMBean {
 	}
 	
 	private long[] convertToPrimativeArray(Long[] src){
+		if(src == null || src.length == 0){
+			return new long[0];
+		}
 		long[] dest = new long[src.length];
-        System.arraycopy(src, 0, dest, 0, src.length);
+		int i = 0;
+		for (Long long1 : src) {
+			dest[i++] = long1;
+		}
         return dest;
 	}
 	

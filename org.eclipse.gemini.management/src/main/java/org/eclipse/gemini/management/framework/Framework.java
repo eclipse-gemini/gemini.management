@@ -248,11 +248,7 @@ public final class Framework implements FrameworkMBean {
 			try {
 				bundle(bundleIdentifiers[i]).adapt(BundleStartLevel.class).setStartLevel(newlevels[i]);
 			} catch (Throwable e) {
-				Long[] completed = new Long[i];
-				System.arraycopy(bundleIdentifiers, 0, completed, 0, completed.length);
-				Long[] remaining = new Long[bundleIdentifiers.length - i - 1];
-				System.arraycopy(bundleIdentifiers, i + 1, remaining, 0, remaining.length);
-				return new BundleBatchActionResult(e.toString(), completed, bundleIdentifiers[i], remaining).asCompositeData();
+				return this.handleUpdateException(bundleIdentifiers, i, e);
 			}
 		}
 		return new BundleBatchActionResult().asCompositeData();
@@ -317,11 +313,7 @@ public final class Framework implements FrameworkMBean {
 			try {
 				bundle(bundleIdentifiers[i]).start();
 			} catch (Throwable e) {
-				Long[] completed = new Long[i];
-				System.arraycopy(bundleIdentifiers, 0, completed, 0, completed.length);
-				Long[] remaining = new Long[bundleIdentifiers.length - i - 1];
-				System.arraycopy(bundleIdentifiers, i + 1, remaining, 0, remaining.length);
-				return new BundleBatchActionResult(e.toString(), completed, bundleIdentifiers[i], remaining).asCompositeData();
+				return this.handleUpdateException(bundleIdentifiers, i, e);
 			}
 		}
 		return new BundleBatchActionResult().asCompositeData();
@@ -349,11 +341,7 @@ public final class Framework implements FrameworkMBean {
 			try {
 				bundle(bundleIdentifiers[i]).stop();
 			} catch (Throwable e) {
-				Long[] completed = new Long[i];
-				System.arraycopy(bundleIdentifiers, 0, completed, 0, completed.length);
-				Long[] remaining = new Long[bundleIdentifiers.length - i - 1];
-				System.arraycopy(bundleIdentifiers, i + 1, remaining, 0, remaining.length);
-				return new BundleBatchActionResult(e.toString(), completed, bundleIdentifiers[i], remaining).asCompositeData();
+				return this.handleUpdateException(bundleIdentifiers, i, e);
 			}
 		}
 		return new BundleBatchActionResult().asCompositeData();
@@ -381,11 +369,7 @@ public final class Framework implements FrameworkMBean {
 			try {
 				bundle(bundleIdentifiers[i]).uninstall();
 			} catch (Throwable e) {
-				Long[] completed = new Long[i];
-				System.arraycopy(bundleIdentifiers, 0, completed, 0, completed.length);
-				Long[] remaining = new Long[bundleIdentifiers.length - i - 1];
-				System.arraycopy(bundleIdentifiers, i + 1, remaining, 0, remaining.length);
-				return new BundleBatchActionResult(e.toString(), completed, bundleIdentifiers[i], remaining).asCompositeData();
+				return this.handleUpdateException(bundleIdentifiers, i, e);
 			}
 		}
 		return new BundleBatchActionResult().asCompositeData();
@@ -433,11 +417,7 @@ public final class Framework implements FrameworkMBean {
 			try {
 				bundle(bundleIdentifiers[i]).update();
 			} catch (Throwable e) {
-				Long[] completed = new Long[i];
-				System.arraycopy(bundleIdentifiers, 0, completed, 0, completed.length);
-				Long[] remaining = new Long[bundleIdentifiers.length - i - 1];
-				System.arraycopy(bundleIdentifiers, i + 1, remaining, 0, remaining.length);
-				return new BundleBatchActionResult(e.toString(), completed, bundleIdentifiers[i], remaining).asCompositeData();
+				return this.handleUpdateException(bundleIdentifiers, i, e);
 			}
 		}
 		return new BundleBatchActionResult().asCompositeData();
@@ -456,11 +436,7 @@ public final class Framework implements FrameworkMBean {
 				is = new URL(urls[i]).openStream();
 				bundle(bundleIdentifiers[i]).update(is);
 			} catch (Throwable e) {
-				Long[] completed = new Long[i];
-				System.arraycopy(bundleIdentifiers, 0, completed, 0, completed.length);
-				Long[] remaining = new Long[bundleIdentifiers.length - i - 1];
-				System.arraycopy(bundleIdentifiers, i + 1, remaining, 0, remaining.length);
-				return new BundleBatchActionResult(e.toString(), completed, bundleIdentifiers[i], remaining).asCompositeData();
+				return this.handleUpdateException(bundleIdentifiers, i, e);
 			} finally {
 				if (is != null) {
 					try {
@@ -471,6 +447,15 @@ public final class Framework implements FrameworkMBean {
 			}
 		}
 		return new BundleBatchActionResult().asCompositeData();
+	}
+	
+	private CompositeData handleUpdateException(long[] bundleIdentifiers, int currentPostion, Throwable e){
+		Long[] completed = this.convertToNonPrimativeArray(bundleIdentifiers, currentPostion);
+		Long[] remaining = new Long[bundleIdentifiers.length - currentPostion - 1];
+		for (int j = 0; j < remaining.length; j++) {
+			remaining[j] = bundleIdentifiers[currentPostion + 1 + j];	
+		}
+		return new BundleBatchActionResult(e.toString(), completed, bundleIdentifiers[currentPostion], remaining).asCompositeData();
 	}
 
 	/**
@@ -492,8 +477,7 @@ public final class Framework implements FrameworkMBean {
 		long[] result = new long[bundles.size()];
 		int i = 0;
 		for (Bundle bundle : bundles) {
-			result[i] = bundle.getBundleId();
-			i++;
+			result[i++] = bundle.getBundleId();
 		}
 		return result;
 	}
@@ -513,8 +497,7 @@ public final class Framework implements FrameworkMBean {
 		long[] result = new long[removalPendingBundles.size()];
 		int i = 0;
 		for (Bundle bundle : removalPendingBundles) {
-			result[i] = bundle.getBundleId();
-			i++;
+			result[i++] = bundle.getBundleId();
 		}
 		return result;
 	}
@@ -534,12 +517,13 @@ public final class Framework implements FrameworkMBean {
 	 * {@inheritDoc}
 	 */
 	public CompositeData refreshBundlesAndWait(long[] bundleIdentifiers) throws IOException {
-		Collection<Bundle> bundles = bundleIdentifiers == null ? null : this.getBundles(bundleIdentifiers);
+		if(bundleIdentifiers == null){
+			return new BundleBatchResolveResult(new Long[0], true).asCompositeData();
+		}
+		Collection<Bundle> bundles = this.getBundles(bundleIdentifiers);
 		StandardFrameworkListener standardFrameworkListener = new StandardFrameworkListener();
 		this.frameworkWiring.refreshBundles(bundles, standardFrameworkListener);
-		Long[] completedBundles = new Long[bundleIdentifiers.length];
-		System.arraycopy(bundleIdentifiers, 0, completedBundles, 0, bundleIdentifiers.length);
-		return new BundleBatchResolveResult(completedBundles, standardFrameworkListener.getResult()).asCompositeData();
+		return new BundleBatchResolveResult(convertToNonPrimativeArray(bundleIdentifiers), standardFrameworkListener.getResult()).asCompositeData();
 	}
 
 	/**
@@ -549,21 +533,20 @@ public final class Framework implements FrameworkMBean {
 		boolean result;
 		Long[] completedBundles;
 		if(bundleIdentifiers == null){
-			Collection<Long> unresolvedBundles = new HashSet<Long>();
 			Bundle[] allBundles = this.bundleContext.getBundles();
+			long[] tmpBundles = new long[allBundles.length];
+			int i = 0;
 			for (Bundle bundle : allBundles) {
 				if(bundle.getState() == Bundle.INSTALLED){
-					unresolvedBundles.add(bundle.getBundleId());
+					tmpBundles[i++] = bundle.getBundleId();
 				}
 			}
-			completedBundles = new Long[unresolvedBundles.size()];
-			unresolvedBundles.toArray(completedBundles);
+			completedBundles = convertToNonPrimativeArray(tmpBundles);
 			result = this.frameworkWiring.resolveBundles(null);	
 		}else{
 			Collection<Bundle> bundles = this.getBundles(bundleIdentifiers);
 			result = this.frameworkWiring.resolveBundles(bundles);
-			completedBundles = new Long[bundleIdentifiers.length];
-			System.arraycopy(bundleIdentifiers, 0, completedBundles, 0, bundleIdentifiers.length);
+			completedBundles = convertToNonPrimativeArray(bundleIdentifiers);
 		}
 		return new BundleBatchResolveResult(completedBundles, result).asCompositeData();
 	}
@@ -582,6 +565,21 @@ public final class Framework implements FrameworkMBean {
 			throw new IOException("Bundle <" + bundleIdentifier + "> does not exist");
 		}
 		return b;
+	}
+
+	private Long[] convertToNonPrimativeArray(long[] src, int length){
+		if(src == null || src.length == 0){
+			return new Long[0];
+		}
+		Long[] dest = new Long[length];
+		for (int i = 0; i < length; i++) {
+			dest[i] = src[i];	
+		}
+        return dest;
+	}
+	
+	private Long[] convertToNonPrimativeArray(long[] src){
+		return this.convertToNonPrimativeArray(src, src.length);
 	}
 	
 	/**
