@@ -135,40 +135,5 @@ public final class OSGiPackage {
 			throw new IllegalStateException("Cannot form package open data", e);
 		}
 	}
-//
-//	/**
-//	 * @return the identifier of the exporting bundles
-//	 */
-//	public long[] getExportingBundles() {
-//		return exportingBundles;
-//	}
-//
-//	/**
-//	 * @return the list of identifiers of the bundles importing this package
-//	 */
-//	public long[] getImportingBundles() {
-//		return importingBundles;
-//	}
-//
-//	/**
-//	 * @return the name of the package
-//	 */
-//	public String getName() {
-//		return name;
-//	}
-//
-//	/**
-//	 * @return the version of the package
-//	 */
-//	public String getVersion() {
-//		return version;
-//	}
-//
-//	/**
-//	 * @return true if the package is pending removal
-//	 */
-//	public boolean isRemovalPending() {
-//		return removalPending;
-//	}
 	
 }

@@ -150,9 +150,10 @@ public final class OSGiService {
 	 */
 	public static TabularData tableFrom(List<OSGiService> services, String... serviceTypeItems) throws IOException {
 		List<String> serviceTypes = Arrays.asList(serviceTypeItems);
-		TabularDataSupport table = new TabularDataSupport(Item.tabularType("SERVICES", "The table of all services", OSGiService.computeServiceType(serviceTypes), ServiceStateMBean.IDENTIFIER));
+		CompositeType computeServiceType = OSGiService.computeServiceType(serviceTypes);
+		TabularDataSupport table = new TabularDataSupport(Item.tabularType("SERVICES", "The table of all services", computeServiceType, ServiceStateMBean.IDENTIFIER));
 		for (OSGiService service : services) {
-			table.put(service.asCompositeData(serviceTypes));
+			table.put(service.asCompositeData(computeServiceType, serviceTypes));
 		}
 		return table;
 	}
@@ -160,14 +161,17 @@ public final class OSGiService {
 	private static CompositeType computeServiceType(List<String> serviceTypes) {
 		List<Item> serviceTypeItems = new ArrayList<Item>();
 		serviceTypeItems.add(ServiceStateMBean.IDENTIFIER_ITEM);
-		if(serviceTypes.contains(ServiceStateMBean.OBJECT_CLASS)){
-			serviceTypeItems.add(ServiceStateMBean.OBJECT_CLASS_ITEM);
-		}
 		if(serviceTypes.contains(ServiceStateMBean.BUNDLE_IDENTIFIER)){
 			serviceTypeItems.add(ServiceStateMBean.BUNDLE_IDENTIFIER_ITEM);
 		}
+		if(serviceTypes.contains(ServiceStateMBean.OBJECT_CLASS)){
+			serviceTypeItems.add(ServiceStateMBean.OBJECT_CLASS_ITEM);
+		}
 		if(serviceTypes.contains(ServiceStateMBean.USING_BUNDLES)){
 			serviceTypeItems.add(ServiceStateMBean.USING_BUNDLES_ITEM);
+		}
+		if(serviceTypes.contains(ServiceStateMBean.PROPERTIES)){
+			serviceTypeItems.add(ServiceStateMBean.PROPERTIES_ITEM);
 		}
 		CompositeType currentCompositeType = Item.compositeType("SERVICE", "This type encapsulates an OSGi service", serviceTypeItems.toArray(new Item[]{}));
 		return currentCompositeType;
@@ -195,27 +199,30 @@ public final class OSGiService {
 
 	/**
 	 * Answer the receiver encoded as CompositeData
+	 * @param computeServiceType 
 	 * 
 	 * @return the CompositeData encoding of the receiver.
 	 */
-	private CompositeData asCompositeData(List<String> serviceTypes) {
+	private CompositeData asCompositeData(CompositeType computeServiceType, List<String> serviceTypes) {
 		Map<String, Object> items = new HashMap<String, Object>();
-		if(serviceTypes.contains(ServiceStateMBean.IDENTIFIER)){
-			items.put(ServiceStateMBean.IDENTIFIER, identifier);
+		items.put(ServiceStateMBean.IDENTIFIER, identifier);
+		if(serviceTypes.contains(ServiceStateMBean.BUNDLE_IDENTIFIER)){
+			items.put(ServiceStateMBean.BUNDLE_IDENTIFIER, bundle);
 		}
 		if(serviceTypes.contains(ServiceStateMBean.OBJECT_CLASS)){
 			items.put(ServiceStateMBean.OBJECT_CLASS, interfaces);
 		}
-		if(serviceTypes.contains(ServiceStateMBean.BUNDLE_IDENTIFIER)){
-			items.put(ServiceStateMBean.BUNDLE_IDENTIFIER, bundle);
-		}
 		if(serviceTypes.contains(ServiceStateMBean.USING_BUNDLES)){
 			items.put(ServiceStateMBean.USING_BUNDLES, usingBundles);
 		}
+		if(serviceTypes.contains(ServiceStateMBean.PROPERTIES)){
+			items.put(ServiceStateMBean.PROPERTIES, properties);
+		}
 		try {
-			return new CompositeDataSupport(ServiceStateMBean.SERVICE_TYPE, items);
+			return new CompositeDataSupport(computeServiceType, items);
 		} catch (OpenDataException e) {
 			throw new IllegalStateException("Cannot form service open data", e);
 		}
 	}
+
 }

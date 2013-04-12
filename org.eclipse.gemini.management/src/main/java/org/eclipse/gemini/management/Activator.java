@@ -77,13 +77,13 @@ public class Activator implements BundleActivator {
 	private static final String REGION_SUPPORT = "org.eclipse.gemini.management.region.support";
 		
 	private final List<MBeanServer> mbeanServers = new CopyOnWriteArrayList<MBeanServer>();
-	
-	private final AtomicBoolean servicesRegistered = new AtomicBoolean(false);
-	
+		
 	private final Object myLock = new Object();
 	
 	private final AtomicBoolean shuttingdown = new AtomicBoolean(false);
-		
+	
+	private String uuid_value;
+	
 	private ObjectName frameworkName;
 	
 	private ObjectName bundleStateName;
@@ -141,6 +141,31 @@ public class Activator implements BundleActivator {
 			logger.log(level, message, t);
 		}
 	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public void start(BundleContext bundleContext) throws Exception {
+		this.bundleContext = bundleContext;
+		logServiceTracker = new ServiceTracker<LogService, Object>(bundleContext, LogService.class, new LogServiceTracker());
+		logServiceTracker.open();    
+		this.uuid_value = this.bundleContext.getBundle(0).getBundleContext().getProperty(Constants.FRAMEWORK_UUID);
+	
+		String regionSupportProperty = bundleContext.getProperty(REGION_SUPPORT);
+		if(regionSupportProperty != null && Boolean.valueOf(regionSupportProperty)){
+			ServiceReference<?> service = bundleContext.getServiceReference("org.eclipse.equinox.region.Region");
+			Object regionService = bundleContext.getService(service);
+			this.regionName = (String) regionService.getClass().getDeclaredMethod("getRegion", Bundle.class).invoke(regionService, bundleContext.getBundle());
+		} else {
+			this.regionName = null;
+		}
+        this.createObjectNames();
+		this.createMBeansAndTrackers();
+		this.registerDefaultMBeanServer();
+		this.mbeanServiceTracker = new ServiceTracker<MBeanServer, Object>(this.bundleContext, MBeanServer.class, new MBeanServiceTracker());
+		log(LogService.LOG_INFO, "Awaiting initial MBeanServer service registration");
+		this.mbeanServiceTracker.open();
+	}
 
 	private void createObjectNames() {
 		try {
@@ -158,33 +183,11 @@ public class Activator implements BundleActivator {
 		}
 	}
 	
-	/**
-	 * {@inheritDoc}
-	 */
-	public void start(BundleContext bundleContext) throws Exception {
-		this.bundleContext = bundleContext;
-		logServiceTracker = new ServiceTracker<LogService, Object>(bundleContext, LogService.class, new LogServiceTracker());
-		logServiceTracker.open();        
-		String regionSupportProperty = bundleContext.getProperty(REGION_SUPPORT);
-		if(regionSupportProperty != null && Boolean.valueOf(regionSupportProperty)){
-			ServiceReference<?> service = bundleContext.getServiceReference("org.eclipse.equinox.region.Region");
-			Object regionService = bundleContext.getService(service);
-			this.regionName = (String) regionService.getClass().getDeclaredMethod("getRegion", Bundle.class).invoke(regionService, bundleContext.getBundle());
-		} else {
-			this.regionName = null;
-		}
-        createObjectNames();
-		registerDefaultMBeanServer();
-		this.mbeanServiceTracker = new ServiceTracker<MBeanServer, Object>(this.bundleContext, MBeanServer.class, new MBeanServiceTracker());
-		log(LogService.LOG_INFO, "Awaiting initial MBeanServer service registration");
-		this.mbeanServiceTracker.open();
-	}
-	
     private ObjectName translateObjectName(String objectName, boolean addFrameworkAndUUID) throws MalformedObjectNameException {
     	StringBuilder builder = new StringBuilder(objectName);
     	if(addFrameworkAndUUID){
     		builder.append("," + FRAMEWORK_KEY + "=" + this.bundleContext.getBundle(0).getSymbolicName());
-    		builder.append("," + UUID_KEY + "=" + this.bundleContext.getBundle(0).getBundleContext().getProperty(Constants.FRAMEWORK_UUID));
+    		builder.append("," + UUID_KEY + "=" + this.uuid_value);
     	}
     	if(this.regionName != null){
     		builder.append("," + REGION_KEY + "=" + regionName);
@@ -196,7 +199,6 @@ public class Activator implements BundleActivator {
     	if ("false".equals(bundleContext.getProperty("register.default.mbeanserver"))) {
     		return;
     	}
-    	
     	ServiceReference<MBeanServer> ref = bundleContext.getServiceReference(MBeanServer.class);
 		if (ref == null) {
 			bundleContext.registerService(MBeanServer.class.getCanonicalName(), ManagementFactory.getPlatformMBeanServer(), null);
@@ -211,9 +213,22 @@ public class Activator implements BundleActivator {
 		this.shuttingdown.set(true);
 		mbeanServiceTracker.close();
 		synchronized (myLock) {
+			userAdminTracker.close();
+			provisioningServiceTracker.close();
+			permissionAdminTracker.close();
+			configAdminTracker.close();	
 			for (MBeanServer mbeanServer : mbeanServers) {
 				deregisterServices(mbeanServer);
 			}
+			framework = null;
+			bundleState = null;
+			bundleWiringState = null;
+			serviceState = null;
+			packageState = null;
+			configAdminTracker = null;
+			permissionAdminTracker = null;
+			provisioningServiceTracker = null;
+			userAdminTracker = null;
 		}
 		mbeanServers.clear();
 		logServiceTracker.close();
@@ -224,122 +239,31 @@ public class Activator implements BundleActivator {
 	 * 
 	 * @param mbeanServer MBean Server to unregister the MBeans from
      */
-	private synchronized void deregisterServices(MBeanServer mbeanServer) {
-		if (!servicesRegistered.get()) {
-			return;
+	private void deregisterServices(MBeanServer mbeanServer) {
+		synchronized (myLock) {
+			this.deregisterService(mbeanServer, frameworkName);
+			this.deregisterService(mbeanServer, bundleStateName);
+			this.deregisterService(mbeanServer, bundleWiringStateName);
+			this.deregisterService(mbeanServer, serviceStateName);
+			this.deregisterService(mbeanServer, packageStateName);
+			this.deregisterService(mbeanServer, configAdminName);
+			this.deregisterService(mbeanServer, permissionAdminName);
+			this.deregisterService(mbeanServer, provisioningServiceName);
+			this.deregisterService(mbeanServer, userAdminName);
 		}
-		log(LogService.LOG_INFO, "Deregistering framework with MBeanServer: " + mbeanServer);
+	}
+	
+	private void deregisterService(MBeanServer mBeanServer, ObjectName objectName){
+		log(LogService.LOG_INFO, "Deregistering bundle wiring state with MBeanServer: " + mBeanServer);
 		try {
-			if(mbeanServer.isRegistered(frameworkName)){
-				mbeanServer.unregisterMBean(frameworkName);
+			if(mBeanServer.isRegistered(objectName)){
+				mBeanServer.unregisterMBean(objectName);
 			}
 		} catch (InstanceNotFoundException e) {
-			log(LogService.LOG_INFO, "FrameworkMBean not found on deregistration", e);
+			log(LogService.LOG_DEBUG, objectName.getCanonicalName() + " not found on deregistration", e);
 		} catch (MBeanRegistrationException e) {
-			log(LogService.LOG_INFO, "FrameworkMBean deregistration problem", e);
+			log(LogService.LOG_INFO,  objectName.getCanonicalName() + " deregistration problem", e);
 		}
-		framework = null;
-
-		log(LogService.LOG_INFO, "Deregistering bundle state with MBeanServer: " + mbeanServer);
-		try {
-			if(mbeanServer.isRegistered(bundleStateName)){
-				mbeanServer.unregisterMBean(bundleStateName);
-			}
-		} catch (InstanceNotFoundException e) {
-			log(LogService.LOG_INFO, "OSGi BundleStateMBean not found on deregistration", e);
-		} catch (MBeanRegistrationException e) {
-			log(LogService.LOG_INFO, "OSGi BundleStateMBean deregistration problem", e);
-		}
-		bundleState = null;
-
-		log(LogService.LOG_INFO, "Deregistering bundle wiring state with MBeanServer: " + mbeanServer);
-		try {
-			if(mbeanServer.isRegistered(bundleWiringStateName)){
-				mbeanServer.unregisterMBean(bundleWiringStateName);
-			}
-		} catch (InstanceNotFoundException e) {
-			log(LogService.LOG_DEBUG, "OSGi BundleWiringStateMBean not found on deregistration", e);
-		} catch (MBeanRegistrationException e) {
-			log(LogService.LOG_INFO, "OSGi BundleWiringStateMBean deregistration problem", e);
-		}
-		bundleWiringState = null;
-		
-		log(LogService.LOG_INFO, "Deregistering services monitor with MBeanServer: " + mbeanServer);
-		try {
-			if(mbeanServer.isRegistered(serviceStateName)){
-				mbeanServer.unregisterMBean(serviceStateName);
-			}
-		} catch (InstanceNotFoundException e) {
-			log(LogService.LOG_DEBUG, "OSGi ServiceStateMBean not found on deregistration", e);
-		} catch (MBeanRegistrationException e) {
-			log(LogService.LOG_INFO, "OSGi ServiceStateMBean deregistration problem", e);
-		}
-		serviceState = null;
-
-		log(LogService.LOG_INFO, "Deregistering packages monitor with MBeanServer: " + mbeanServer);
-		try {
-			if(mbeanServer.isRegistered(packageStateName)){
-				mbeanServer.unregisterMBean(packageStateName);
-			}
-		} catch (InstanceNotFoundException e) {
-			log(LogService.LOG_DEBUG, "OSGi PackageStateMBean not found on deregistration", e);
-		} catch (MBeanRegistrationException e) {
-			log(LogService.LOG_INFO, "OSGi PackageStateMBean deregistration problem", e);
-		}
-		packageState = null;
-
-		log(LogService.LOG_INFO, "Deregistering config admin with MBeanServer: " + mbeanServer);
-		configAdminTracker.close();
-		try {
-			if(mbeanServer.isRegistered(configAdminName)){
-				mbeanServer.unregisterMBean(configAdminName);
-			}
-		} catch (InstanceNotFoundException e) {
-			log(LogService.LOG_DEBUG, "OSGi ConfigAdminMBean not found on deregistration", e);
-		} catch (MBeanRegistrationException e) {
-			log(LogService.LOG_INFO, "OSGi ConfigAdminMBean deregistration problem", e);
-		}
-		configAdminTracker = null;
-
-		log(LogService.LOG_INFO, "Deregistering permission admin with MBeanServer: " + mbeanServer);
-		permissionAdminTracker.close();
-		try {
-			if(mbeanServer.isRegistered(permissionAdminName)){
-				mbeanServer.unregisterMBean(permissionAdminName);
-			}
-		} catch (InstanceNotFoundException e) {
-			log(LogService.LOG_DEBUG, "OSGi PermissionAdminMBean not found on deregistration", e);
-		} catch (MBeanRegistrationException e) {
-			log(LogService.LOG_INFO, "OSGi PermissionAdminMBean deregistration problem", e);
-		}
-		permissionAdminTracker = null;
-
-		log(LogService.LOG_INFO, "Deregistering provisioning service admin with MBeanServer: " + mbeanServer);
-		provisioningServiceTracker.close();
-		try {
-			if(mbeanServer.isRegistered(provisioningServiceName)){
-				mbeanServer.unregisterMBean(provisioningServiceName);
-			}
-		} catch (InstanceNotFoundException e) {
-			log(LogService.LOG_DEBUG, "OSGi ProvisioningServiceMBean not found on deregistration", e);
-		} catch (MBeanRegistrationException e) {
-			log(LogService.LOG_INFO, "OSGi ProvisioningServiceMBean deregistration problem", e);
-		}
-		provisioningServiceTracker = null;
-
-		log(LogService.LOG_INFO, "Deregistering user admin with MBeanServer: " + mbeanServer);
-		userAdminTracker.close();
-		try {
-			if(mbeanServer.isRegistered(userAdminName)){
-				mbeanServer.unregisterMBean(userAdminName);
-			}
-		} catch (InstanceNotFoundException e) {
-			log(LogService.LOG_DEBUG, "OSGi UserAdminMBean not found on deregistration", e);
-		} catch (MBeanRegistrationException e) {
-			log(LogService.LOG_INFO, "OSGi UserAdminMBean deregistration problem", e);
-		}
-		userAdminTracker = null;
-		servicesRegistered.set(false);
 	}
 
 	/**
@@ -347,10 +271,36 @@ public class Activator implements BundleActivator {
 	 * 
 	 * @param mbeanServer MBean Server to register the MBeans in
      */
-	private synchronized void registerServices(MBeanServer mbeanServer) {
+	private void registerServices(MBeanServer mbeanServer) {
 		if(shuttingdown.get()){
 			return;
 		}
+		synchronized (myLock) {	
+			this.registerMBean(mbeanServer, frameworkName, framework);
+			this.registerMBean(mbeanServer, bundleStateName, bundleState);
+			this.registerMBean(mbeanServer, bundleWiringStateName, bundleWiringState);
+			this.registerMBean(mbeanServer, serviceStateName, serviceState);
+			this.registerMBean(mbeanServer, packageStateName, packageState);
+		}
+    }
+	
+	private void registerMBean(MBeanServer mbeanServer, ObjectName objectName, Object service){
+		if(shuttingdown.get()){
+			return;
+		}
+		log(LogService.LOG_INFO, "Registering '" + objectName.getCanonicalName() + "' with MBeanServer: " + mbeanServer);
+		try {
+			mbeanServer.registerMBean(service, objectName);
+		} catch (InstanceAlreadyExistsException e) {
+			log(LogService.LOG_INFO, "Cannot register " + objectName, e);
+		} catch (MBeanRegistrationException e) {
+			log(LogService.LOG_ERROR, "Cannot register " + objectName, e);
+		} catch (NotCompliantMBeanException e) {
+			log(LogService.LOG_ERROR, "Cannot register " + objectName, e);
+		}
+	}
+
+	private void createMBeansAndTrackers(){
 		try {
 			framework = new StandardMBean(new Framework(bundleContext), FrameworkMBean.class);
 		} catch (NotCompliantMBeanException e) {
@@ -382,75 +332,16 @@ public class Activator implements BundleActivator {
 			return;
 		}
 
-		log(LogService.LOG_INFO, "Registering Framework with MBeanServer: " + mbeanServer + " with name: " + frameworkName);
-		try {
-			mbeanServer.registerMBean(framework, frameworkName);
-		} catch (InstanceAlreadyExistsException e) {
-			log(LogService.LOG_INFO, "Cannot register OSGi framework MBean", e);
-		} catch (MBeanRegistrationException e) {
-			log(LogService.LOG_ERROR, "Cannot register OSGi framework MBean", e);
-		} catch (NotCompliantMBeanException e) {
-			log(LogService.LOG_ERROR, "Cannot register OSGi framework MBean", e);
-		}
-
-		log(LogService.LOG_INFO, "Registering bundle state with MBeanServer: " + mbeanServer + " with name: " + bundleStateName);
-		try {
-			mbeanServer.registerMBean(bundleState, bundleStateName);
-		} catch (InstanceAlreadyExistsException e) {
-			log(LogService.LOG_INFO, "Cannot register OSGi BundleStateMBean", e);
-		} catch (MBeanRegistrationException e) {
-			log(LogService.LOG_ERROR, "Cannot register OSGi BundleStateMBean", e);
-		} catch (NotCompliantMBeanException e) {
-			log(LogService.LOG_ERROR, "Cannot register OSGi BundleStateMBean", e);
-		}
-
-		log(LogService.LOG_INFO, "Registering bundle wiring state with MBeanServer: " + mbeanServer + " with name: " + bundleStateName);
-		try {
-			mbeanServer.registerMBean(bundleWiringState, bundleWiringStateName);
-		} catch (InstanceAlreadyExistsException e) {
-			log(LogService.LOG_INFO, "Cannot register OSGi BundleWiringStateMBean", e);
-		} catch (MBeanRegistrationException e) {
-			log(LogService.LOG_ERROR, "Cannot register OSGi BundleWiringStateMBean", e);
-		} catch (NotCompliantMBeanException e) {
-			log(LogService.LOG_ERROR, "Cannot register OSGi BundleWiringStateMBean", e);
-		}
-
-		log(LogService.LOG_INFO, "Registering services monitor with MBeanServer: " + mbeanServer + " with name: " + serviceStateName);
-		try {
-			mbeanServer.registerMBean(serviceState, serviceStateName);
-		} catch (InstanceAlreadyExistsException e) {
-			log(LogService.LOG_INFO, "Cannot register OSGi ServiceStateMBean", e);
-		} catch (MBeanRegistrationException e) {
-			log(LogService.LOG_ERROR, "Cannot register OSGi ServiceStateMBean", e);
-		} catch (NotCompliantMBeanException e) {
-			log(LogService.LOG_ERROR, "Cannot register OSGi ServiceStateMBean", e);
-		}
-
-		log(LogService.LOG_INFO, "Registering packages monitor with MBeanServer: " + mbeanServer + " with name: " + packageStateName);
-		try {
-			mbeanServer.registerMBean(packageState, packageStateName);
-		} catch (InstanceAlreadyExistsException e) {
-			log(LogService.LOG_INFO, "Cannot register OSGi PackageStateMBean", e);
-		} catch (MBeanRegistrationException e) {
-			log(LogService.LOG_ERROR, "Cannot register OSGi PackageStateMBean", e);
-		} catch (NotCompliantMBeanException e) {
-			log(LogService.LOG_ERROR, "Cannot register OSGi PackageStateMBean", e);
-		}
-
-        configAdminTracker = new ServiceTracker<ConfigurationAdmin, Object>(bundleContext, "org.osgi.service.cm.ConfigurationAdmin",
-            new ConfigAdminTracker());
-        permissionAdminTracker = new ServiceTracker<PermissionAdmin, Object>(bundleContext, "org.osgi.service.permissionadmin.PermissionAdmin",
-            new PermissionAdminTracker());
-        provisioningServiceTracker = new ServiceTracker<ProvisioningService, Object>(bundleContext,
-            "org.osgi.service.provisioning.ProvisioningService", new ProvisioningServiceTracker());
+        configAdminTracker = new ServiceTracker<ConfigurationAdmin, Object>(bundleContext, "org.osgi.service.cm.ConfigurationAdmin", new ConfigAdminTracker());
+        permissionAdminTracker = new ServiceTracker<PermissionAdmin, Object>(bundleContext, "org.osgi.service.permissionadmin.PermissionAdmin", new PermissionAdminTracker());
+        provisioningServiceTracker = new ServiceTracker<ProvisioningService, Object>(bundleContext, "org.osgi.service.provisioning.ProvisioningService", new ProvisioningServiceTracker());
         userAdminTracker = new ServiceTracker<UserAdmin, Object>(bundleContext, "org.osgi.service.useradmin.UserAdmin", new UserAdminTracker());
         configAdminTracker.open();
         permissionAdminTracker.open();
         provisioningServiceTracker.open();
         userAdminTracker.open();
-        servicesRegistered.set(true);
-    }
-
+	}
+	
 	private class MBeanServiceTracker implements ServiceTrackerCustomizer<MBeanServer, Object> {
 
 		/**
@@ -465,7 +356,7 @@ public class Activator implements BundleActivator {
 				mbeanServers.add(mbeanServer);
 				Runnable registration = new Runnable() {
 					public void run() {
-						registerServices(mbeanServer);
+						registerServices(mbeanServer);			
 					}
 				};
 				
@@ -536,16 +427,17 @@ public class Activator implements BundleActivator {
 			}
 			
 			for (MBeanServer mbeanServer : mbeanServers) {
-				log(LogService.LOG_INFO, "Registering configuration admin with MBeanServer: " + mbeanServer + " with name: " + configAdminName);
-				try {
-					mbeanServer.registerMBean(manager, configAdminName);
-				} catch (InstanceAlreadyExistsException e) {
-					log(LogService.LOG_INFO, "Cannot register Configuration Manager MBean", e);
-				} catch (MBeanRegistrationException e) {
-					log(LogService.LOG_ERROR, "Cannot register Configuration Manager MBean", e);
-				} catch (NotCompliantMBeanException e) {
-					log(LogService.LOG_ERROR, "Cannot register Configuration Manager MBean", e);
-				}
+				registerMBean(mbeanServer, configAdminName, manager);
+//				log(LogService.LOG_INFO, "Registering configuration admin with MBeanServer: " + mbeanServer + " with name: " + configAdminName);
+//				try {
+//					mbeanServer.registerMBean(manager, configAdminName);
+//				} catch (InstanceAlreadyExistsException e) {
+//					log(LogService.LOG_INFO, "Cannot register Configuration Manager MBean", e);
+//				} catch (MBeanRegistrationException e) {
+//					log(LogService.LOG_ERROR, "Cannot register Configuration Manager MBean", e);
+//				} catch (NotCompliantMBeanException e) {
+//					log(LogService.LOG_ERROR, "Cannot register Configuration Manager MBean", e);
+//				}
 			}
 			
 			return admin;

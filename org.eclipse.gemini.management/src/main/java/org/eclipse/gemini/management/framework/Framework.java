@@ -463,7 +463,10 @@ public final class Framework implements FrameworkMBean {
 	 */
 	public void updateFramework() throws IOException {
 		try {
-			bundle(0).update();
+			Bundle b = bundle(0);
+			if(b != null){
+				b.update();
+			}
 		} catch (BundleException be) {
 			throw new IOException("Update of the framework is not implemented: " + be);
 		}
@@ -507,48 +510,73 @@ public final class Framework implements FrameworkMBean {
 	 */
 	public boolean refreshBundleAndWait(long bundleIdentifier) throws IOException {
 		Collection<Bundle> bundles = new HashSet<Bundle>();
-		bundles.add(this.bundle(bundleIdentifier));
+		Bundle bundle = this.bundle(bundleIdentifier);
+		bundles.add(bundle);
 		StandardFrameworkListener standardFrameworkListener = new StandardFrameworkListener();
 		this.frameworkWiring.refreshBundles(bundles, standardFrameworkListener);
-		return standardFrameworkListener.getResult();
+		standardFrameworkListener.getResult();
+		return bundle.getState() >= Bundle.RESOLVED;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public CompositeData refreshBundlesAndWait(long[] bundleIdentifiers) throws IOException {
+		Collection<Bundle> bundles;
 		if(bundleIdentifiers == null){
-			return new BundleBatchResolveResult(new Long[0], true).asCompositeData();
+			bundles = this.frameworkWiring.getRemovalPendingBundles();
+		} else {
+			bundles = this.getBundles(bundleIdentifiers);
 		}
-		Collection<Bundle> bundles = this.getBundles(bundleIdentifiers);
 		StandardFrameworkListener standardFrameworkListener = new StandardFrameworkListener();
 		this.frameworkWiring.refreshBundles(bundles, standardFrameworkListener);
-		return new BundleBatchResolveResult(convertToNonPrimativeArray(bundleIdentifiers), standardFrameworkListener.getResult()).asCompositeData();
+		
+		boolean operationResult = standardFrameworkListener.getResult();
+		ArrayList<Long> completedBundles = new ArrayList<Long>();
+		boolean result = true;
+		for (Bundle bundle : bundles) {
+			if(bundle.getState() >= Bundle.RESOLVED){
+				completedBundles.add(bundle.getBundleId());
+			}else{
+				result = false;
+			}		
+		}
+		if(!operationResult){
+			result = false;
+		}
+		return new BundleBatchResolveResult(completedBundles.toArray(new Long[completedBundles.size()]), result).asCompositeData();
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public CompositeData resolve(long[] bundleIdentifiers) throws IOException {
-		boolean result;
-		Long[] completedBundles;
+		Collection<Bundle> bundles;
 		if(bundleIdentifiers == null){
+			bundles = new HashSet<Bundle>();
 			Bundle[] allBundles = this.bundleContext.getBundles();
-			long[] tmpBundles = new long[allBundles.length];
-			int i = 0;
 			for (Bundle bundle : allBundles) {
-				if(bundle.getState() == Bundle.INSTALLED){
-					tmpBundles[i++] = bundle.getBundleId();
+				if(bundle.getState() < Bundle.RESOLVED){
+					bundles.add(bundle);
 				}
 			}
-			completedBundles = convertToNonPrimativeArray(tmpBundles);
-			result = this.frameworkWiring.resolveBundles(null);	
 		}else{
-			Collection<Bundle> bundles = this.getBundles(bundleIdentifiers);
-			result = this.frameworkWiring.resolveBundles(bundles);
-			completedBundles = convertToNonPrimativeArray(bundleIdentifiers);
+			bundles = this.getBundles(bundleIdentifiers);
 		}
-		return new BundleBatchResolveResult(completedBundles, result).asCompositeData();
+		boolean operationResult = this.frameworkWiring.resolveBundles(bundles);
+		boolean result = true;
+		ArrayList<Long> completedBundles = new ArrayList<Long>();
+		for (Bundle bundle : bundles) {
+			if(bundle.getState() >= Bundle.RESOLVED){
+				completedBundles.add(bundle.getBundleId());
+			}else{
+				result = false;
+			}
+		}
+		if(!operationResult){
+			result = false;
+		}
+		return new BundleBatchResolveResult(completedBundles.toArray(new Long[completedBundles.size()]), result).asCompositeData();
 	}
 
 	private Collection<Bundle> getBundles(long[] bundleIdentifiers) throws IOException{
@@ -560,7 +588,12 @@ public final class Framework implements FrameworkMBean {
 	}
 	
 	private Bundle bundle(long bundleIdentifier) throws IOException {
-		Bundle b = bundleContext.getBundle(bundleIdentifier);
+		Bundle b;
+		try{
+			b = bundleContext.getBundle(bundleIdentifier);
+		} catch(IllegalStateException e){
+			return null;
+		}
 		if (b == null) {
 			throw new IOException("Bundle <" + bundleIdentifier + "> does not exist");
 		}
@@ -578,10 +611,6 @@ public final class Framework implements FrameworkMBean {
         return dest;
 	}
 	
-	private Long[] convertToNonPrimativeArray(long[] src){
-		return this.convertToNonPrimativeArray(src, src.length);
-	}
-	
 	/**
 	 * 
 	 * @author Christopher Frost
@@ -590,8 +619,6 @@ public final class Framework implements FrameworkMBean {
 	 *
 	 */
 	private static class StandardFrameworkListener implements FrameworkListener {
-
-		private final int waitForEvent = FrameworkEvent.PACKAGES_REFRESHED;
 				
 		private final Object monitor = new Object();
 						
@@ -601,7 +628,7 @@ public final class Framework implements FrameworkMBean {
 		
 		@Override
 		public void frameworkEvent(FrameworkEvent event) {
-			if(this.waitForEvent == event.getType()){
+			if(FrameworkEvent.PACKAGES_REFRESHED == event.getType()){
 				this.sucsess = true;
 			} else if(FrameworkEvent.ERROR == event.getType()){
 				this.sucsess = false;

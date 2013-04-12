@@ -63,20 +63,27 @@ public final class PackageState implements PackageStateMBean {
 				throw new IOException("Invalid package version: " + version);
 			}
 		}
+
+		ArrayList<Bundle> bundles = this.getBundlesExportingPackage(packageName, v);
+		
+		long[] bundleIds = new long[bundles.size()];
+		int i = 0;
+		for (Bundle id : bundles) {
+			bundleIds[i++] = id.getBundleId();
+		}
+		return bundleIds;
+	}
+	
+	private ArrayList<Bundle> getBundlesExportingPackage(String packageName, Version version){
+		ArrayList<Bundle> bundles = new ArrayList<Bundle>();
 		ExportedPackage[] exportedPackages = admin.getExportedPackages(packageName);
 		if (exportedPackages == null) {
-			return new long[0];
+			return bundles;
 		}
-		ArrayList<Long> bundleIdentifiers = new ArrayList<Long>();
 		for (ExportedPackage pkg : exportedPackages) {
-			if (pkg.getVersion().equals(v)) {
-				bundleIdentifiers.add(pkg.getExportingBundle().getBundleId());
+			if (pkg.getVersion().equals(version)) {
+				bundles.add(pkg.getExportingBundle());
 			}
-		}
-		long[] bundles = new long[bundleIdentifiers.size()];
-		int i = 0;
-		for (long id : bundleIdentifiers) {
-			bundles[i++] = id;
 		}
 		return bundles;
 	}
@@ -119,7 +126,8 @@ public final class PackageState implements PackageStateMBean {
 	public TabularData listPackages() {
 		Set<OSGiPackage> packages = new HashSet<OSGiPackage>();
 		for(ExportedPackage pkg : admin.getExportedPackages((Bundle) null)){
-			packages.add(new OSGiPackage(pkg.getName(), pkg.getVersion().toString(), pkg.isRemovalPending(), new Bundle[] { pkg.getExportingBundle() }, pkg.getImportingBundles()));
+			ArrayList<Bundle> bundlesExportingPackage = this.getBundlesExportingPackage(pkg.getName(), pkg.getVersion());
+			packages.add(new OSGiPackage(pkg.getName(), pkg.getVersion().toString(), pkg.isRemovalPending(), bundlesExportingPackage.toArray(new Bundle[bundlesExportingPackage.size()]), pkg.getImportingBundles()));
 		}
 		return OSGiPackage.tableFrom(packages);
 	}

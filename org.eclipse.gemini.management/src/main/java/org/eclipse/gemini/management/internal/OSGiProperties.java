@@ -161,6 +161,8 @@ public final class OSGiProperties {
 		Class<?> clazz = value.getClass();
 		if (clazz.isArray()) {
 			return encodeArray(key, value, clazz.getComponentType());
+		} else if(value instanceof Vector){
+			return encodeVector(key, (Vector<?>) value);
 		} else if (value instanceof Collection) {
 			return encodeCollection(key, (Collection<?>) value);
 		}
@@ -271,6 +273,30 @@ public final class OSGiProperties {
 	}
 
 	/**
+	 * Encode the vector as composite data
+	 *
+	 * @param key
+	 * @param value
+	 * @return the composite data representation
+	 */
+	private static <T> CompositeData encodeVector(String key, Vector<T> value) {
+		String type = "String";
+		if (value.size() > 0) {
+			type = typeOf(value.get(0).getClass());
+		}
+		StringBuilder builder = new StringBuilder();
+		for (T item: value){
+
+			builder.append(item);
+			builder.append(',');
+		}
+		if(builder.length() > 0){
+			builder.deleteCharAt(builder.length()-1);
+		}
+		return propertyData(key, builder.toString(), JmxConstants.VECTOR_OF + type);
+	}
+	
+	/**
 	 * Encode the list as composite data
 	 * 
 	 * @param key
@@ -287,8 +313,10 @@ public final class OSGiProperties {
 			builder.append(item);
 			builder.append(',');
 		}
-		builder.deleteCharAt(builder.length()-1);
-		return propertyData(key, builder.toString(), JmxConstants.VECTOR_OF + type);
+		if(builder.length() > 0){
+			builder.deleteCharAt(builder.length()-1);
+		}
+		return propertyData(key, builder.toString(), JmxConstants.ARRAY_OF + type);
 	}
 	
 	/**
