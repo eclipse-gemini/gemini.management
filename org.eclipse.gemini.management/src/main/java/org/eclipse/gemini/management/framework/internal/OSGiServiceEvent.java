@@ -109,40 +109,5 @@ public final class OSGiServiceEvent {
 			throw new IllegalStateException("Cannot form service event open data", e);
 		}
 	}
-//
-//	/**
-//	 * @return the identifier of the bundle the service belongs to
-//	 */
-//	public long getBundleId() {
-//		return bundleId;
-//	}
-//
-//	/**
-//	 * @return the type of the event
-//	 */
-//	public int getEventType() {
-//		return eventType;
-//	}
-//
-//	/**
-//	 * @return the interfaces the service implements
-//	 */
-//	public String[] getInterfaces() {
-//		return interfaces;
-//	}
-//
-//	/**
-//	 * @return the location of the bundle the service belongs to
-//	 */
-//	public String getLocation() {
-//		return location;
-//	}
-//
-//	/**
-//	 * @return the identifier of the service
-//	 */
-//	public long getServiceId() {
-//		return serviceId;
-//	}
 
 }

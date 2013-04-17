@@ -94,32 +94,4 @@ public final class OSGiBundleEvent {
 		}
 	}
 
-//	/**
-//	 * @return the identifier of the bundle for this event
-//	 */
-//	public long getBundleId() {
-//		return bundleId;
-//	}
-//
-//	/**
-//	 * @return the type of the event
-//	 */
-//	public int getEventType() {
-//		return eventType;
-//	}
-//
-//	/**
-//	 * @return the location of the bundle for this event
-//	 */
-//	public String getLocation() {
-//		return location;
-//	}
-//
-//	/**
-//	 * @return the symbolic name of the bundle for this event
-//	 */
-//	public String getSymbolicName() {
-//		return symbolicName;
-//	}
-
 }

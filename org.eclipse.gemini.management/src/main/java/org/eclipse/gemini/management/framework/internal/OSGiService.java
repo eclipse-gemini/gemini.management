@@ -19,7 +19,6 @@ import static org.osgi.framework.Constants.OBJECTCLASS;
 import static org.osgi.framework.Constants.SERVICE_ID;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -27,7 +26,6 @@ import java.util.Map;
 
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.CompositeDataSupport;
-import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularDataSupport;
@@ -35,7 +33,7 @@ import javax.management.openmbean.TabularDataSupport;
 import org.eclipse.gemini.management.internal.OSGiProperties;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
-import org.osgi.jmx.Item;
+import org.osgi.jmx.framework.BundleStateMBean;
 import org.osgi.jmx.framework.ServiceStateMBean;
 
 /**
@@ -150,31 +148,11 @@ public final class OSGiService {
 	 */
 	public static TabularData tableFrom(List<OSGiService> services, String... serviceTypeItems) throws IOException {
 		List<String> serviceTypes = Arrays.asList(serviceTypeItems);
-		CompositeType computeServiceType = OSGiService.computeServiceType(serviceTypes);
-		TabularDataSupport table = new TabularDataSupport(Item.tabularType("SERVICES", "The table of all services", computeServiceType, ServiceStateMBean.IDENTIFIER));
+		TabularDataSupport table = new TabularDataSupport(ServiceStateMBean.SERVICES_TYPE);
 		for (OSGiService service : services) {
-			table.put(service.asCompositeData(computeServiceType, serviceTypes));
+			table.put(service.asCompositeData(serviceTypes));
 		}
 		return table;
-	}
-	
-	private static CompositeType computeServiceType(List<String> serviceTypes) {
-		List<Item> serviceTypeItems = new ArrayList<Item>();
-		serviceTypeItems.add(ServiceStateMBean.IDENTIFIER_ITEM);
-		if(serviceTypes.contains(ServiceStateMBean.BUNDLE_IDENTIFIER)){
-			serviceTypeItems.add(ServiceStateMBean.BUNDLE_IDENTIFIER_ITEM);
-		}
-		if(serviceTypes.contains(ServiceStateMBean.OBJECT_CLASS)){
-			serviceTypeItems.add(ServiceStateMBean.OBJECT_CLASS_ITEM);
-		}
-		if(serviceTypes.contains(ServiceStateMBean.USING_BUNDLES)){
-			serviceTypeItems.add(ServiceStateMBean.USING_BUNDLES_ITEM);
-		}
-		if(serviceTypes.contains(ServiceStateMBean.PROPERTIES)){
-			serviceTypeItems.add(ServiceStateMBean.PROPERTIES_ITEM);
-		}
-		CompositeType currentCompositeType = Item.compositeType("SERVICE", "This type encapsulates an OSGi service", serviceTypeItems.toArray(new Item[]{}));
-		return currentCompositeType;
 	}
 
 	/**
@@ -203,23 +181,16 @@ public final class OSGiService {
 	 * 
 	 * @return the CompositeData encoding of the receiver.
 	 */
-	private CompositeData asCompositeData(CompositeType computeServiceType, List<String> serviceTypes) {
+	private CompositeData asCompositeData(List<String> serviceTypes) {
 		Map<String, Object> items = new HashMap<String, Object>();
 		items.put(ServiceStateMBean.IDENTIFIER, identifier);
-		if(serviceTypes.contains(ServiceStateMBean.BUNDLE_IDENTIFIER)){
-			items.put(ServiceStateMBean.BUNDLE_IDENTIFIER, bundle);
-		}
-		if(serviceTypes.contains(ServiceStateMBean.OBJECT_CLASS)){
-			items.put(ServiceStateMBean.OBJECT_CLASS, interfaces);
-		}
-		if(serviceTypes.contains(ServiceStateMBean.USING_BUNDLES)){
-			items.put(ServiceStateMBean.USING_BUNDLES, usingBundles);
-		}
-		if(serviceTypes.contains(ServiceStateMBean.PROPERTIES)){
-			items.put(ServiceStateMBean.PROPERTIES, properties);
-		}
+		
+		items.put(ServiceStateMBean.BUNDLE_IDENTIFIER, 	serviceTypes.contains(ServiceStateMBean.BUNDLE_IDENTIFIER) ? bundle : null);
+		items.put(ServiceStateMBean.OBJECT_CLASS, 		serviceTypes.contains(ServiceStateMBean.OBJECT_CLASS) ? 		interfaces : null);
+		items.put(ServiceStateMBean.USING_BUNDLES, 		serviceTypes.contains(ServiceStateMBean.USING_BUNDLES) ? 	usingBundles : null);
+		items.put(ServiceStateMBean.PROPERTIES, 		serviceTypes.contains(ServiceStateMBean.PROPERTIES) ? 		properties : null);
 		try {
-			return new CompositeDataSupport(computeServiceType, items);
+			return new CompositeDataSupport(ServiceStateMBean.SERVICE_TYPE, items);
 		} catch (OpenDataException e) {
 			throw new IllegalStateException("Cannot form service open data", e);
 		}

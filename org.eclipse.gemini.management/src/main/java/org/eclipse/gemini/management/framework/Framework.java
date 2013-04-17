@@ -22,6 +22,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
@@ -523,17 +524,18 @@ public final class Framework implements FrameworkMBean {
 	 */
 	public CompositeData refreshBundlesAndWait(long[] bundleIdentifiers) throws IOException {
 		Collection<Bundle> bundles;
+		StandardFrameworkListener standardFrameworkListener = new StandardFrameworkListener();
 		if(bundleIdentifiers == null){
-			bundles = this.frameworkWiring.getRemovalPendingBundles();
+			bundles = Arrays.asList(this.bundleContext.getBundles());
+			this.frameworkWiring.refreshBundles(null, standardFrameworkListener);
+
 		} else {
 			bundles = this.getBundles(bundleIdentifiers);
-		}
-		StandardFrameworkListener standardFrameworkListener = new StandardFrameworkListener();
-		this.frameworkWiring.refreshBundles(bundles, standardFrameworkListener);
-		
+			this.frameworkWiring.refreshBundles(bundles, standardFrameworkListener);
+		}		
 		boolean operationResult = standardFrameworkListener.getResult();
 		ArrayList<Long> completedBundles = new ArrayList<Long>();
-		boolean result = true;
+		boolean result = true;		
 		for (Bundle bundle : bundles) {
 			if(bundle.getState() >= Bundle.RESOLVED){
 				completedBundles.add(bundle.getBundleId());

@@ -26,7 +26,6 @@ import java.util.Map;
 
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.CompositeDataSupport;
-import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularDataSupport;
@@ -38,7 +37,6 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.BundleWire;
 import org.osgi.framework.wiring.BundleWiring;
-import org.osgi.jmx.Item;
 import org.osgi.jmx.framework.BundleStateMBean;
 
 
@@ -66,146 +64,38 @@ public final class OSGiBundle {
 
 	public static TabularData tableFrom(List<OSGiBundle> bundles, String... bundleTypeItems) throws IOException {
 		List<String> bundleTypes = Arrays.asList(bundleTypeItems);
-		CompositeType computeBundleType = OSGiBundle.computeBundleType(bundleTypes);
-		TabularDataSupport table = new TabularDataSupport(Item.tabularType("BUNDLES", "A list of bundles", computeBundleType, new String[] { BundleStateMBean.IDENTIFIER }));
+		TabularDataSupport table = new TabularDataSupport(BundleStateMBean.BUNDLES_TYPE);
 		for (OSGiBundle bundle : bundles) {
-			table.put(bundle.asCompositeData(computeBundleType, bundleTypes));
+			table.put(bundle.asCompositeData(bundleTypes));
 		}
 		return table;
 	}
 	
-	private static CompositeType computeBundleType(List<String> bundleTypes) {
-		List<Item> bundleTypeItems = new ArrayList<Item>();
-		bundleTypeItems.add(BundleStateMBean.IDENTIFIER_ITEM);
-		if(bundleTypes.contains(BundleStateMBean.LOCATION)) {
-			bundleTypeItems.add(BundleStateMBean.LOCATION_ITEM);
-		}
-		if(bundleTypes.contains(BundleStateMBean.SYMBOLIC_NAME)) {
-			bundleTypeItems.add(BundleStateMBean.SYMBOLIC_NAME_ITEM);
-		}
-		if(bundleTypes.contains(BundleStateMBean.VERSION)) {
-			bundleTypeItems.add(BundleStateMBean.VERSION_ITEM);
-		}
-		if(bundleTypes.contains(BundleStateMBean.START_LEVEL)) {
-			bundleTypeItems.add(BundleStateMBean.START_LEVEL_ITEM);
-		}
-		if(bundleTypes.contains(BundleStateMBean.STATE)) {
-			bundleTypeItems.add(BundleStateMBean.STATE_ITEM);
-		}
-		if(bundleTypes.contains(BundleStateMBean.LAST_MODIFIED)) {
-			bundleTypeItems.add(BundleStateMBean.LAST_MODIFIED_ITEM);
-		}
-		if(bundleTypes.contains(BundleStateMBean.PERSISTENTLY_STARTED)) {
-			bundleTypeItems.add(BundleStateMBean.PERSISTENTLY_STARTED_ITEM);
-		}
-		if(bundleTypes.contains(BundleStateMBean.ACTIVATION_POLICY_USED)) {
-			bundleTypeItems.add(BundleStateMBean.ACTIVATION_POLICY_USED_ITEM);
-		}
-		if(bundleTypes.contains(BundleStateMBean.REMOVAL_PENDING)) {
-			bundleTypeItems.add(BundleStateMBean.REMOVAL_PENDING_ITEM);
-		}
-		if(bundleTypes.contains(BundleStateMBean.REQUIRED)) {
-			bundleTypeItems.add(BundleStateMBean.REQUIRED_ITEM);
-		}
-		if(bundleTypes.contains(BundleStateMBean.FRAGMENT)) {
-			bundleTypeItems.add(BundleStateMBean.FRAGMENT_ITEM);
-		}
-		if(bundleTypes.contains(BundleStateMBean.REGISTERED_SERVICES)) {
-			bundleTypeItems.add(BundleStateMBean.REGISTERED_SERVICES_ITEM);
-		}
-		if(bundleTypes.contains(BundleStateMBean.SERVICES_IN_USE)) {
-			bundleTypeItems.add(BundleStateMBean.SERVICES_IN_USE_ITEM);
-		}
-		if(bundleTypes.contains(BundleStateMBean.HEADERS)) {
-			bundleTypeItems.add(BundleStateMBean.HEADERS_ITEM);
-		}
-		if(bundleTypes.contains(BundleStateMBean.EXPORTED_PACKAGES)) {
-			bundleTypeItems.add(BundleStateMBean.EXPORTED_PACKAGES_ITEM);
-		}
-		if(bundleTypes.contains(BundleStateMBean.IMPORTED_PACKAGES)) {
-			bundleTypeItems.add(BundleStateMBean.IMPORTED_PACKAGES_ITEM);
-		}
-		if(bundleTypes.contains(BundleStateMBean.FRAGMENTS)) {
-			bundleTypeItems.add(BundleStateMBean.FRAGMENTS_ITEM);
-		}
-		if(bundleTypes.contains(BundleStateMBean.HOSTS)) {
-			bundleTypeItems.add(BundleStateMBean.HOSTS_ITEM);
-		}
-		if(bundleTypes.contains(BundleStateMBean.REQUIRING_BUNDLES)) {
-			bundleTypeItems.add(BundleStateMBean.REQUIRING_BUNDLES_ITEM);
-		}
-		if(bundleTypes.contains(BundleStateMBean.REQUIRED_BUNDLES)) {
-			bundleTypeItems.add(BundleStateMBean.REQUIRED_BUNDLES_ITEM);
-		}
-		CompositeType currentCompositeType = Item.compositeType("BUNDLE", "This type encapsulates OSGi bundles", bundleTypeItems.toArray(new Item[]{}));
-		return currentCompositeType;
-	}
-	
-	private CompositeData asCompositeData(CompositeType computeBundleType, List<String> bundleTypes) throws IOException {
+	private CompositeData asCompositeData(List<String> bundleTypes) throws IOException {
 		Map<String, Object> items = new HashMap<String, Object>();
 		items.put(BundleStateMBean.IDENTIFIER, getIdentifier());
-		if(bundleTypes.contains(BundleStateMBean.LOCATION)) {
-			items.put(BundleStateMBean.LOCATION, getLocation());
-		}
-		if(bundleTypes.contains(BundleStateMBean.SYMBOLIC_NAME)) {
-			items.put(BundleStateMBean.SYMBOLIC_NAME, getSymbolicName());
-		}
-		if(bundleTypes.contains(BundleStateMBean.VERSION)) {
-			items.put(BundleStateMBean.VERSION, getVersion());
-		}
-		if(bundleTypes.contains(BundleStateMBean.START_LEVEL)) {
-			items.put(BundleStateMBean.START_LEVEL, getStartLevel());
-		}
-		if(bundleTypes.contains(BundleStateMBean.STATE)) {
-			items.put(BundleStateMBean.STATE, getState());
-		}
-		if(bundleTypes.contains(BundleStateMBean.LAST_MODIFIED)) {
-			items.put(BundleStateMBean.LAST_MODIFIED, getLastModified());
-		}
-		if(bundleTypes.contains(BundleStateMBean.PERSISTENTLY_STARTED)) {
-			items.put(BundleStateMBean.PERSISTENTLY_STARTED, isPersistentlyStarted());
-		}
-		if(bundleTypes.contains(BundleStateMBean.ACTIVATION_POLICY_USED)) {
-			items.put(BundleStateMBean.ACTIVATION_POLICY_USED, isActivationPolicyUsed());
-		}
-		if(bundleTypes.contains(BundleStateMBean.REMOVAL_PENDING)) {
-			items.put(BundleStateMBean.REMOVAL_PENDING, isRemovalPending());
-		}
-		if(bundleTypes.contains(BundleStateMBean.REQUIRED)) {
-			items.put(BundleStateMBean.REQUIRED, isRequired());
-		}
-		if(bundleTypes.contains(BundleStateMBean.FRAGMENT)) {
-			items.put(BundleStateMBean.FRAGMENT, isFragment());
-		}
-		if(bundleTypes.contains(BundleStateMBean.REGISTERED_SERVICES)) {
-			items.put(BundleStateMBean.REGISTERED_SERVICES, getRegisteredServices());
-		}
-		if(bundleTypes.contains(BundleStateMBean.SERVICES_IN_USE)) {
-			items.put(BundleStateMBean.SERVICES_IN_USE, getServicesInUse());
-		}
-		if(bundleTypes.contains(BundleStateMBean.HEADERS)) {
-			items.put(BundleStateMBean.HEADERS, headerTable(getHeaders()));
-		}
-		if(bundleTypes.contains(BundleStateMBean.EXPORTED_PACKAGES)) {
-			items.put(BundleStateMBean.EXPORTED_PACKAGES, getExportedPackages());
-		}
-		if(bundleTypes.contains(BundleStateMBean.IMPORTED_PACKAGES)) {
-			items.put(BundleStateMBean.IMPORTED_PACKAGES, getImportedPackages());
-		}
-		if(bundleTypes.contains(BundleStateMBean.FRAGMENTS)) {
-			items.put(BundleStateMBean.FRAGMENTS, getFragments());
-		}
-		if(bundleTypes.contains(BundleStateMBean.HOSTS)) {
-			items.put(BundleStateMBean.HOSTS, getHosts());
-		}
-		if(bundleTypes.contains(BundleStateMBean.REQUIRING_BUNDLES)) {
-			items.put(BundleStateMBean.REQUIRING_BUNDLES, getRequiringBundles());
-		}
-		if(bundleTypes.contains(BundleStateMBean.REQUIRED_BUNDLES)) {
-			items.put(BundleStateMBean.REQUIRED_BUNDLES, getRequiredBundles());
-		}
+		items.put(BundleStateMBean.LOCATION, 				bundleTypes.contains(BundleStateMBean.LOCATION) ? 				getLocation() : null);
+		items.put(BundleStateMBean.SYMBOLIC_NAME, 			bundleTypes.contains(BundleStateMBean.SYMBOLIC_NAME) ? 			getSymbolicName() : null);
+		items.put(BundleStateMBean.VERSION, 				bundleTypes.contains(BundleStateMBean.VERSION) ? 				getVersion() : null);
+		items.put(BundleStateMBean.START_LEVEL, 			bundleTypes.contains(BundleStateMBean.START_LEVEL) ? 			getStartLevel() : null);
+		items.put(BundleStateMBean.STATE, 					bundleTypes.contains(BundleStateMBean.STATE) ? 					getState() : null);
+		items.put(BundleStateMBean.LAST_MODIFIED, 			bundleTypes.contains(BundleStateMBean.LAST_MODIFIED) ? 			getLastModified() : null);
+		items.put(BundleStateMBean.PERSISTENTLY_STARTED, 	bundleTypes.contains(BundleStateMBean.PERSISTENTLY_STARTED) ? 	isPersistentlyStarted() : null);
+		items.put(BundleStateMBean.ACTIVATION_POLICY_USED, 	bundleTypes.contains(BundleStateMBean.ACTIVATION_POLICY_USED) ? isActivationPolicyUsed() : null);
+		items.put(BundleStateMBean.REMOVAL_PENDING, 		bundleTypes.contains(BundleStateMBean.REMOVAL_PENDING) ? 		isRemovalPending() : null);
+		items.put(BundleStateMBean.REQUIRED, 				bundleTypes.contains(BundleStateMBean.REQUIRED) ? 				isRequired() : null);
+		items.put(BundleStateMBean.FRAGMENT, 				bundleTypes.contains(BundleStateMBean.FRAGMENT) ? 				isFragment() : null);
+		items.put(BundleStateMBean.REGISTERED_SERVICES, 	bundleTypes.contains(BundleStateMBean.REGISTERED_SERVICES) ? 	getRegisteredServices() : null);
+		items.put(BundleStateMBean.SERVICES_IN_USE, 		bundleTypes.contains(BundleStateMBean.SERVICES_IN_USE) ? 		getServicesInUse() : null);
+		items.put(BundleStateMBean.HEADERS, 				bundleTypes.contains(BundleStateMBean.HEADERS) ? 				getHeaders() : null);
+		items.put(BundleStateMBean.EXPORTED_PACKAGES, 		bundleTypes.contains(BundleStateMBean.EXPORTED_PACKAGES) ? 		getExportedPackages() : null);
+		items.put(BundleStateMBean.IMPORTED_PACKAGES, 		bundleTypes.contains(BundleStateMBean.IMPORTED_PACKAGES) ? 		getImportedPackages() : null);
+		items.put(BundleStateMBean.FRAGMENTS, 				bundleTypes.contains(BundleStateMBean.FRAGMENTS) ? 				getFragments() : null);
+		items.put(BundleStateMBean.HOSTS, 					bundleTypes.contains(BundleStateMBean.HOSTS) ? 					getHosts() : null);
+		items.put(BundleStateMBean.REQUIRING_BUNDLES, 		bundleTypes.contains(BundleStateMBean.REQUIRING_BUNDLES) ? 		getRequiringBundles() : null);
+		items.put(BundleStateMBean.REQUIRED_BUNDLES, 		bundleTypes.contains(BundleStateMBean.REQUIRED_BUNDLES) ? 		getRequiredBundles() : null);
 		try {
-			return new CompositeDataSupport(computeBundleType, items);
+			return new CompositeDataSupport(BundleStateMBean.BUNDLE_TYPE, items);
 		} catch (OpenDataException e) {
 			throw new IllegalStateException("Cannot form bundle open data", e);
 		}
