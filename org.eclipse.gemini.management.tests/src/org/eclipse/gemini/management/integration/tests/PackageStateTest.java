@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.gemini.management.integration.tests;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
