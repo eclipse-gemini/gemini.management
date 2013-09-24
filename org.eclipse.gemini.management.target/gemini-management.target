@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.6"?>
 
-<target name="gemini-management" sequenceNumber="60">
+<target name="gemini-management" sequenceNumber="61">
 <locations>
 <location includeAllPlatforms="false" includeMode="planner" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.osgi" version="3.8.0.v20120529-1548"/>
+<unit id="org.eclipse.osgi" version="3.8.2.v20130124-134944"/>
 <unit id="org.eclipse.osgi.services" version="3.3.100.v20120522-1822"/>
+<unit id="org.eclipse.equinox.region" version="1.1.1.v20130108-172736"/>
 <unit id="org.junit4" version="0.0.0"/>
 <repository location="http://download.eclipse.org/eclipse/updates/3.8/"/>
 </location>
