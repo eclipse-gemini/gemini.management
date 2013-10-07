@@ -47,12 +47,14 @@
 								</goals>
 								<configuration>
 									<tasks>
+										<mkdir dir="/home/data/httpd/download.eclipse.org/gemini/management/${site-folder-name}/${project.version}"/>
 										<copy includeemptydirs="false"
 											todir="/home/data/httpd/download.eclipse.org/gemini/management/${site-folder-name}/${project.version}">
 											<fileset dir="target/site">
 												<include name="**" />
 											</fileset>
 										</copy>
+										<mkdir dir="/home/data/httpd/download.eclipse.org/gemini/management/${zip-folder-name}/${project.version}"/>
 										<copy includeemptydirs="false"
 											todir="/home/data/httpd/download.eclipse.org/gemini/management/${zip-folder-name}/${project.version}">
 											<fileset dir="target/site/plugins">
