@@ -9,9 +9,9 @@
 	<name>Gemini Management Parent POM</name>
 
 	<properties>
-		<tycho-version>0.18.0</tycho-version>
+		<tycho-version>0.22.0</tycho-version>
 	</properties>
-	
+
 	<modules>
 		<module>../org.eclipse.gemini.management</module>
 		<module>../org.eclipse.gemini.management.tests</module>
@@ -118,7 +118,7 @@
 			</plugins>
 		</pluginManagement>
 	</build>
-	
+
 	<pluginRepositories>
 		<pluginRepository>
 			<id>codehaus.snapshots</id>
