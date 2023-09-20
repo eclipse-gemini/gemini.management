@@ -6,7 +6,6 @@
 		<groupId>org.eclipse.gemini.management</groupId>
 		<artifactId>org.eclipse.gemini.management_parent</artifactId>
 		<version>2.0.1-SNAPSHOT</version>
-		<relativePath>../gemini.management.releng/pom.xml</relativePath>
 	</parent>
 
 	<artifactId>gemini.management.repository</artifactId>
@@ -24,9 +23,9 @@
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>tycho-p2-publisher-plugin</artifactId>
 				<version>${tycho-version}</version>
-				<configuration>
-					<publishArtifacts>true</publishArtifacts>
-				</configuration>
+<!--				<configuration>-->
+<!--					<publishArtifacts>true</publishArtifacts>-->
+<!--				</configuration>-->
 			</plugin>
 		</plugins>
 	</build>
