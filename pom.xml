@@ -1,5 +1,5 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.eclipse.gemini.management</groupId>
@@ -9,15 +9,15 @@
 	<name>Gemini Management Parent POM</name>
 
 	<properties>
-		<tycho-version>0.22.0</tycho-version>
+		<tycho-version>0.26.0</tycho-version>
 	</properties>
 
 	<modules>
-		<module>../org.eclipse.gemini.management</module>
-		<module>../org.eclipse.gemini.management.tests</module>
-		<module>../org.eclipse.gemini.management.feature</module>
-		<module>../gemini.management.repository</module>
-		<module>../org.eclipse.gemini.management.target</module>
+		<module>org.eclipse.gemini.management</module>
+		<module>org.eclipse.gemini.management.tests</module>
+		<module>org.eclipse.gemini.management.feature</module>
+		<module>gemini.management.repository</module>
+		<module>org.eclipse.gemini.management.target</module>
 	</modules>
 	<build>
 		<plugins>
@@ -122,11 +122,11 @@
 	<pluginRepositories>
 		<pluginRepository>
 			<id>codehaus.snapshots</id>
-			<url>http://snapshots.repository.codehaus.org/</url>
+			<url>https://snapshots.repository.codehaus.org/</url>
 		</pluginRepository>
 		<pluginRepository>
 			<id>maven.eclipse.org</id>
-			<url>http://maven.eclipse.org/nexus/content/repositories/release-indigo</url>
+			<url>https://maven.eclipse.org/nexus/content/repositories/release-indigo</url>
 		</pluginRepository>
 	</pluginRepositories>
 </project>
