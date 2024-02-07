@@ -185,15 +185,21 @@ public final class OSGiBundle {
 	 *         bundle as a host
 	 */
 	private Long[] getFragments() {
+		if (isFragment()) {
+			return new Long[0];
+		}
 		BundleWiring wiring = bundle.adapt(BundleWiring.class);
 		List<BundleWire> requiredWires = wiring.getRequiredWires(BundleRevision.HOST_NAMESPACE);
-        return OSGiBundle.bundleWiresToProviderIds(requiredWires);
+	    return OSGiBundle.bundleWiresToProviderIds(requiredWires);
 	}
 
 	/**
 	 * @return list of identifiers of the bundles which host this fragment
 	 */
 	private Long[] getHosts() {
+		if (isFragment()) {
+			return new Long[0];
+		}
 		BundleWiring wiring = bundle.adapt(BundleWiring.class);
 		List<BundleWire> providedWires = wiring.getProvidedWires(BundleRevision.HOST_NAMESPACE);
         return OSGiBundle.bundleWiresToRequirerIds(providedWires);

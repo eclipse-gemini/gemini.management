@@ -19,8 +19,6 @@
 				<artifactId>tycho-surefire-plugin</artifactId>
 				<version>${tycho-version}</version>
 				<configuration>
-<!--					<argLine>-Xmx512m -Xms128m -XX:PermSize=128m -XX:MaxPermSize=384m -Dcom.sun.management.jmxremote.port=21045 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false</argLine>-->
-					<argLine>-Xmx512m -Xms128m -Dcom.sun.management.jmxremote.port=21045 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false</argLine>
 					<bundleStartLevel>
 						<bundle>
 							<id>osgi.enterprise</id>
