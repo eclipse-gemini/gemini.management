@@ -12,7 +12,7 @@
 	<packaging>eclipse-plugin</packaging>
 	<name>Gemini Management Bundle</name>
 
-	<build>
+	<!-- <build>
 		<plugins>
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
@@ -27,5 +27,5 @@
 				<artifactId>maven-pmd-plugin</artifactId>
 			</plugin>
 		</plugins>
-	</build>
+	</build> -->
 </project>

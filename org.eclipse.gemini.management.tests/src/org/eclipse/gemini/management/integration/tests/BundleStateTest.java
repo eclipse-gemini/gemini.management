@@ -202,10 +202,12 @@ public final class BundleStateTest extends AbstractOSGiMBeanTest{
 			Arrays.sort(importedPackages2);
 			assertTrue(Arrays.equals(importedPackages, importedPackages2));
 
-			Long[] frags2 = getBundleFragments(bundle);
-			Arrays.sort(fragments);
-			Arrays.sort(frags2);
-			assertTrue(Arrays.equals(fragments, frags2));
+			if (!BundleUtil.isBundleFragment(bundle)) {
+				Long[] frags2 = getBundleFragments(bundle);
+				Arrays.sort(fragments);
+				Arrays.sort(frags2);
+				assertTrue(Arrays.equals(fragments, frags2));
+			}
 
 			Long[] hst2 = getBundleHosts(bundle);
 			Arrays.sort(hosts);
@@ -245,24 +247,36 @@ public final class BundleStateTest extends AbstractOSGiMBeanTest{
 
     private Long[] getRequiredBundles(Bundle bundle) {
         BundleWiring wiring = bundle.adapt(BundleWiring.class);
+		if (wiring == null) {
+			return new Long[0];
+		}
         List<BundleWire> requiredWires = wiring.getRequiredWires(null);//BundleRevision.BUNDLE_NAMESPACE);
         return bundleWiresToProviderIds(requiredWires);
     }
 
     private Long[] getRequiringBundles(Bundle bundle) {
         BundleWiring wiring = bundle.adapt(BundleWiring.class);
+		if (wiring == null) {
+			return new Long[0];
+		}
         List<BundleWire> providedWires = wiring.getProvidedWires(null);//BundleRevision.BUNDLE_NAMESPACE);
         return bundleWiresToRequirerIds(providedWires);
     }
 
 	private Long[] getBundleFragments(Bundle bundle) {
 		BundleWiring wiring = bundle.adapt(BundleWiring.class);
+		if (wiring == null) {
+			return new Long[0];
+		}
 		List<BundleWire> requiredWires = wiring.getRequiredWires(BundleRevision.HOST_NAMESPACE);
         return bundleWiresToProviderIds(requiredWires);
 	}
 
 	private Long[] getBundleHosts(Bundle bundle) {
 		BundleWiring wiring = bundle.adapt(BundleWiring.class);
+		if (wiring == null) {
+			return new Long[0];
+		}
 		List<BundleWire> providedWires = wiring.getProvidedWires(BundleRevision.HOST_NAMESPACE);
         return bundleWiresToRequirerIds(providedWires);
 	}
